@@ -171,7 +171,7 @@ export default function Commissions() {
                       size="sm"
                       disabled={(v.solde_commission || 0) <= 0}
                       onClick={() => ouvrirPaiement(v)}
-                      className="bg-yellow-500 hover:bg-yellow-600 text-slate-900"
+                      className="bg-[#F5C518] hover:bg-[#e0b010] text-[#1a1f5e] font-bold"
                     >
                       Payer
                     </Button>
@@ -272,7 +272,7 @@ export default function Commissions() {
             <Button
               onClick={payerCommission}
               disabled={enCours || montantPaiement <= 0 || montantPaiement > (vendeurPaiement?.solde_commission || 0)}
-              className="bg-yellow-500 hover:bg-yellow-600 text-slate-900"
+              className="bg-[#F5C518] hover:bg-[#e0b010] text-[#1a1f5e] font-bold"
             >
               {enCours ? <Loader2 className="w-4 h-4 animate-spin" /> : "Confirmer le Paiement"}
             </Button>

@@ -243,7 +243,7 @@ export default function FormulaireVente({ produits, vendeurs, livraisons, onSubm
       <Button
         onClick={valider}
         disabled={enCours}
-        className="w-full h-12 text-base bg-blue-600 hover:bg-blue-700"
+        className="w-full h-12 text-base bg-[#1a1f5e] hover:bg-[#141952] text-white"
       >
         {enCours ? (
           <>

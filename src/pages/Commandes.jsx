@@ -245,7 +245,7 @@ export default function Commandes() {
                         key={s}
                         size="sm"
                         variant={s === "annulee" ? "destructive" : "default"}
-                        className={s !== "annulee" ? "bg-blue-600 hover:bg-blue-700" : ""}
+                        className={s !== "annulee" ? "bg-[#1a1f5e] hover:bg-[#141952]" : ""}
                         onClick={() => changerStatut(detailVente, s)}
                       >
                         {STATUTS[s]?.label}
