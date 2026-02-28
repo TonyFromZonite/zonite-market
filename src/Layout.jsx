@@ -84,8 +84,8 @@ export default function Layout({ children, currentPageName }) {
                 onClick={() => setMenuOuvert(false)}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group ${
                   estActif
-                    ? "bg-blue-600 text-white shadow-lg shadow-blue-600/30"
-                    : "text-slate-300 hover:bg-white/8 hover:text-white"
+                    ? "bg-[#F5C518] text-[#1a1f5e] shadow-lg shadow-yellow-400/30 font-bold"
+                    : "text-slate-300 hover:bg-white/10 hover:text-white"
                 }`}
               >
                 <Icone className={`w-4.5 h-4.5 ${estActif ? "text-white" : "text-slate-400 group-hover:text-slate-200"}`} />
