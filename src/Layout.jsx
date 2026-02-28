@@ -88,7 +88,7 @@ export default function Layout({ children, currentPageName }) {
                     : "text-slate-300 hover:bg-white/10 hover:text-white"
                 }`}
               >
-                <Icone className={`w-4.5 h-4.5 ${estActif ? "text-white" : "text-slate-400 group-hover:text-slate-200"}`} />
+                <Icone className={`w-4.5 h-4.5 ${estActif ? "text-[#1a1f5e]" : "text-slate-400 group-hover:text-slate-200"}`} />
                 <span>{item.nom}</span>
                 {estActif && <ChevronRight className="w-4 h-4 ml-auto" />}
               </Link>
