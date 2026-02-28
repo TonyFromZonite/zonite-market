@@ -153,7 +153,7 @@ export default function Vendeurs() {
                     <p>{v.email || "—"}</p>
                     <p className="text-slate-500">{v.telephone || "—"}</p>
                   </TableCell>
-                  <TableCell className="text-center font-medium">{v.taux_commission}%</TableCell>
+
                   <TableCell className="text-right font-medium">{formater(v.chiffre_affaires_genere)}</TableCell>
                   <TableCell className="text-right font-bold text-yellow-600">{formater(v.solde_commission)}</TableCell>
                   <TableCell className="text-center">{v.nombre_ventes || 0}</TableCell>
