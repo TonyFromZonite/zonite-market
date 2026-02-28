@@ -75,7 +75,7 @@ export default function Vendeurs() {
       await base44.entities.JournalAudit.create({
         action: "Vendeur créé",
         module: "vendeur",
-        details: `Nouveau vendeur: ${form.nom_complet} (${form.taux_commission}%)`,
+        details: `Nouveau vendeur: ${form.nom_complet}`,
       });
     }
     queryClient.invalidateQueries({ queryKey: ["vendeurs"] });
