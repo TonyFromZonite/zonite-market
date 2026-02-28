@@ -80,7 +80,7 @@ export default function Livraisons() {
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
-        <Button onClick={() => ouvrir(null)} className="bg-blue-600 hover:bg-blue-700">
+        <Button onClick={() => ouvrir(null)} className="bg-[#1a1f5e] hover:bg-[#141952]">
           <Plus className="w-4 h-4 mr-2" /> Nouvelle Livraison
         </Button>
       </div>
@@ -145,7 +145,7 @@ export default function Livraisons() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOuvert(false)}>Annuler</Button>
-            <Button onClick={sauvegarder} disabled={enCours || !form.nom} className="bg-blue-600 hover:bg-blue-700">
+            <Button onClick={sauvegarder} disabled={enCours || !form.nom} className="bg-[#1a1f5e] hover:bg-[#141952]">
               {enCours ? <Loader2 className="w-4 h-4 animate-spin" /> : livraisonEditee ? "Enregistrer" : "Créer"}
             </Button>
           </DialogFooter>

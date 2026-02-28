@@ -156,7 +156,7 @@ export default function Produits() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <Input placeholder="Rechercher un produit..." value={recherche} onChange={(e) => setRecherche(e.target.value)} className="pl-9" />
         </div>
-        <Button onClick={() => ouvrir(null)} className="bg-blue-600 hover:bg-blue-700">
+        <Button onClick={() => ouvrir(null)} className="bg-[#1a1f5e] hover:bg-[#141952]">
           <Plus className="w-4 h-4 mr-2" /> Nouveau Produit
         </Button>
       </div>
@@ -250,7 +250,7 @@ export default function Produits() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOuvert(false)}>Annuler</Button>
-            <Button onClick={sauvegarder} disabled={enCours || !form.nom || !form.reference} className="bg-blue-600 hover:bg-blue-700">
+            <Button onClick={sauvegarder} disabled={enCours || !form.nom || !form.reference} className="bg-[#1a1f5e] hover:bg-[#141952]">
               {enCours ? <Loader2 className="w-4 h-4 animate-spin" /> : produitEdite ? "Enregistrer" : "Créer"}
             </Button>
           </DialogFooter>

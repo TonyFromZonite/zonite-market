@@ -113,7 +113,7 @@ export default function Vendeurs() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <Input placeholder="Rechercher un vendeur..." value={recherche} onChange={(e) => setRecherche(e.target.value)} className="pl-9" />
         </div>
-        <Button onClick={() => ouvrir(null)} className="bg-blue-600 hover:bg-blue-700">
+        <Button onClick={() => ouvrir(null)} className="bg-[#1a1f5e] hover:bg-[#141952]">
           <Plus className="w-4 h-4 mr-2" /> Nouveau Vendeur
         </Button>
       </div>
@@ -194,7 +194,7 @@ export default function Vendeurs() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOuvert(false)}>Annuler</Button>
-            <Button onClick={sauvegarder} disabled={enCours || !form.nom_complet} className="bg-blue-600 hover:bg-blue-700">
+            <Button onClick={sauvegarder} disabled={enCours || !form.nom_complet} className="bg-[#1a1f5e] hover:bg-[#141952]">
               {enCours ? <Loader2 className="w-4 h-4 animate-spin" /> : vendeurEdite ? "Enregistrer" : "Créer"}
             </Button>
           </DialogFooter>

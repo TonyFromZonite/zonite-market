@@ -114,7 +114,7 @@ export default function NouvelleVente() {
           La vente a été enregistrée avec succès. Le stock, les commissions et les statistiques ont été mis à jour automatiquement.
         </p>
         <div className="flex gap-3 justify-center">
-          <Button onClick={() => setSucces(false)} className="bg-blue-600 hover:bg-blue-700">
+          <Button onClick={() => setSucces(false)} className="bg-[#1a1f5e] hover:bg-[#141952]">
             Nouvelle Vente
           </Button>
           <Link to={createPageUrl("TableauDeBord")}>
