@@ -188,7 +188,6 @@ export default function Vendeurs() {
             <div className="space-y-2"><Label>Nom Complet *</Label><Input value={form.nom_complet} onChange={(e) => modifier("nom_complet", e.target.value)} /></div>
             <div className="space-y-2"><Label>Email</Label><Input type="email" value={form.email} onChange={(e) => modifier("email", e.target.value)} /></div>
             <div className="space-y-2"><Label>Téléphone</Label><Input value={form.telephone} onChange={(e) => modifier("telephone", e.target.value)} /></div>
-            <div className="space-y-2"><Label>Taux de Commission (%)</Label><Input type="number" min="0" max="100" value={form.taux_commission} onChange={(e) => modifier("taux_commission", parseFloat(e.target.value) || 0)} /></div>
             <div className="space-y-2"><Label>Date d'Embauche</Label><Input type="date" value={form.date_embauche} onChange={(e) => modifier("date_embauche", e.target.value)} /></div>
           </div>
           <DialogFooter>
