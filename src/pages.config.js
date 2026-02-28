@@ -49,12 +49,24 @@
  */
 import TableauDeBord from './pages/TableauDeBord';
 import NouvelleVente from './pages/NouvelleVente';
+import Commandes from './pages/Commandes';
+import Produits from './pages/Produits';
+import Vendeurs from './pages/Vendeurs';
+import Livraisons from './pages/Livraisons';
+import Commissions from './pages/Commissions';
+import JournalAudit from './pages/JournalAudit';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
     "TableauDeBord": TableauDeBord,
     "NouvelleVente": NouvelleVente,
+    "Commandes": Commandes,
+    "Produits": Produits,
+    "Vendeurs": Vendeurs,
+    "Livraisons": Livraisons,
+    "Commissions": Commissions,
+    "JournalAudit": JournalAudit,
 }
 
 export const pagesConfig = {
