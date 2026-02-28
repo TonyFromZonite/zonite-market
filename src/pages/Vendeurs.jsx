@@ -24,7 +24,7 @@ import { Plus, Pencil, Trash2, Loader2, Search, UserCircle } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton";
 
 const initVendeur = {
-  nom_complet: "", email: "", telephone: "",
+  nom_complet: "", email: "", telephone: "", taux_commission: 0,
   statut: "actif", date_embauche: new Date().toISOString().split("T")[0],
 };
 
