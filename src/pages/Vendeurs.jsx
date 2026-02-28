@@ -61,7 +61,6 @@ export default function Vendeurs() {
         nom_complet: form.nom_complet,
         email: form.email,
         telephone: form.telephone,
-        taux_commission: form.taux_commission,
         statut: form.statut,
         date_embauche: form.date_embauche,
       });
