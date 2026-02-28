@@ -52,12 +52,17 @@ export default function Layout({ children, currentPageName }) {
         }`}
       >
         {/* Logo */}
-        <div className="h-16 flex items-center px-6 border-b border-white/10">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-yellow-400 to-yellow-500 flex items-center justify-center font-bold text-[#0F1D33] text-sm">
-              Z
+        <div className="h-16 flex items-center px-4 border-b border-white/10">
+          <div className="flex items-center gap-2">
+            <img
+              src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69a304769dda004762ee3a57/be2e82d8c_410287629_332500566218921_7304714630055582730_n.jpg"
+              alt="Zonite Market"
+              className="h-10 w-10 rounded-lg object-contain bg-white p-0.5"
+            />
+            <div>
+              <span className="text-base font-bold tracking-tight leading-none">zonite</span>
+              <span className="block text-[10px] font-medium text-yellow-400 tracking-widest leading-none">MARKET</span>
             </div>
-            <span className="text-lg font-bold tracking-tight">ZONITE</span>
           </div>
           <button
             className="ml-auto lg:hidden text-white/60 hover:text-white"
