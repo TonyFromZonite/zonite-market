@@ -47,13 +47,18 @@
  *
  * The mainPage value must match a key in the PAGES object exactly.
  */
+import TableauDeBord from './pages/TableauDeBord';
+import NouvelleVente from './pages/NouvelleVente';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
+    "TableauDeBord": TableauDeBord,
+    "NouvelleVente": NouvelleVente,
 }
 
 export const pagesConfig = {
+    mainPage: "TableauDeBord",
     Pages: PAGES,
     Layout: __Layout,
 };
