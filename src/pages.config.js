@@ -47,26 +47,26 @@
  *
  * The mainPage value must match a key in the PAGES object exactly.
  */
-import TableauDeBord from './pages/TableauDeBord';
-import NouvelleVente from './pages/NouvelleVente';
 import Commandes from './pages/Commandes';
-import Produits from './pages/Produits';
-import Vendeurs from './pages/Vendeurs';
-import Livraisons from './pages/Livraisons';
 import Commissions from './pages/Commissions';
 import JournalAudit from './pages/JournalAudit';
+import Livraisons from './pages/Livraisons';
+import NouvelleVente from './pages/NouvelleVente';
+import Produits from './pages/Produits';
+import TableauDeBord from './pages/TableauDeBord';
+import Vendeurs from './pages/Vendeurs';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
-    "TableauDeBord": TableauDeBord,
-    "NouvelleVente": NouvelleVente,
     "Commandes": Commandes,
-    "Produits": Produits,
-    "Vendeurs": Vendeurs,
-    "Livraisons": Livraisons,
     "Commissions": Commissions,
     "JournalAudit": JournalAudit,
+    "Livraisons": Livraisons,
+    "NouvelleVente": NouvelleVente,
+    "Produits": Produits,
+    "TableauDeBord": TableauDeBord,
+    "Vendeurs": Vendeurs,
 }
 
 export const pagesConfig = {
