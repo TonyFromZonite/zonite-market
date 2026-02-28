@@ -124,7 +124,7 @@ export default function Vendeurs() {
               <TableRow className="bg-slate-50">
                 <TableHead>Vendeur</TableHead>
                 <TableHead>Contact</TableHead>
-                <TableHead className="text-center">Commission</TableHead>
+
                 <TableHead className="text-right">CA Généré</TableHead>
                 <TableHead className="text-right">Solde Commission</TableHead>
                 <TableHead className="text-center">Ventes</TableHead>
