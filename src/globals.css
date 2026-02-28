@@ -1,18 +1,19 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --zonite-bleu-900: #0F1D33;
-  --zonite-bleu-800: #1A2D4D;
-  --zonite-bleu-700: #1E3A5F;
-  --zonite-bleu-600: #2563EB;
-  --zonite-bleu-500: #3B82F6;
-  --zonite-bleu-100: #DBEAFE;
-  --zonite-bleu-50: #EFF6FF;
-  --zonite-jaune-500: #F59E0B;
-  --zonite-jaune-400: #FBBF24;
-  --zonite-jaune-100: #FEF3C7;
+  --zonite-bleu-900: #0d1240;
+  --zonite-bleu-800: #141952;
+  --zonite-bleu-700: #1a1f5e;
+  --zonite-bleu-600: #1a1f5e;
+  --zonite-bleu-500: #2d34a5;
+  --zonite-bleu-100: #e0e2f7;
+  --zonite-bleu-50: #f0f1fc;
+  --zonite-jaune-500: #F5C518;
+  --zonite-jaune-400: #f7d043;
+  --zonite-jaune-100: #fef9e0;
 }
 
 @layer base {
