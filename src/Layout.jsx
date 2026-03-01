@@ -23,6 +23,7 @@ const menuItems = [
 { nom: "Nouvelle Vente", page: "NouvelleVente", icone: ShoppingCart },
 { nom: "Commandes", page: "Commandes", icone: ClipboardList },
 { nom: "Produits", page: "Produits", icone: Package },
+{ nom: "Catégories", page: "Categories", icone: Tag },
 { nom: "Vendeurs", page: "Vendeurs", icone: Users },
 { nom: "Livraisons", page: "Livraisons", icone: Truck },
 { nom: "Commissions", page: "Commissions", icone: DollarSign },
