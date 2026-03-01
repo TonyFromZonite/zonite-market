@@ -20,7 +20,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 const initProduit = {
   nom: "", description: "", reference: "",
   categorie_id: "", categorie_nom: "",
-  prix_achat: 0, prix_gros: 0, prix_vente: 0,
+  prix_achat: "", prix_gros: "",
   fournisseur_nom: "", fournisseur_pays: "", delai_acquisition: "",
   stock_global: 0, seuil_alerte_global: 5,
   stocks_par_localisation: [],
