@@ -43,15 +43,15 @@ export default function FormulaireVente({ produits, vendeurs, livraisons, onSubm
   );
 
   // Calculs automatiques
-  // commission vendeur = (prix_vente - prix_gros) * quantite
-  // bénéfice zonite = (prix_gros - prix_achat) * quantite
-  const montantTotal = donnees.quantite * donnees.prix_unitaire;
+  const qte = parseFloat(donnees.quantite) || 0;
+  const prixUnit = parseFloat(donnees.prix_unitaire) || 0;
+  const montantTotal = qte * prixUnit;
   const coutLivraison = livraisonSelectionnee?.cout || 0;
   const prixGros = produitSelectionne?.prix_gros || 0;
   const prixAchat = produitSelectionne?.prix_achat || 0;
-  const commission = (donnees.prix_unitaire - prixGros) * donnees.quantite;
-  const profitZonite = (prixGros - prixAchat) * donnees.quantite - coutLivraison;
-  const tauxCommission = 0; // non utilisé, commission basée sur prix_vente - prix_gros
+  const commission = (prixUnit - prixGros) * qte;
+  const profitZonite = (prixGros - prixAchat) * qte - coutLivraison;
+  const tauxCommission = 0;
 
   const modifier = (champ, valeur) => {
     setDonnees((prev) => ({ ...prev, [champ]: valeur }));
