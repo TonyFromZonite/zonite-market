@@ -117,7 +117,7 @@ export default function FormulaireVente({ produits, vendeurs, livraisons, onSubm
           </Select>
           {produitSelectionne && (
             <p className="text-xs text-slate-500">
-              Prix d'achat: {formater(produitSelectionne.prix_achat)} | Stock: {produitSelectionne.stock_actuel || 0}
+              Prix de gros: {formater(produitSelectionne.prix_gros)} | Stock: {produitSelectionne.stock_global || 0}
             </p>
           )}
         </div>
