@@ -13,7 +13,8 @@ import {
   Menu,
   X,
   ChevronRight,
-  LogOut } from
+  LogOut,
+  Tag } from
 "lucide-react";
 import { base44 } from "@/api/base44Client";
 
