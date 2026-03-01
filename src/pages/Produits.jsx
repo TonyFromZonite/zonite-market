@@ -170,7 +170,8 @@ export default function Produits() {
                 <TableHead>Référence</TableHead>
                 <TableHead>Catégorie</TableHead>
                 <TableHead className="text-right">Prix Achat</TableHead>
-                <TableHead className="text-right">Prix Vente</TableHead>
+                <TableHead className="text-right">Prix de Gros</TableHead>
+                <TableHead className="text-right">Prix de Vente</TableHead>
                 <TableHead className="text-center">Stock</TableHead>
                 <TableHead>Statut</TableHead>
                 <TableHead className="w-24">Actions</TableHead>
