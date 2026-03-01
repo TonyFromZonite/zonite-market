@@ -57,11 +57,11 @@ export default function FormulaireVente({ produits, vendeurs, livraisons, onSubm
     setDonnees((prev) => ({ ...prev, [champ]: valeur }));
     setErreur("");
 
-    // Remplir automatiquement le prix de vente conseillé
+    // Remplir automatiquement le prix unitaire avec le prix de gros (minimum)
     if (champ === "produit_id") {
       const p = produits.find((pr) => pr.id === valeur);
-      if (p?.prix_vente) {
-        setDonnees((prev) => ({ ...prev, [champ]: valeur, prix_unitaire: p.prix_vente }));
+      if (p) {
+        setDonnees((prev) => ({ ...prev, [champ]: valeur, prix_unitaire: p.prix_gros || "" }));
       }
     }
   };
