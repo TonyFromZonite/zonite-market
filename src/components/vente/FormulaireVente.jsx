@@ -60,8 +60,8 @@ export default function FormulaireVente({ produits, vendeurs, livraisons, onSubm
     // Remplir automatiquement le prix de vente conseillé
     if (champ === "produit_id") {
       const p = produits.find((pr) => pr.id === valeur);
-      if (p?.prix_vente_conseille) {
-        setDonnees((prev) => ({ ...prev, [champ]: valeur, prix_unitaire: p.prix_vente_conseille }));
+      if (p?.prix_vente) {
+        setDonnees((prev) => ({ ...prev, [champ]: valeur, prix_unitaire: p.prix_vente }));
       }
     }
   };
