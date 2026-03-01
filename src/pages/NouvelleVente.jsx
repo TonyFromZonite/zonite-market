@@ -59,10 +59,11 @@ export default function NouvelleVente() {
       notes: donnees.notes,
     });
 
-    // 2. Diminuer le stock
-    const nouveauStock = (produit.stock_actuel || 0) - donnees.quantite;
+    // 2. Diminuer le stock global
+    const ancienStock = produit.stock_global || 0;
+    const nouveauStock = ancienStock - donnees.quantite;
     await base44.entities.Produit.update(produit.id, {
-      stock_actuel: nouveauStock,
+      stock_global: nouveauStock,
       total_vendu: (produit.total_vendu || 0) + donnees.quantite,
       statut: nouveauStock <= 0 ? "rupture" : "actif",
     });
@@ -73,7 +74,7 @@ export default function NouvelleVente() {
       produit_nom: produit.nom,
       type_mouvement: "sortie",
       quantite: donnees.quantite,
-      stock_avant: produit.stock_actuel || 0,
+      stock_avant: ancienStock,
       stock_apres: nouveauStock,
       raison: "Vente enregistrée",
     });
