@@ -174,7 +174,7 @@ export default function Produits() {
                 <TableHead className="text-right">Prix de Vente</TableHead>
                 <TableHead className="text-center">Stock</TableHead>
                 <TableHead>Statut</TableHead>
-                <TableHead className="w-24">Actions</TableHead>
+                <TableHead className="w-24 text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
