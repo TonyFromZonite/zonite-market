@@ -150,20 +150,30 @@ export default function FormulaireVente({ produits, vendeurs, livraisons, onSubm
             type="number"
             min="1"
             value={donnees.quantite}
-            onChange={(e) => modifier("quantite", parseInt(e.target.value) || 0)}
+            onFocus={(e) => e.target.select()}
+            onChange={(e) => modifier("quantite", e.target.value)}
+            onBlur={(e) => { if (e.target.value === "") modifier("quantite", ""); }}
+            placeholder="0"
           />
         </div>
 
         {/* Prix unitaire */}
         <div className="space-y-2">
-          <Label>Prix Unitaire (DA) *</Label>
+          <Label>Prix de Vente (DA) *</Label>
           <Input
             type="number"
             min="0"
             step="0.01"
             value={donnees.prix_unitaire}
-            onChange={(e) => modifier("prix_unitaire", parseFloat(e.target.value) || 0)}
+            onFocus={(e) => e.target.select()}
+            onChange={(e) => modifier("prix_unitaire", e.target.value)}
+            placeholder="0"
           />
+          {produitSelectionne && (
+            <p className="text-xs text-slate-400">
+              Prix de gros (minimum) : {(produitSelectionne.prix_gros || 0).toLocaleString("fr-FR")} DA
+            </p>
+          )}
         </div>
 
         {/* Livraison */}
