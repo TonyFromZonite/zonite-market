@@ -230,7 +230,7 @@ export default function FormulaireVente({ produits, vendeurs, livraisons, onSubm
             <p className="font-bold text-lg text-slate-900">{formater(coutLivraison)}</p>
           </div>
           <div>
-            <p className="text-slate-500">Commission ({tauxCommission}%)</p>
+            <p className="text-slate-500">Commission Vendeur</p>
             <p className="font-bold text-lg text-yellow-600">{formater(commission)}</p>
           </div>
           <div>
