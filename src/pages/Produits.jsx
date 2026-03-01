@@ -244,7 +244,11 @@ export default function Produits() {
               </Select>
             </div>
             <div className="space-y-2"><Label>Prix d'Achat (DA) *</Label><Input type="number" min="0" value={form.prix_achat} onChange={(e) => modifier("prix_achat", parseFloat(e.target.value) || 0)} /></div>
-            <div className="space-y-2"><Label>Prix Vente Conseillé</Label><Input type="number" min="0" value={form.prix_vente_conseille} onChange={(e) => modifier("prix_vente_conseille", parseFloat(e.target.value) || 0)} /></div>
+            <div className="space-y-2"><Label>Prix de Gros (DA)</Label><Input type="number" min="0" value={form.prix_gros} onChange={(e) => modifier("prix_gros", parseFloat(e.target.value) || 0)} /></div>
+            <div className="col-span-2 space-y-2">
+              <Label>Prix de Vente (DA) <span className="text-slate-400 font-normal text-xs">— prix vendeur → client</span></Label>
+              <Input type="number" min="0" value={form.prix_vente} onChange={(e) => modifier("prix_vente", parseFloat(e.target.value) || 0)} />
+            </div>
             <div className="space-y-2"><Label>Stock Actuel</Label><Input type="number" min="0" value={form.stock_actuel} onChange={(e) => modifier("stock_actuel", parseInt(e.target.value) || 0)} /></div>
             <div className="space-y-2"><Label>Seuil d'Alerte</Label><Input type="number" min="0" value={form.seuil_alerte} onChange={(e) => modifier("seuil_alerte", parseInt(e.target.value) || 0)} /></div>
             <div className="col-span-2 space-y-2"><Label>Fournisseur</Label><Input value={form.fournisseur} onChange={(e) => modifier("fournisseur", e.target.value)} /></div>
