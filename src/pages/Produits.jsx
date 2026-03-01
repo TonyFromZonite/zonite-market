@@ -271,33 +271,35 @@ export default function Produits() {
             {/* Prix */}
             <div>
               <p className="text-sm font-semibold text-slate-700 mb-3 border-b pb-1">Tarification</p>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Prix d'Achat (DA) *</Label>
-                  <Input type="number" min="0" value={form.prix_achat} onChange={(e) => modifier("prix_achat", parseFloat(e.target.value) || 0)} />
+                  <Input
+                    type="number" min="0"
+                    value={form.prix_achat}
+                    onFocus={(e) => e.target.select()}
+                    onChange={(e) => modifier("prix_achat", e.target.value === "" ? "" : parseFloat(e.target.value))}
+                    onBlur={(e) => modifier("prix_achat", parseFloat(e.target.value) || 0)}
+                  />
                   <p className="text-xs text-slate-400">Coût fournisseur</p>
                 </div>
                 <div className="space-y-2">
                   <Label>Prix de Gros (DA)</Label>
-                  <Input type="number" min="0" value={form.prix_gros} onChange={(e) => modifier("prix_gros", parseFloat(e.target.value) || 0)} />
-                  <p className="text-xs text-slate-400">Cédé au vendeur</p>
-                </div>
-                <div className="space-y-2">
-                  <Label>Prix de Vente (DA)</Label>
-                  <Input type="number" min="0" value={form.prix_vente} onChange={(e) => modifier("prix_vente", parseFloat(e.target.value) || 0)} />
-                  <p className="text-xs text-slate-400">Vendeur → Client</p>
+                  <Input
+                    type="number" min="0"
+                    value={form.prix_gros}
+                    onFocus={(e) => e.target.select()}
+                    onChange={(e) => modifier("prix_gros", e.target.value === "" ? "" : parseFloat(e.target.value))}
+                    onBlur={(e) => modifier("prix_gros", parseFloat(e.target.value) || 0)}
+                  />
+                  <p className="text-xs text-slate-400">Prix cédé au vendeur — le vendeur fixe son propre prix de vente (≥ prix de gros)</p>
                 </div>
               </div>
-              {(form.prix_gros > 0 || form.prix_vente > 0) && (
-                <div className="mt-3 grid grid-cols-2 gap-3">
-                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-sm">
-                    <p className="text-slate-500">Commission Vendeur</p>
-                    <p className="font-bold text-yellow-700">{formater((form.prix_vente || 0) - (form.prix_gros || 0))}</p>
-                    <p className="text-xs text-slate-400">Prix vente − Prix gros</p>
-                  </div>
+              {(parseFloat(form.prix_gros) > 0 && parseFloat(form.prix_achat) > 0) && (
+                <div className="mt-3">
                   <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3 text-sm">
-                    <p className="text-slate-500">Bénéfice ZONITE</p>
-                    <p className="font-bold text-emerald-700">{formater((form.prix_gros || 0) - (form.prix_achat || 0))}</p>
+                    <p className="text-slate-500">Bénéfice ZONITE par unité</p>
+                    <p className="font-bold text-emerald-700">{formater((parseFloat(form.prix_gros) || 0) - (parseFloat(form.prix_achat) || 0))}</p>
                     <p className="text-xs text-slate-400">Prix gros − Prix achat</p>
                   </div>
                 </div>
