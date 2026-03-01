@@ -69,9 +69,12 @@ export default function FormulaireVente({ produits, vendeurs, livraisons, onSubm
   const valider = () => {
     if (!donnees.produit_id) return setErreur("Sélectionnez un produit");
     if (!donnees.vendeur_id) return setErreur("Sélectionnez un vendeur");
-    if (!donnees.quantite || donnees.quantite <= 0) return setErreur("La quantité doit être positive");
-    if (!donnees.prix_unitaire || donnees.prix_unitaire <= 0) return setErreur("Le prix unitaire doit être positif");
-    if (produitSelectionne && donnees.quantite > (produitSelectionne.stock_global || 0)) {
+    if (!qte || qte <= 0) return setErreur("La quantité doit être positive");
+    if (!prixUnit || prixUnit <= 0) return setErreur("Le prix unitaire doit être positif");
+    if (produitSelectionne && prixUnit < prixGros) {
+      return setErreur(`Le prix de vente (${prixUnit} DA) doit être ≥ au prix de gros (${prixGros} DA)`);
+    }
+    if (produitSelectionne && qte > (produitSelectionne.stock_global || 0)) {
       return setErreur(`Stock insuffisant (${produitSelectionne.stock_global || 0} disponibles)`);
     }
     onSubmit({
