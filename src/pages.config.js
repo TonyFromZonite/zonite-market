@@ -55,6 +55,7 @@ import NouvelleVente from './pages/NouvelleVente';
 import Produits from './pages/Produits';
 import TableauDeBord from './pages/TableauDeBord';
 import Vendeurs from './pages/Vendeurs';
+import Categories from './pages/Categories';
 import __Layout from './Layout.jsx';
 
 
@@ -67,6 +68,7 @@ export const PAGES = {
     "Produits": Produits,
     "TableauDeBord": TableauDeBord,
     "Vendeurs": Vendeurs,
+    "Categories": Categories,
 }
 
 export const pagesConfig = {
