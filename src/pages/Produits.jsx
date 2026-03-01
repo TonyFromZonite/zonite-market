@@ -187,7 +187,8 @@ export default function Produits() {
                   <TableCell className="text-sm text-slate-500">{p.reference}</TableCell>
                   <TableCell className="capitalize text-sm">{CATEGORIES.find(c => c.valeur === p.categorie)?.label || p.categorie}</TableCell>
                   <TableCell className="text-right text-sm">{formater(p.prix_achat)}</TableCell>
-                  <TableCell className="text-right text-sm">{formater(p.prix_vente_conseille)}</TableCell>
+                  <TableCell className="text-right text-sm">{formater(p.prix_gros)}</TableCell>
+                  <TableCell className="text-right text-sm">{formater(p.prix_vente)}</TableCell>
                   <TableCell className="text-center">
                     <button
                       onClick={() => { setProduitEdite(p); setDialogStock(true); }}
