@@ -132,7 +132,7 @@ export default function FormulaireVente({ produits, vendeurs, livraisons, onSubm
             <SelectContent>
               {vendeurs.filter(v => v.statut === "actif").map((v) => (
                 <SelectItem key={v.id} value={v.id}>
-                  {v.nom_complet} – {v.taux_commission}%
+                  {v.nom_complet}
                 </SelectItem>
               ))}
             </SelectContent>
