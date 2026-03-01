@@ -42,7 +42,7 @@ const CATEGORIES = [
 
 const initProduit = {
   nom: "", description: "", reference: "", prix_achat: 0,
-  prix_vente_conseille: 0, stock_actuel: 0, seuil_alerte: 5,
+  prix_gros: 0, prix_vente: 0, stock_actuel: 0, seuil_alerte: 5,
   categorie: "autre", statut: "actif", fournisseur: "", image_url: "",
 };
 
