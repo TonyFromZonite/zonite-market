@@ -79,12 +79,13 @@ export default function FormulaireVente({ produits, vendeurs, livraisons, onSubm
     }
     onSubmit({
       ...donnees,
+      quantite: qte,
+      prix_unitaire: prixUnit,
       montantTotal,
       coutLivraison,
       commission,
       tauxCommission,
       profitZonite,
-      coutAchat,
       produitSelectionne,
       vendeurSelectionne,
       livraisonSelectionnee,
