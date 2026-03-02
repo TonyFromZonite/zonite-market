@@ -18,13 +18,24 @@ import {
 "lucide-react";
 import { base44 } from "@/api/base44Client";
 
+// Pages de l'Application Vendeur (interface vendeur mobile)
+const PAGES_VENDEUR = [
+  "EspaceVendeur", "InscriptionVendeur", "VideoFormation", "CatalogueVendeur",
+  "NouvelleCommandeVendeur", "MesCommandesVendeur", "ProfilVendeur",
+  "DemandePaiement", "NotificationsVendeur", "Candidature"
+];
+
 const menuItems = [
 { nom: "Tableau de Bord", page: "TableauDeBord", icone: LayoutDashboard },
 { nom: "Nouvelle Vente", page: "NouvelleVente", icone: ShoppingCart },
-{ nom: "Commandes", page: "Commandes", icone: ClipboardList },
+{ nom: "Commandes Admin", page: "Commandes", icone: ClipboardList },
+{ nom: "Commandes Vendeurs", page: "CommandesVendeurs", icone: ShoppingCart },
 { nom: "Produits", page: "Produits", icone: Package },
 { nom: "Catégories", page: "Categories", icone: Tag },
 { nom: "Vendeurs", page: "Vendeurs", icone: Users },
+{ nom: "Candidatures", page: "GestionCandidatures", icone: Users },
+{ nom: "Validation KYC", page: "GestionKYC", icone: Shield },
+{ nom: "Paiements Vendeurs", page: "PaiementsVendeurs", icone: DollarSign },
 { nom: "Livraisons", page: "Livraisons", icone: Truck },
 { nom: "Commissions", page: "Commissions", icone: DollarSign },
 { nom: "Journal d'Audit", page: "JournalAudit", icone: Shield }];
