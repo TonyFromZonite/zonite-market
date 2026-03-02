@@ -92,7 +92,7 @@ export default function FormulaireVente({ produits, vendeurs, livraisons, onSubm
     });
   };
 
-  const formater = (n) => `${Math.round(n).toLocaleString("fr-FR")} DA`;
+  const formater = (n) => `${Math.round(n).toLocaleString("fr-FR")} FCFA`;
 
   return (
     <div className="space-y-6">
@@ -159,7 +159,7 @@ export default function FormulaireVente({ produits, vendeurs, livraisons, onSubm
 
         {/* Prix unitaire */}
         <div className="space-y-2">
-          <Label>Prix de Vente (DA) *</Label>
+          <Label>Prix de Vente (FCFA) *</Label>
           <Input
             type="number"
             min="0"
@@ -171,7 +171,7 @@ export default function FormulaireVente({ produits, vendeurs, livraisons, onSubm
           />
           {produitSelectionne && (
             <p className="text-xs text-slate-400">
-              Prix de gros (minimum) : {(produitSelectionne.prix_gros || 0).toLocaleString("fr-FR")} DA
+              Prix de gros (minimum) : {(produitSelectionne.prix_gros || 0).toLocaleString("fr-FR")} FCFA
             </p>
           )}
         </div>

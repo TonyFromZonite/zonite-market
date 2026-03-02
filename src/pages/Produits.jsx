@@ -148,7 +148,7 @@ export default function Produits() {
     `${p.nom} ${p.reference} ${p.fournisseur_nom}`.toLowerCase().includes(recherche.toLowerCase())
   );
 
-  const formater = (n) => `${Math.round(n || 0).toLocaleString("fr-FR")} DA`;
+  const formater = (n) => `${Math.round(n || 0).toLocaleString("fr-FR")} FCFA`;
 
   // Calculs commissions
   const commissionVendeur = (p) => (p.prix_vente || 0) - (p.prix_gros || 0);
@@ -273,7 +273,7 @@ export default function Produits() {
               <p className="text-sm font-semibold text-slate-700 mb-3 border-b pb-1">Tarification</p>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Prix d'Achat (DA) *</Label>
+                  <Label>Prix d'Achat (FCFA) *</Label>
                   <Input
                     type="number" min="0"
                     value={form.prix_achat}
@@ -284,7 +284,7 @@ export default function Produits() {
                   <p className="text-xs text-slate-400">Coût fournisseur</p>
                 </div>
                 <div className="space-y-2">
-                  <Label>Prix de Gros (DA)</Label>
+                  <Label>Prix de Gros (FCFA)</Label>
                   <Input
                     type="number" min="0"
                     value={form.prix_gros}

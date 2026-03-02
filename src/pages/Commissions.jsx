@@ -87,7 +87,7 @@ export default function Commissions() {
     setEnCours(false);
   };
 
-  const formater = (n) => `${Math.round(n || 0).toLocaleString("fr-FR")} DA`;
+  const formater = (n) => `${Math.round(n || 0).toLocaleString("fr-FR")} FCFA`;
   const formaterDate = (d) => d ? new Date(d).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" }) : "—";
 
   const totalAPayer = vendeurs.reduce((s, v) => s + (v.solde_commission || 0), 0);
@@ -234,7 +234,7 @@ export default function Commissions() {
                 <p className="text-sm text-slate-600">Solde actuel: <span className="font-bold text-yellow-600">{formater(vendeurPaiement.solde_commission)}</span></p>
               </div>
               <div className="space-y-2">
-                <Label>Montant à Payer (DA)</Label>
+                <Label>Montant à Payer (FCFA)</Label>
                 <Input
                   type="number"
                   min="0"

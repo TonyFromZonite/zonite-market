@@ -57,7 +57,7 @@ export default function TableauDeBord() {
   const topProduit = [...produits].sort((a, b) => (b.total_vendu || 0) - (a.total_vendu || 0))[0];
   const topVendeur = [...vendeurs].sort((a, b) => (b.chiffre_affaires_genere || 0) - (a.chiffre_affaires_genere || 0))[0];
 
-  const formaterMontant = (n) => `${Math.round(n).toLocaleString("fr-FR")} DA`;
+  const formaterMontant = (n) => `${Math.round(n).toLocaleString("fr-FR")} FCFA`;
 
   if (enChargement) {
     return (

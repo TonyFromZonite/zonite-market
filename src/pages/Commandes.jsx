@@ -119,7 +119,7 @@ export default function Commandes() {
   const totalPages = Math.ceil(ventesFiltrees.length / PAR_PAGE);
   const ventesPage = ventesFiltrees.slice(page * PAR_PAGE, (page + 1) * PAR_PAGE);
 
-  const formater = (n) => `${Math.round(n || 0).toLocaleString("fr-FR")} DA`;
+  const formater = (n) => `${Math.round(n || 0).toLocaleString("fr-FR")} FCFA`;
   const formaterDate = (d) => d ? new Date(d).toLocaleString("fr-FR", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "—";
 
   if (isLoading) {
