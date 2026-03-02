@@ -56,6 +56,16 @@ import NouvelleVente from './pages/NouvelleVente';
 import Produits from './pages/Produits';
 import TableauDeBord from './pages/TableauDeBord';
 import Vendeurs from './pages/Vendeurs';
+import Candidature from './pages/Candidature';
+import EspaceVendeur from './pages/EspaceVendeur';
+import InscriptionVendeur from './pages/InscriptionVendeur';
+import VideoFormation from './pages/VideoFormation';
+import CatalogueVendeur from './pages/CatalogueVendeur';
+import NouvelleCommandeVendeur from './pages/NouvelleCommandeVendeur';
+import MesCommandesVendeur from './pages/MesCommandesVendeur';
+import ProfilVendeur from './pages/ProfilVendeur';
+import DemandePaiement from './pages/DemandePaiement';
+import NotificationsVendeur from './pages/NotificationsVendeur';
 import __Layout from './Layout.jsx';
 
 
@@ -69,6 +79,16 @@ export const PAGES = {
     "Produits": Produits,
     "TableauDeBord": TableauDeBord,
     "Vendeurs": Vendeurs,
+    "Candidature": Candidature,
+    "EspaceVendeur": EspaceVendeur,
+    "InscriptionVendeur": InscriptionVendeur,
+    "VideoFormation": VideoFormation,
+    "CatalogueVendeur": CatalogueVendeur,
+    "NouvelleCommandeVendeur": NouvelleCommandeVendeur,
+    "MesCommandesVendeur": MesCommandesVendeur,
+    "ProfilVendeur": ProfilVendeur,
+    "DemandePaiement": DemandePaiement,
+    "NotificationsVendeur": NotificationsVendeur,
 }
 
 export const pagesConfig = {
