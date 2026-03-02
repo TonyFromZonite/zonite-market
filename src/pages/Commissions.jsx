@@ -77,7 +77,7 @@ export default function Commissions() {
     await base44.entities.JournalAudit.create({
       action: "Commission payée",
       module: "paiement",
-      details: `Paiement de ${montantPaiement} DA à ${vendeurPaiement.nom_complet} (${methodePaiement})`,
+      details: `Paiement de ${montantPaiement} FCFA à ${vendeurPaiement.nom_complet} (${methodePaiement})`,
       entite_id: vendeurPaiement.id,
     });
 
