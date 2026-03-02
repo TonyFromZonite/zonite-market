@@ -66,6 +66,10 @@ import MesCommandesVendeur from './pages/MesCommandesVendeur';
 import ProfilVendeur from './pages/ProfilVendeur';
 import DemandePaiement from './pages/DemandePaiement';
 import NotificationsVendeur from './pages/NotificationsVendeur';
+import GestionCandidatures from './pages/GestionCandidatures';
+import GestionKYC from './pages/GestionKYC';
+import CommandesVendeurs from './pages/CommandesVendeurs';
+import PaiementsVendeurs from './pages/PaiementsVendeurs';
 import __Layout from './Layout.jsx';
 
 
@@ -89,6 +93,10 @@ export const PAGES = {
     "ProfilVendeur": ProfilVendeur,
     "DemandePaiement": DemandePaiement,
     "NotificationsVendeur": NotificationsVendeur,
+    "GestionCandidatures": GestionCandidatures,
+    "GestionKYC": GestionKYC,
+    "CommandesVendeurs": CommandesVendeurs,
+    "PaiementsVendeurs": PaiementsVendeurs,
 }
 
 export const pagesConfig = {
