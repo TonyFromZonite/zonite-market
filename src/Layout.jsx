@@ -48,6 +48,11 @@ export default function Layout({ children, currentPageName }) {
     base44.auth.logout();
   };
 
+  // Pages vendeur : pas de sidebar admin, interface mobile standalone
+  if (PAGES_VENDEUR.includes(currentPageName)) {
+    return <div className="min-h-screen bg-slate-50">{children}</div>;
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 flex">
       {/* Overlay mobile */}
