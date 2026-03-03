@@ -182,8 +182,8 @@ export default function CommandesVendeurs() {
     // Restituer le stock si la commande était encore en cours (pas livrée)
     const statutsAvecStockReserve = ["en_attente_validation_admin", "validee_admin", "attribuee_livreur", "en_livraison"];
     if (statutsAvecStockReserve.includes(commandeSelectionnee.statut)) {
-      const produits = await base44.entities.Produit.filter({ id: commandeSelectionnee.produit_id });
-      const produit = produits[0];
+      const produits = await base44.entities.Produit.list();
+      const produit = produits.find(p => p.id === commandeSelectionnee.produit_id);
       if (produit) {
         await base44.entities.Produit.update(produit.id, {
           stock_global: (produit.stock_global || 0) + commandeSelectionnee.quantite,
