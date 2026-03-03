@@ -7,10 +7,12 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import {
-  ShoppingBag, TrendingUp, Wallet, Bell, Package,
-  Clock, CheckCircle2, XCircle, Truck, Plus, ChevronRight,
+  ShoppingBag, Bell, Package,
+  Clock, CheckCircle2, XCircle, Truck, Plus,
   AlertCircle
 } from "lucide-react";
+
+const LOGO = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69a304769dda004762ee3a57/be2e82d8c_410287629_332500566218921_7304714630055582730_n.jpg";
 
 const STATUTS = {
   en_attente: { label: "En attente", couleur: "bg-yellow-100 text-yellow-800" },
