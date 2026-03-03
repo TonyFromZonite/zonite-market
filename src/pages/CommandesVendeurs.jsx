@@ -4,25 +4,20 @@ import { base44 } from "@/api/base44Client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Search, Eye } from "lucide-react";
+import { Search, Eye, CheckCircle2, Truck, XCircle, PackageCheck } from "lucide-react";
 
 const STATUTS = {
-  en_attente: { label: "En attente", couleur: "bg-yellow-100 text-yellow-800 border-yellow-200" },
-  en_preparation: { label: "En préparation", couleur: "bg-blue-100 text-blue-800 border-blue-200" },
-  en_livraison: { label: "En livraison", couleur: "bg-purple-100 text-purple-800 border-purple-200" },
-  livree: { label: "Livrée", couleur: "bg-emerald-100 text-emerald-800 border-emerald-200" },
-  echec: { label: "Échec", couleur: "bg-red-100 text-red-800 border-red-200" },
-};
-
-const TRANSITIONS = {
-  en_attente: ["en_preparation", "echec"],
-  en_preparation: ["en_livraison", "echec"],
-  en_livraison: ["livree", "echec"],
-  livree: [],
-  echec: [],
+  en_attente_validation_admin: { label: "En attente validation", couleur: "bg-yellow-100 text-yellow-800 border-yellow-200" },
+  validee_admin:               { label: "Validée", couleur: "bg-blue-100 text-blue-800 border-blue-200" },
+  attribuee_livreur:           { label: "Attribuée livreur", couleur: "bg-indigo-100 text-indigo-800 border-indigo-200" },
+  en_livraison:                { label: "En livraison", couleur: "bg-purple-100 text-purple-800 border-purple-200" },
+  livree:                      { label: "Livrée ✓", couleur: "bg-emerald-100 text-emerald-800 border-emerald-200" },
+  echec_livraison:             { label: "Échec livraison", couleur: "bg-orange-100 text-orange-800 border-orange-200" },
+  annulee:                     { label: "Annulée", couleur: "bg-red-100 text-red-800 border-red-200" },
 };
 
 export default function CommandesVendeurs() {
@@ -30,6 +25,8 @@ export default function CommandesVendeurs() {
   const [filtreStatut, setFiltreStatut] = useState("tous");
   const [commandeSelectionnee, setCommandeSelectionnee] = useState(null);
   const [notesAdmin, setNotesAdmin] = useState("");
+  const [livreurNom, setLivreurNom] = useState("");
+  const [enCours, setEnCours] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: commandes = [], isLoading } = useQuery({
@@ -37,37 +34,172 @@ export default function CommandesVendeurs() {
     queryFn: () => base44.entities.CommandeVendeur.list("-created_date", 200),
   });
 
-  const changerStatut = async (commande, statut) => {
-    await base44.entities.CommandeVendeur.update(commande.id, { statut, notes_admin: notesAdmin || commande.notes_admin });
-    await base44.entities.NotificationVendeur.create({
-      vendeur_email: commande.vendeur_email,
-      titre: `Commande ${STATUTS[statut]?.label}`,
-      message: `Votre commande de ${commande.produit_nom} pour ${commande.client_nom} est maintenant : ${STATUTS[statut]?.label}.`,
-      type: statut === "livree" ? "succes" : statut === "echec" ? "alerte" : "info",
+  const nbEnAttente = commandes.filter(c => c.statut === "en_attente_validation_admin").length;
+
+  const validerCommande = async () => {
+    setEnCours(true);
+    await base44.entities.CommandeVendeur.update(commandeSelectionnee.id, {
+      statut: "validee_admin",
+      notes_admin: notesAdmin || commandeSelectionnee.notes_admin,
     });
-
-    if (statut === "livree") {
-      const comptes = await base44.entities.CompteVendeur.filter({ id: commande.vendeur_id });
-      if (comptes.length > 0) {
-        const compte = comptes[0];
-        await base44.entities.CompteVendeur.update(compte.id, {
-          solde_commission: (compte.solde_commission || 0) + (commande.commission_vendeur || 0),
-          total_commissions_gagnees: (compte.total_commissions_gagnees || 0) + (commande.commission_vendeur || 0),
-          ventes_reussies: (compte.ventes_reussies || 0) + 1,
-        });
-      }
-    }
-    if (statut === "echec") {
-      const comptes = await base44.entities.CompteVendeur.filter({ id: commande.vendeur_id });
-      if (comptes.length > 0) {
-        const compte = comptes[0];
-        await base44.entities.CompteVendeur.update(compte.id, {
-          ventes_echouees: (compte.ventes_echouees || 0) + 1,
-        });
-      }
-    }
-
+    await base44.entities.NotificationVendeur.create({
+      vendeur_email: commandeSelectionnee.vendeur_email,
+      titre: "Commande validée ✓",
+      message: `Votre commande de ${commandeSelectionnee.quantite}x ${commandeSelectionnee.produit_nom} pour ${commandeSelectionnee.client_nom} a été validée par l'équipe ZONITE.`,
+      type: "succes",
+    });
+    await base44.entities.JournalAudit.create({
+      action: "Validation commande vendeur",
+      module: "commande",
+      details: `Commande ${commandeSelectionnee.id} validée — Vendeur: ${commandeSelectionnee.vendeur_nom}`,
+      entite_id: commandeSelectionnee.id,
+    });
     queryClient.invalidateQueries({ queryKey: ["commandes_vendeurs_admin"] });
+    setEnCours(false);
+    setCommandeSelectionnee(null);
+  };
+
+  const attribuerLivreur = async () => {
+    if (!livreurNom.trim()) return;
+    setEnCours(true);
+    await base44.entities.CommandeVendeur.update(commandeSelectionnee.id, {
+      statut: "attribuee_livreur",
+      livreur_nom: livreurNom,
+      notes_admin: notesAdmin || commandeSelectionnee.notes_admin,
+    });
+    await base44.entities.NotificationVendeur.create({
+      vendeur_email: commandeSelectionnee.vendeur_email,
+      titre: "Livreur attribué",
+      message: `Un livreur (${livreurNom}) a été attribué à votre commande pour ${commandeSelectionnee.client_nom}.`,
+      type: "info",
+    });
+    await base44.entities.JournalAudit.create({
+      action: "Attribution livreur",
+      module: "commande",
+      details: `Livreur "${livreurNom}" attribué à la commande ${commandeSelectionnee.id}`,
+      entite_id: commandeSelectionnee.id,
+    });
+    queryClient.invalidateQueries({ queryKey: ["commandes_vendeurs_admin"] });
+    setEnCours(false);
+    setCommandeSelectionnee(null);
+  };
+
+  const marquerEnLivraison = async () => {
+    setEnCours(true);
+    await base44.entities.CommandeVendeur.update(commandeSelectionnee.id, { statut: "en_livraison" });
+    await base44.entities.NotificationVendeur.create({
+      vendeur_email: commandeSelectionnee.vendeur_email,
+      titre: "Commande en livraison 🚚",
+      message: `La commande de ${commandeSelectionnee.produit_nom} pour ${commandeSelectionnee.client_nom} est en cours de livraison.`,
+      type: "info",
+    });
+    queryClient.invalidateQueries({ queryKey: ["commandes_vendeurs_admin"] });
+    setEnCours(false);
+    setCommandeSelectionnee(null);
+  };
+
+  const marquerLivree = async () => {
+    setEnCours(true);
+    const produits = await base44.entities.Produit.filter({ id: commandeSelectionnee.produit_id });
+    const produit = produits[0];
+    if (produit) {
+      // Libérer le stock réservé (la sortie physique est définitive)
+      await base44.entities.Produit.update(produit.id, {
+        stock_reserve: Math.max(0, (produit.stock_reserve || 0) - commandeSelectionnee.quantite),
+        total_vendu: (produit.total_vendu || 0) + commandeSelectionnee.quantite,
+      });
+    }
+
+    // Attribuer la commission au vendeur
+    const comptes = await base44.entities.CompteVendeur.filter({ id: commandeSelectionnee.vendeur_id });
+    if (comptes.length > 0) {
+      const compte = comptes[0];
+      await base44.entities.CompteVendeur.update(compte.id, {
+        solde_commission: (compte.solde_commission || 0) + (commandeSelectionnee.commission_vendeur || 0),
+        total_commissions_gagnees: (compte.total_commissions_gagnees || 0) + (commandeSelectionnee.commission_vendeur || 0),
+        ventes_reussies: (compte.ventes_reussies || 0) + 1,
+      });
+    }
+
+    await base44.entities.CommandeVendeur.update(commandeSelectionnee.id, { statut: "livree", notes_admin: notesAdmin || commandeSelectionnee.notes_admin });
+    await base44.entities.NotificationVendeur.create({
+      vendeur_email: commandeSelectionnee.vendeur_email,
+      titre: "Commande livrée ✓",
+      message: `La commande de ${commandeSelectionnee.produit_nom} a été livrée à ${commandeSelectionnee.client_nom}. Commission de ${Math.round(commandeSelectionnee.commission_vendeur || 0).toLocaleString("fr-FR")} FCFA créditée.`,
+      type: "succes",
+    });
+    await base44.entities.JournalAudit.create({
+      action: "Livraison confirmée",
+      module: "commande",
+      details: `Commande ${commandeSelectionnee.id} livrée — Commission: ${commandeSelectionnee.commission_vendeur} FCFA`,
+      entite_id: commandeSelectionnee.id,
+    });
+    queryClient.invalidateQueries({ queryKey: ["commandes_vendeurs_admin"] });
+    setEnCours(false);
+    setCommandeSelectionnee(null);
+  };
+
+  const marquerEchec = async () => {
+    setEnCours(true);
+    const produits = await base44.entities.Produit.filter({ id: commandeSelectionnee.produit_id });
+    const produit = produits[0];
+    if (produit) {
+      // Remettre le stock réservé dans le stock disponible
+      await base44.entities.Produit.update(produit.id, {
+        stock_global: (produit.stock_global || 0) + commandeSelectionnee.quantite,
+        stock_reserve: Math.max(0, (produit.stock_reserve || 0) - commandeSelectionnee.quantite),
+      });
+      await base44.entities.MouvementStock.create({
+        produit_id: produit.id,
+        produit_nom: produit.nom,
+        type_mouvement: "entree",
+        quantite: commandeSelectionnee.quantite,
+        stock_avant: produit.stock_global || 0,
+        stock_apres: (produit.stock_global || 0) + commandeSelectionnee.quantite,
+        raison: `Échec livraison — commande ${commandeSelectionnee.id}`,
+      });
+    }
+    const comptes = await base44.entities.CompteVendeur.filter({ id: commandeSelectionnee.vendeur_id });
+    if (comptes.length > 0) {
+      await base44.entities.CompteVendeur.update(comptes[0].id, {
+        ventes_echouees: (comptes[0].ventes_echouees || 0) + 1,
+      });
+    }
+    await base44.entities.CommandeVendeur.update(commandeSelectionnee.id, { statut: "echec_livraison", notes_admin: notesAdmin || commandeSelectionnee.notes_admin });
+    await base44.entities.NotificationVendeur.create({
+      vendeur_email: commandeSelectionnee.vendeur_email,
+      titre: "Échec de livraison",
+      message: `La livraison de ${commandeSelectionnee.produit_nom} pour ${commandeSelectionnee.client_nom} a échoué. Le stock a été restitué.`,
+      type: "alerte",
+    });
+    queryClient.invalidateQueries({ queryKey: ["commandes_vendeurs_admin"] });
+    setEnCours(false);
+    setCommandeSelectionnee(null);
+  };
+
+  const annulerCommande = async () => {
+    setEnCours(true);
+    // Restituer le stock si la commande était encore en cours (pas livrée)
+    const statutsAvecStockReserve = ["en_attente_validation_admin", "validee_admin", "attribuee_livreur", "en_livraison"];
+    if (statutsAvecStockReserve.includes(commandeSelectionnee.statut)) {
+      const produits = await base44.entities.Produit.filter({ id: commandeSelectionnee.produit_id });
+      const produit = produits[0];
+      if (produit) {
+        await base44.entities.Produit.update(produit.id, {
+          stock_global: (produit.stock_global || 0) + commandeSelectionnee.quantite,
+          stock_reserve: Math.max(0, (produit.stock_reserve || 0) - commandeSelectionnee.quantite),
+        });
+      }
+    }
+    await base44.entities.CommandeVendeur.update(commandeSelectionnee.id, { statut: "annulee", notes_admin: notesAdmin || commandeSelectionnee.notes_admin });
+    await base44.entities.NotificationVendeur.create({
+      vendeur_email: commandeSelectionnee.vendeur_email,
+      titre: "Commande annulée",
+      message: `Votre commande de ${commandeSelectionnee.produit_nom} pour ${commandeSelectionnee.client_nom} a été annulée.`,
+      type: "alerte",
+    });
+    queryClient.invalidateQueries({ queryKey: ["commandes_vendeurs_admin"] });
+    setEnCours(false);
     setCommandeSelectionnee(null);
   };
 
@@ -83,13 +215,20 @@ export default function CommandesVendeurs() {
 
   return (
     <div className="space-y-4">
+      {nbEnAttente > 0 && (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-3 flex items-center gap-2">
+          <span className="w-6 h-6 bg-yellow-500 text-white text-xs font-bold rounded-full flex items-center justify-center flex-shrink-0">{nbEnAttente}</span>
+          <p className="text-sm text-yellow-800 font-medium">{nbEnAttente} commande{nbEnAttente > 1 ? "s" : ""} en attente de validation</p>
+        </div>
+      )}
+
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <Input placeholder="Rechercher..." value={recherche} onChange={e => setRecherche(e.target.value)} className="pl-9" />
         </div>
         <Select value={filtreStatut} onValueChange={v => setFiltreStatut(v)}>
-          <SelectTrigger className="w-48"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="w-52"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="tous">Tous les statuts</SelectItem>
             {Object.entries(STATUTS).map(([k, v]) => <SelectItem key={k} value={k}>{v.label}</SelectItem>)}
@@ -102,14 +241,14 @@ export default function CommandesVendeurs() {
           <div className="p-8 text-center text-slate-400">Aucune commande</div>
         )}
         {commandesFiltrees.map(c => (
-          <div key={c.id} className="p-4 flex items-center justify-between hover:bg-slate-50 cursor-pointer" onClick={() => { setCommandeSelectionnee(c); setNotesAdmin(c.notes_admin || ""); }}>
+          <div key={c.id} className="p-4 flex items-center justify-between hover:bg-slate-50 cursor-pointer" onClick={() => { setCommandeSelectionnee(c); setNotesAdmin(c.notes_admin || ""); setLivreurNom(c.livreur_nom || ""); }}>
             <div className="flex-1 min-w-0 mr-3">
-              <p className="font-medium text-sm text-slate-900 truncate">{c.produit_nom}</p>
+              <p className="font-medium text-sm text-slate-900 truncate">{c.produit_nom} <span className="text-slate-400 font-normal">× {c.quantite}</span></p>
               <p className="text-xs text-slate-500">{c.vendeur_nom} → {c.client_nom} ({c.client_ville})</p>
               <p className="text-xs text-slate-400">{formaterDate(c.created_date)} • Commission: {formater(c.commission_vendeur)}</p>
             </div>
             <div className="flex items-center gap-2">
-              <Badge className={`${STATUTS[c.statut]?.couleur} border text-xs`}>{STATUTS[c.statut]?.label}</Badge>
+              <Badge className={`${STATUTS[c.statut]?.couleur} border text-xs whitespace-nowrap`}>{STATUTS[c.statut]?.label}</Badge>
               <Eye className="w-4 h-4 text-slate-400" />
             </div>
           </div>
@@ -117,40 +256,72 @@ export default function CommandesVendeurs() {
       </div>
 
       <Dialog open={!!commandeSelectionnee} onOpenChange={() => setCommandeSelectionnee(null)}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Commande : {commandeSelectionnee?.produit_nom}</DialogTitle>
           </DialogHeader>
           {commandeSelectionnee && (
             <div className="space-y-4 text-sm">
-              <div className="grid grid-cols-2 gap-3">
-                <div><p className="text-slate-400">Vendeur</p><p className="font-medium">{commandeSelectionnee.vendeur_nom}</p></div>
-                <div><p className="text-slate-400">Quantité</p><p className="font-medium">{commandeSelectionnee.quantite}</p></div>
-                <div><p className="text-slate-400">Prix client</p><p className="font-bold">{formater(commandeSelectionnee.prix_final_client)}</p></div>
-                <div><p className="text-slate-400">Commission vendeur</p><p className="font-bold text-yellow-600">{formater(commandeSelectionnee.commission_vendeur)}</p></div>
-                <div><p className="text-slate-400">Client</p><p className="font-medium">{commandeSelectionnee.client_nom}</p></div>
-                <div><p className="text-slate-400">Téléphone</p><p className="font-medium">{commandeSelectionnee.client_telephone}</p></div>
-                <div className="col-span-2"><p className="text-slate-400">Adresse</p><p className="font-medium">{commandeSelectionnee.client_ville}, {commandeSelectionnee.client_quartier} – {commandeSelectionnee.client_adresse || "—"}</p></div>
-                {commandeSelectionnee.notes && <div className="col-span-2"><p className="text-slate-400">Notes vendeur</p><p>{commandeSelectionnee.notes}</p></div>}
+              <Badge className={`${STATUTS[commandeSelectionnee.statut]?.couleur} border`}>{STATUTS[commandeSelectionnee.statut]?.label}</Badge>
+
+              <div className="grid grid-cols-2 gap-3 bg-slate-50 rounded-xl p-3">
+                <div><p className="text-slate-400 text-xs">Vendeur</p><p className="font-medium">{commandeSelectionnee.vendeur_nom}</p></div>
+                <div><p className="text-slate-400 text-xs">Quantité</p><p className="font-medium">{commandeSelectionnee.quantite}</p></div>
+                <div><p className="text-slate-400 text-xs">Prix client</p><p className="font-bold">{formater(commandeSelectionnee.prix_final_client)}</p></div>
+                <div><p className="text-slate-400 text-xs">Commission vendeur</p><p className="font-bold text-yellow-600">{formater(commandeSelectionnee.commission_vendeur)}</p></div>
+                <div><p className="text-slate-400 text-xs">Client</p><p className="font-medium">{commandeSelectionnee.client_nom}</p></div>
+                <div><p className="text-slate-400 text-xs">Téléphone</p><p className="font-medium">{commandeSelectionnee.client_telephone}</p></div>
+                <div className="col-span-2"><p className="text-slate-400 text-xs">Adresse</p><p className="font-medium">{commandeSelectionnee.client_ville}{commandeSelectionnee.client_quartier ? `, ${commandeSelectionnee.client_quartier}` : ""}{commandeSelectionnee.client_adresse ? ` – ${commandeSelectionnee.client_adresse}` : ""}</p></div>
+                {commandeSelectionnee.livreur_nom && <div className="col-span-2"><p className="text-slate-400 text-xs">Livreur</p><p className="font-medium">{commandeSelectionnee.livreur_nom}</p></div>}
+                {commandeSelectionnee.notes && <div className="col-span-2"><p className="text-slate-400 text-xs">Notes vendeur</p><p>{commandeSelectionnee.notes}</p></div>}
               </div>
+
               <div className="space-y-1">
-                <label className="text-slate-400">Note admin</label>
-                <Input value={notesAdmin} onChange={e => setNotesAdmin(e.target.value)} placeholder="Message au vendeur..." />
+                <label className="text-slate-500 text-xs font-medium">Note admin (visible par le vendeur)</label>
+                <Textarea value={notesAdmin} onChange={e => setNotesAdmin(e.target.value)} placeholder="Message au vendeur..." rows={2} />
               </div>
-              {TRANSITIONS[commandeSelectionnee.statut]?.length > 0 && (
-                <div>
-                  <p className="text-slate-400 mb-2">Changer le statut :</p>
-                  <div className="flex flex-wrap gap-2">
-                    {TRANSITIONS[commandeSelectionnee.statut].map(s => (
-                      <Button key={s} size="sm"
-                        className={s === "echec" ? "bg-red-600 hover:bg-red-700" : "bg-[#1a1f5e] hover:bg-[#141952]"}
-                        onClick={() => changerStatut(commandeSelectionnee, s)}>
-                        {STATUTS[s]?.label}
-                      </Button>
-                    ))}
+
+              {/* Actions selon statut */}
+              <div className="space-y-2">
+                {commandeSelectionnee.statut === "en_attente_validation_admin" && (
+                  <Button onClick={validerCommande} disabled={enCours} className="w-full bg-blue-600 hover:bg-blue-700 gap-2">
+                    <CheckCircle2 className="w-4 h-4" /> Valider la commande
+                  </Button>
+                )}
+                {(commandeSelectionnee.statut === "validee_admin") && (
+                  <div className="space-y-2">
+                    <div className="space-y-1">
+                      <label className="text-slate-500 text-xs font-medium">Nom du livreur *</label>
+                      <Input value={livreurNom} onChange={e => setLivreurNom(e.target.value)} placeholder="Nom du livreur..." />
+                    </div>
+                    <Button onClick={attribuerLivreur} disabled={enCours || !livreurNom.trim()} className="w-full bg-indigo-600 hover:bg-indigo-700 gap-2">
+                      <Truck className="w-4 h-4" /> Attribuer le livreur
+                    </Button>
                   </div>
-                </div>
-              )}
+                )}
+                {commandeSelectionnee.statut === "attribuee_livreur" && (
+                  <Button onClick={marquerEnLivraison} disabled={enCours} className="w-full bg-purple-600 hover:bg-purple-700 gap-2">
+                    <Truck className="w-4 h-4" /> Marquer en livraison
+                  </Button>
+                )}
+                {commandeSelectionnee.statut === "en_livraison" && (
+                  <Button onClick={marquerLivree} disabled={enCours} className="w-full bg-emerald-600 hover:bg-emerald-700 gap-2">
+                    <PackageCheck className="w-4 h-4" /> Confirmer livraison
+                  </Button>
+                )}
+                {!["livree", "echec_livraison", "annulee"].includes(commandeSelectionnee.statut) && (
+                  <div className="flex gap-2">
+                    {["en_livraison", "attribuee_livreur", "validee_admin"].includes(commandeSelectionnee.statut) && (
+                      <Button onClick={marquerEchec} disabled={enCours} variant="outline" className="flex-1 border-orange-300 text-orange-600 hover:bg-orange-50 gap-2">
+                        <XCircle className="w-4 h-4" /> Échec livraison
+                      </Button>
+                    )}
+                    <Button onClick={annulerCommande} disabled={enCours} variant="outline" className="flex-1 border-red-300 text-red-600 hover:bg-red-50 gap-2">
+                      <XCircle className="w-4 h-4" /> Annuler
+                    </Button>
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </DialogContent>
