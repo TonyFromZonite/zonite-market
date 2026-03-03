@@ -4,7 +4,7 @@ import { createPageUrl } from "@/utils";
 import {
   LayoutDashboard, ShoppingCart, Package, Users, Truck,
   ClipboardList, DollarSign, Shield, Menu, X, ChevronRight,
-  LogOut, Tag, Bell
+  LogOut, Tag, Bell, TrendingUp
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
