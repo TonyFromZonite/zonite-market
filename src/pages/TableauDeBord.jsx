@@ -79,13 +79,19 @@ export default function TableauDeBord() {
 
   const formaterMontant = (n) => `${Math.round(n).toLocaleString("fr-FR")} FCFA`;
 
+  // Stats vendeurs app
+  const commandesVendeursAujourdhui = commandesVendeurs.filter(c => {
+    const d = c.created_date?.split("T")[0];
+    return d === new Date().toISOString().split("T")[0];
+  }).length;
+
+  const commissionsVendeursAPayer = paiementsEnAttente.reduce((s, p) => s + (p.montant || 0), 0);
+
   if (enChargement) {
     return (
       <div className="space-y-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {Array(7).fill(0).map((_, i) => (
-            <Skeleton key={i} className="h-28 rounded-xl" />
-          ))}
+          {Array(8).fill(0).map((_, i) => <Skeleton key={i} className="h-28 rounded-xl" />)}
         </div>
       </div>
     );
@@ -93,50 +99,50 @@ export default function TableauDeBord() {
 
   return (
     <div className="space-y-6">
-      {/* Cartes statistiques */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <CarteStatistique
-          titre="Chiffre d'Affaires Total"
-          valeur={formaterMontant(chiffreAffaires)}
-          icone={DollarSign}
-          couleur="bleu"
-        />
-        <CarteStatistique
-          titre="Profit Net"
-          valeur={formaterMontant(profitNet)}
-          icone={TrendingUp}
-          couleur="vert"
-        />
-        <CarteStatistique
-          titre="Commissions à Payer"
-          valeur={formaterMontant(commissionsAPayer)}
-          icone={Wallet}
-          couleur="orange"
-        />
-        <CarteStatistique
-          titre="Stock Critique"
-          valeur={stockCritique}
-          icone={AlertTriangle}
-          couleur={stockCritique > 0 ? "rouge" : "vert"}
-        />
-        <CarteStatistique
-          titre="Commandes du Jour"
-          valeur={commandesDuJour}
-          icone={ShoppingCart}
-          couleur="violet"
-        />
-        <CarteStatistique
-          titre="Top Produit"
-          valeur={topProduit?.nom || "—"}
-          icone={Package}
-          couleur="jaune"
-        />
-        <CarteStatistique
-          titre="Top Vendeur"
-          valeur={topVendeur?.nom_complet || "—"}
-          icone={Users}
-          couleur="indigo"
-        />
+      {/* Alertes actions requises */}
+      {(candidaturesEnAttente.length > 0 || kycEnAttente.length > 0 || paiementsEnAttente.length > 0) && (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
+          <p className="font-semibold text-yellow-800 text-sm mb-2">⚠️ Actions requises</p>
+          <div className="flex flex-wrap gap-2">
+            {candidaturesEnAttente.length > 0 && (
+              <a href={`#/GestionCandidatures`} className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full font-medium">
+                {candidaturesEnAttente.length} candidature{candidaturesEnAttente.length > 1 ? "s" : ""} en attente
+              </a>
+            )}
+            {kycEnAttente.length > 0 && (
+              <span className="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded-full font-medium">
+                {kycEnAttente.length} KYC à valider
+              </span>
+            )}
+            {paiementsEnAttente.length > 0 && (
+              <span className="text-xs bg-red-100 text-red-800 px-2 py-1 rounded-full font-medium">
+                {paiementsEnAttente.length} paiement{paiementsEnAttente.length > 1 ? "s" : ""} en attente ({formaterMontant(commissionsVendeursAPayer)})
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Cartes statistiques Admin */}
+      <div>
+        <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">Ventes Directes (Admin)</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <CarteStatistique titre="Chiffre d'Affaires Total" valeur={formaterMontant(chiffreAffaires)} icone={DollarSign} couleur="bleu" />
+          <CarteStatistique titre="Profit Net" valeur={formaterMontant(profitNet)} icone={TrendingUp} couleur="vert" />
+          <CarteStatistique titre="Commissions à Payer" valeur={formaterMontant(commissionsAPayer)} icone={Wallet} couleur="orange" />
+          <CarteStatistique titre="Commandes du Jour" valeur={commandesDuJour} icone={ShoppingCart} couleur="violet" />
+        </div>
+      </div>
+
+      {/* Cartes statistiques Vendeurs */}
+      <div>
+        <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">Application Vendeurs</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <CarteStatistique titre="Commandes Vendeurs Aujourd'hui" valeur={commandesVendeursAujourdhui} icone={ShoppingCart} couleur="indigo" />
+          <CarteStatistique titre="Total Commandes Vendeurs" valeur={commandesVendeurs.length} icone={Package} couleur="jaune" />
+          <CarteStatistique titre="Stock Critique" valeur={stockCritique} icone={AlertTriangle} couleur={stockCritique > 0 ? "rouge" : "vert"} />
+          <CarteStatistique titre="Top Produit" valeur={topProduit?.nom || "—"} icone={Package} couleur="bleu" />
+        </div>
       </div>
 
       {/* Graphiques et listes */}
