@@ -226,7 +226,7 @@ export default function RapportsVentes() {
       ["Panier Moyen", fmt(nbTransactions > 0 ? caTotal / nbTransactions : 0)],
     ];
 
-    doc.autoTable({
+    autoTable(doc, {
       startY: y,
       head: [["Indicateur", "Valeur"]],
       body: kpis,
@@ -246,7 +246,7 @@ export default function RapportsVentes() {
       doc.setTextColor(0, 0, 0);
       doc.text("Top Produits", 15, y);
       y += 4;
-      doc.autoTable({
+      autoTable(doc, {
         startY: y,
         head: [["#", "Produit", "Quantité", "CA", "Marge"]],
         body: topProduits.map((p, i) => [i + 1, p.nom, p.qte, fmt(p.ca), fmt(p.marge)]),
@@ -266,7 +266,7 @@ export default function RapportsVentes() {
       doc.setTextColor(0, 0, 0);
       doc.text("Top Vendeurs", 15, y);
       y += 4;
-      doc.autoTable({
+      autoTable(doc, {
         startY: y,
         head: [["#", "Vendeur", "Ventes", "CA", "Commissions"]],
         body: topVendeurs.map((v, i) => [i + 1, v.nom, v.nb, fmt(v.ca), fmt(v.commissions)]),
@@ -286,7 +286,7 @@ export default function RapportsVentes() {
       doc.setTextColor(0, 0, 0);
       doc.text("Répartition par Ville", 15, y);
       y += 4;
-      doc.autoTable({
+      autoTable(doc, {
         startY: y,
         head: [["Ville", "Commandes", "CA", "%"]],
         body: topVilles.map(v => {
