@@ -47,56 +47,56 @@
  *
  * The mainPage value must match a key in the PAGES object exactly.
  */
+import Candidature from './pages/Candidature';
+import CatalogueVendeur from './pages/CatalogueVendeur';
 import Categories from './pages/Categories';
 import Commandes from './pages/Commandes';
+import CommandesVendeurs from './pages/CommandesVendeurs';
 import Commissions from './pages/Commissions';
-import JournalAudit from './pages/JournalAudit';
-import Livraisons from './pages/Livraisons';
-import NouvelleVente from './pages/NouvelleVente';
-import Produits from './pages/Produits';
-import TableauDeBord from './pages/TableauDeBord';
-import Vendeurs from './pages/Vendeurs';
-import Candidature from './pages/Candidature';
-import EspaceVendeur from './pages/EspaceVendeur';
-import InscriptionVendeur from './pages/InscriptionVendeur';
-import VideoFormation from './pages/VideoFormation';
-import CatalogueVendeur from './pages/CatalogueVendeur';
-import NouvelleCommandeVendeur from './pages/NouvelleCommandeVendeur';
-import MesCommandesVendeur from './pages/MesCommandesVendeur';
-import ProfilVendeur from './pages/ProfilVendeur';
 import DemandePaiement from './pages/DemandePaiement';
-import NotificationsVendeur from './pages/NotificationsVendeur';
+import EspaceVendeur from './pages/EspaceVendeur';
 import GestionCandidatures from './pages/GestionCandidatures';
 import GestionKYC from './pages/GestionKYC';
-import CommandesVendeurs from './pages/CommandesVendeurs';
+import InscriptionVendeur from './pages/InscriptionVendeur';
+import JournalAudit from './pages/JournalAudit';
+import Livraisons from './pages/Livraisons';
+import MesCommandesVendeur from './pages/MesCommandesVendeur';
+import NotificationsVendeur from './pages/NotificationsVendeur';
+import NouvelleCommandeVendeur from './pages/NouvelleCommandeVendeur';
+import NouvelleVente from './pages/NouvelleVente';
 import PaiementsVendeurs from './pages/PaiementsVendeurs';
+import Produits from './pages/Produits';
+import ProfilVendeur from './pages/ProfilVendeur';
+import TableauDeBord from './pages/TableauDeBord';
+import Vendeurs from './pages/Vendeurs';
+import VideoFormation from './pages/VideoFormation';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
+    "Candidature": Candidature,
+    "CatalogueVendeur": CatalogueVendeur,
     "Categories": Categories,
     "Commandes": Commandes,
+    "CommandesVendeurs": CommandesVendeurs,
     "Commissions": Commissions,
-    "JournalAudit": JournalAudit,
-    "Livraisons": Livraisons,
-    "NouvelleVente": NouvelleVente,
-    "Produits": Produits,
-    "TableauDeBord": TableauDeBord,
-    "Vendeurs": Vendeurs,
-    "Candidature": Candidature,
-    "EspaceVendeur": EspaceVendeur,
-    "InscriptionVendeur": InscriptionVendeur,
-    "VideoFormation": VideoFormation,
-    "CatalogueVendeur": CatalogueVendeur,
-    "NouvelleCommandeVendeur": NouvelleCommandeVendeur,
-    "MesCommandesVendeur": MesCommandesVendeur,
-    "ProfilVendeur": ProfilVendeur,
     "DemandePaiement": DemandePaiement,
-    "NotificationsVendeur": NotificationsVendeur,
+    "EspaceVendeur": EspaceVendeur,
     "GestionCandidatures": GestionCandidatures,
     "GestionKYC": GestionKYC,
-    "CommandesVendeurs": CommandesVendeurs,
+    "InscriptionVendeur": InscriptionVendeur,
+    "JournalAudit": JournalAudit,
+    "Livraisons": Livraisons,
+    "MesCommandesVendeur": MesCommandesVendeur,
+    "NotificationsVendeur": NotificationsVendeur,
+    "NouvelleCommandeVendeur": NouvelleCommandeVendeur,
+    "NouvelleVente": NouvelleVente,
     "PaiementsVendeurs": PaiementsVendeurs,
+    "Produits": Produits,
+    "ProfilVendeur": ProfilVendeur,
+    "TableauDeBord": TableauDeBord,
+    "Vendeurs": Vendeurs,
+    "VideoFormation": VideoFormation,
 }
 
 export const pagesConfig = {
