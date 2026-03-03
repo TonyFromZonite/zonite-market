@@ -8,7 +8,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import jsPDF from "jspdf";
-import "jspdf-autotable" 
+import autoTable from "jspdf-autotable";
 
 const PERIODES = [
   { label: "7 jours", valeur: 7 },
