@@ -59,6 +59,7 @@ function CustomTooltip({ active, payload, label }) {
 
 export default function RapportsVentes() {
   const [periodeJours, setPeriodeJours] = useState(30);
+  const [exportEnCours, setExportEnCours] = useState(false);
 
   const { data: ventes = [], isLoading: chargVentes } = useQuery({
     queryKey: ["ventes_rapport"],
