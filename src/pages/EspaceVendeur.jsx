@@ -130,11 +130,14 @@ export default function EspaceVendeur() {
   return (
     <div className="min-h-screen bg-slate-50 pb-20">
       {/* Header */}
-      <div className="bg-[#1a1f5e] text-white px-4 pt-6 pb-10">
+      <div className="bg-[#1a1f5e] text-white px-4 pt-6 pb-10" style={{ paddingTop: "max(1.5rem, env(safe-area-inset-top, 0px))" }}>
         <div className="flex justify-between items-center mb-1">
-          <div>
-            <p className="text-slate-300 text-sm">Bonjour 👋</p>
-            <h1 className="text-lg font-bold">{compteVendeur.nom_complet}</h1>
+          <div className="flex items-center gap-3">
+            <img src={LOGO} alt="Zonite" className="h-9 w-9 rounded-xl object-contain bg-white p-0.5 flex-shrink-0" />
+            <div>
+              <p className="text-slate-300 text-xs">Bonjour 👋</p>
+              <h1 className="text-base font-bold leading-tight">{compteVendeur.nom_complet}</h1>
+            </div>
           </div>
           <div className="flex items-center gap-3">
             <Link to={createPageUrl("NotificationsVendeur")} className="relative">
