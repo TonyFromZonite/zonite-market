@@ -111,9 +111,9 @@ export default function CommandesVendeurs() {
     }
 
     // Attribuer la commission au vendeur
-    const comptes = await base44.entities.CompteVendeur.filter({ id: commandeSelectionnee.vendeur_id });
-    if (comptes.length > 0) {
-      const compte = comptes[0];
+    const tousComptes = await base44.entities.CompteVendeur.list();
+    const compte = tousComptes.find(c => c.id === commandeSelectionnee.vendeur_id);
+    if (compte) {
       await base44.entities.CompteVendeur.update(compte.id, {
         solde_commission: (compte.solde_commission || 0) + (commandeSelectionnee.commission_vendeur || 0),
         total_commissions_gagnees: (compte.total_commissions_gagnees || 0) + (commandeSelectionnee.commission_vendeur || 0),
