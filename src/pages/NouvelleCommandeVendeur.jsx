@@ -60,6 +60,7 @@ export default function NouvelleCommandeVendeur() {
   const soumettre = async () => {
     if (!form.produit_id) return setErreur("Sélectionnez un produit.");
     if (qte < 1) return setErreur("La quantité doit être au moins 1.");
+    if (qte > stockDisponible) return setErreur(`Stock insuffisant. Stock disponible : ${stockDisponible} unité(s).`);
     if (!prixFinal || prixFinal < prixGros) return setErreur(`Le prix final doit être ≥ ${formater(prixGros)} (prix de gros).`);
     if (!form.client_nom || !form.client_telephone || !form.client_ville) return setErreur("Renseignez les informations du client.");
 
@@ -165,7 +166,9 @@ export default function NouvelleCommandeVendeur() {
               <SelectTrigger><SelectValue placeholder="Choisir un produit" /></SelectTrigger>
               <SelectContent>
                 {produits.map(p => (
-                  <SelectItem key={p.id} value={p.id}>{p.nom} — Stock: {p.stock_global || 0}</SelectItem>
+                  <SelectItem key={p.id} value={p.id} disabled={(p.stock_global || 0) <= 0}>
+                    {p.nom} — Dispo: {p.stock_global || 0}{(p.stock_global || 0) <= 0 ? " (rupture)" : ""}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
