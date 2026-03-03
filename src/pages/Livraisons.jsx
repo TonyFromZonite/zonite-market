@@ -71,7 +71,7 @@ export default function Livraisons() {
     queryClient.invalidateQueries({ queryKey: ["livraisons"] });
   };
 
-  const formater = (n) => `${Math.round(n || 0).toLocaleString("fr-FR")} DA`;
+  const formater = (n) => `${Math.round(n || 0).toLocaleString("fr-FR")} FCFA`;
 
   if (isLoading) {
     return <div className="space-y-3">{Array(4).fill(0).map((_, i) => <Skeleton key={i} className="h-12 rounded-lg" />)}</div>;
@@ -140,7 +140,7 @@ export default function Livraisons() {
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2"><Label>Nom *</Label><Input value={form.nom} onChange={(e) => modifier("nom", e.target.value)} placeholder="Ex: Livraison Express" /></div>
-            <div className="space-y-2"><Label>Coût (DA) *</Label><Input type="number" min="0" value={form.cout} onChange={(e) => modifier("cout", parseFloat(e.target.value) || 0)} /></div>
+            <div className="space-y-2"><Label>Coût (FCFA) *</Label><Input type="number" min="0" value={form.cout} onChange={(e) => modifier("cout", parseFloat(e.target.value) || 0)} /></div>
             <div className="space-y-2"><Label>Délai Estimé</Label><Input value={form.delai_estime} onChange={(e) => modifier("delai_estime", e.target.value)} placeholder="Ex: 2-3 jours" /></div>
           </div>
           <DialogFooter>
