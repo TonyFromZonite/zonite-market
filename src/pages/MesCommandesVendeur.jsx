@@ -9,11 +9,17 @@ import { createPageUrl } from "@/utils";
 import { Search, ChevronLeft, ShoppingBag } from "lucide-react";
 
 const STATUTS = {
-  en_attente: { label: "En attente", couleur: "bg-yellow-100 text-yellow-800" },
-  en_preparation: { label: "En préparation", couleur: "bg-blue-100 text-blue-800" },
-  en_livraison: { label: "En livraison", couleur: "bg-purple-100 text-purple-800" },
-  livree: { label: "Livrée ✓", couleur: "bg-emerald-100 text-emerald-800" },
-  echec: { label: "Échec", couleur: "bg-red-100 text-red-800" },
+  en_attente_validation_admin: { label: "⏳ En attente validation", couleur: "bg-yellow-100 text-yellow-800" },
+  validee_admin:               { label: "✓ Validée", couleur: "bg-blue-100 text-blue-800" },
+  attribuee_livreur:           { label: "🚴 Livreur attribué", couleur: "bg-indigo-100 text-indigo-800" },
+  en_livraison:                { label: "🚚 En livraison", couleur: "bg-purple-100 text-purple-800" },
+  livree:                      { label: "✅ Livrée", couleur: "bg-emerald-100 text-emerald-800" },
+  echec_livraison:             { label: "❌ Échec livraison", couleur: "bg-orange-100 text-orange-800" },
+  annulee:                     { label: "🚫 Annulée", couleur: "bg-red-100 text-red-800" },
+  // Rétrocompatibilité anciens statuts
+  en_attente:                  { label: "⏳ En attente", couleur: "bg-yellow-100 text-yellow-800" },
+  en_preparation:              { label: "En préparation", couleur: "bg-blue-100 text-blue-800" },
+  echec:                       { label: "Échec", couleur: "bg-red-100 text-red-800" },
 };
 
 export default function MesCommandesVendeur() {

@@ -54,6 +54,8 @@ export default function NouvelleCommandeVendeur() {
   const prixFinal = parseFloat(form.prix_final_client) || 0;
   const commission = Math.max(0, (prixFinal - prixGros) * qte);
   const formater = n => `${Math.round(n || 0).toLocaleString("fr-FR")} FCFA`;
+  // Stock disponible = stock_global (le stock_reserve est déjà déduit lors des réservations précédentes)
+  const stockDisponible = produitSelectionne ? (produitSelectionne.stock_global || 0) : 0;
 
   const soumettre = async () => {
     if (!form.produit_id) return setErreur("Sélectionnez un produit.");
