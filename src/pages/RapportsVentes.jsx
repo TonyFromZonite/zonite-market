@@ -188,6 +188,131 @@ export default function RapportsVentes() {
   const totalCAVilles = topVilles.reduce((s, v) => s + v.ca, 0);
   const badgeRank = (i) => i === 0 ? "bg-yellow-100 text-yellow-700" : i === 1 ? "bg-slate-200 text-slate-600" : i === 2 ? "bg-orange-100 text-orange-700" : "bg-slate-100 text-slate-500";
 
+  const periodLabel = PERIODES.find(p => p.valeur === periodeJours)?.label || "";
+
+  const exporterPDF = () => {
+    setExportEnCours(true);
+    const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+    const dateGen = format(new Date(), "dd/MM/yyyy HH:mm");
+    const couleurBleu = [26, 31, 94];
+    const couleurJaune = [245, 197, 24];
+
+    // En-tête
+    doc.setFillColor(...couleurBleu);
+    doc.rect(0, 0, 210, 30, "F");
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(18);
+    doc.setFont("helvetica", "bold");
+    doc.text("ZONITE - Rapport des Ventes", 15, 13);
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.text(`Période : ${periodLabel}   |   Généré le : ${dateGen}`, 15, 23);
+
+    let y = 40;
+
+    // KPIs
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(13);
+    doc.setFont("helvetica", "bold");
+    doc.text("Indicateurs Clés", 15, y);
+    y += 7;
+
+    const kpis = [
+      ["Chiffre d'Affaires Total", fmt(caTotal)],
+      ["CA Ventes Directes", fmt(caVentes)],
+      ["CA Ventes Vendeurs", fmt(caCmds)],
+      ["Marge Brute Globale", `${fmt(margeTotal)} (${tauxMarge}%)`],
+      ["Nombre de Transactions", `${nbTransactions} (${ventesFiltrees.length} directes + ${cmdsFiltrees.length} vendeurs)`],
+      ["Panier Moyen", fmt(nbTransactions > 0 ? caTotal / nbTransactions : 0)],
+    ];
+
+    doc.autoTable({
+      startY: y,
+      head: [["Indicateur", "Valeur"]],
+      body: kpis,
+      theme: "grid",
+      headStyles: { fillColor: couleurBleu, textColor: 255, fontSize: 10 },
+      bodyStyles: { fontSize: 10 },
+      columnStyles: { 1: { fontStyle: "bold" } },
+      margin: { left: 15, right: 15 },
+    });
+
+    y = doc.lastAutoTable.finalY + 12;
+
+    // Top Produits
+    if (topProduits.length > 0) {
+      doc.setFontSize(13);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(0, 0, 0);
+      doc.text("Top Produits", 15, y);
+      y += 4;
+      doc.autoTable({
+        startY: y,
+        head: [["#", "Produit", "Quantité", "CA", "Marge"]],
+        body: topProduits.map((p, i) => [i + 1, p.nom, p.qte, fmt(p.ca), fmt(p.marge)]),
+        theme: "striped",
+        headStyles: { fillColor: couleurBleu, textColor: 255, fontSize: 9 },
+        bodyStyles: { fontSize: 9 },
+        margin: { left: 15, right: 15 },
+      });
+      y = doc.lastAutoTable.finalY + 12;
+    }
+
+    // Top Vendeurs
+    if (topVendeurs.length > 0) {
+      if (y > 220) { doc.addPage(); y = 20; }
+      doc.setFontSize(13);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(0, 0, 0);
+      doc.text("Top Vendeurs", 15, y);
+      y += 4;
+      doc.autoTable({
+        startY: y,
+        head: [["#", "Vendeur", "Ventes", "CA", "Commissions"]],
+        body: topVendeurs.map((v, i) => [i + 1, v.nom, v.nb, fmt(v.ca), fmt(v.commissions)]),
+        theme: "striped",
+        headStyles: { fillColor: [139, 92, 246], textColor: 255, fontSize: 9 },
+        bodyStyles: { fontSize: 9 },
+        margin: { left: 15, right: 15 },
+      });
+      y = doc.lastAutoTable.finalY + 12;
+    }
+
+    // Top Villes
+    if (topVilles.length > 0) {
+      if (y > 220) { doc.addPage(); y = 20; }
+      doc.setFontSize(13);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(0, 0, 0);
+      doc.text("Répartition par Ville", 15, y);
+      y += 4;
+      doc.autoTable({
+        startY: y,
+        head: [["Ville", "Commandes", "CA", "%"]],
+        body: topVilles.map(v => {
+          const pct = totalCAVilles > 0 ? ((v.ca / totalCAVilles) * 100).toFixed(1) : 0;
+          return [v.ville, v.nb, fmt(v.ca), `${pct}%`];
+        }),
+        theme: "striped",
+        headStyles: { fillColor: [239, 68, 68], textColor: 255, fontSize: 9 },
+        bodyStyles: { fontSize: 9 },
+        margin: { left: 15, right: 15 },
+      });
+    }
+
+    // Pied de page
+    const totalPages = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= totalPages; i++) {
+      doc.setPage(i);
+      doc.setFontSize(8);
+      doc.setTextColor(150);
+      doc.text(`Page ${i} / ${totalPages}  —  ZONITE Gestion`, 105, 290, { align: "center" });
+    }
+
+    doc.save(`rapport_ventes_${periodLabel.replace(" ", "_")}_${format(new Date(), "yyyyMMdd")}.pdf`);
+    setExportEnCours(false);
+  };
+
   if (isLoading) {
     return (
       <div className="space-y-6">
