@@ -1,7 +1,23 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ====== PWA / Mobile optimizations ====== */
+html, body {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  overscroll-behavior-y: none;
+}
+
+/* Safe area pour iOS */
+.pb-safe { padding-bottom: env(safe-area-inset-bottom, 0px); }
+.pt-safe { padding-top: env(safe-area-inset-top, 0px); }
+
+/* Bottom nav avec safe area */
+.bottom-nav-safe {
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+}
+
 
 :root {
   --zonite-bleu-900: #0d1240;
