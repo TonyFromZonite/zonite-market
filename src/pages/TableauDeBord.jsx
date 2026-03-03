@@ -33,6 +33,26 @@ export default function TableauDeBord() {
     queryFn: () => base44.entities.Vendeur.list(),
   });
 
+  const { data: commandesVendeurs = [] } = useQuery({
+    queryKey: ["commandes_vendeurs_stats"],
+    queryFn: () => base44.entities.CommandeVendeur.list("-created_date", 200),
+  });
+
+  const { data: candidaturesEnAttente = [] } = useQuery({
+    queryKey: ["candidatures_attente"],
+    queryFn: () => base44.entities.CandidatureVendeur.filter({ statut: "en_attente" }),
+  });
+
+  const { data: kycEnAttente = [] } = useQuery({
+    queryKey: ["kyc_attente"],
+    queryFn: () => base44.entities.CompteVendeur.filter({ statut_kyc: "en_attente" }),
+  });
+
+  const { data: paiementsEnAttente = [] } = useQuery({
+    queryKey: ["paiements_attente"],
+    queryFn: () => base44.entities.DemandePaiementVendeur.filter({ statut: "en_attente" }),
+  });
+
   const enChargement = chargementVentes || chargementProduits || chargementVendeurs;
 
   // Calculs
