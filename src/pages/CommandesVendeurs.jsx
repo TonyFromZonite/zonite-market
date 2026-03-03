@@ -141,8 +141,8 @@ export default function CommandesVendeurs() {
 
   const marquerEchec = async () => {
     setEnCours(true);
-    const produits = await base44.entities.Produit.filter({ id: commandeSelectionnee.produit_id });
-    const produit = produits[0];
+    const produits = await base44.entities.Produit.list();
+    const produit = produits.find(p => p.id === commandeSelectionnee.produit_id);
     if (produit) {
       // Remettre le stock réservé dans le stock disponible
       await base44.entities.Produit.update(produit.id, {
