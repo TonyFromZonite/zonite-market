@@ -64,6 +64,7 @@ export default function NouvelleCommandeVendeur() {
     setEnCours(true);
     setErreur("");
 
+    // Créer la commande avec le nouveau statut
     await base44.entities.CommandeVendeur.create({
       vendeur_id: compteVendeur.id,
       vendeur_nom: compteVendeur.nom_complet,
@@ -81,19 +82,31 @@ export default function NouvelleCommandeVendeur() {
       client_quartier: form.client_quartier,
       client_adresse: form.client_adresse,
       notes: form.notes,
-      statut: "en_attente",
+      statut: "en_attente_validation_admin",
     });
 
-    // Mettre à jour stats vendeur
-    await base44.entities.CompteVendeur.update(compteVendeur.id, {
-      nombre_ventes: (compteVendeur.nombre_ventes || 0) + 1,
+    // Réserver le stock (déduire du stock_global, ajouter au stock_reserve)
+    await base44.entities.Produit.update(form.produit_id, {
+      stock_global: Math.max(0, (produitSelectionne.stock_global || 0) - qte),
+      stock_reserve: (produitSelectionne.stock_reserve || 0) + qte,
     });
 
-    // Notification de confirmation
+    // Enregistrer mouvement de stock
+    await base44.entities.MouvementStock.create({
+      produit_id: form.produit_id,
+      produit_nom: produitSelectionne.nom,
+      type_mouvement: "sortie",
+      quantite: qte,
+      stock_avant: produitSelectionne.stock_global || 0,
+      stock_apres: Math.max(0, (produitSelectionne.stock_global || 0) - qte),
+      raison: `Réservation commande vendeur ${compteVendeur.nom_complet}`,
+    });
+
+    // Notification de confirmation au vendeur
     await base44.entities.NotificationVendeur.create({
       vendeur_email: compteVendeur.user_email,
       titre: "Commande envoyée !",
-      message: `Votre commande de ${qte}x ${produitSelectionne.nom} pour ${form.client_nom} a été enregistrée.`,
+      message: `Votre commande de ${qte}x ${produitSelectionne.nom} pour ${form.client_nom} a été transmise à l'équipe ZONITE pour validation.`,
       type: "succes",
     });
 
