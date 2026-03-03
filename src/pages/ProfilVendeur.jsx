@@ -30,10 +30,11 @@ export default function ProfilVendeur() {
   return (
     <div className="min-h-screen bg-slate-50 pb-20">
       <div className="bg-[#1a1f5e] text-white px-4 pb-8" style={{ paddingTop: "max(1.25rem, env(safe-area-inset-top, 0px))" }}>
-        <div className="flex items-center gap-3 mb-6">
+        <div className="flex items-center gap-3 mb-4">
           <Link to={createPageUrl("EspaceVendeur")}>
             <ChevronLeft className="w-6 h-6 text-white" />
           </Link>
+          <img src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69a304769dda004762ee3a57/be2e82d8c_410287629_332500566218921_7304714630055582730_n.jpg" alt="Zonite" className="h-7 w-7 rounded-lg object-contain bg-white p-0.5" />
           <h1 className="text-lg font-bold">Mon Profil</h1>
         </div>
         <div className="flex items-center gap-4">
