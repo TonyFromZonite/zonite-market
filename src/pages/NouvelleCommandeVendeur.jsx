@@ -124,7 +124,7 @@ export default function NouvelleCommandeVendeur() {
 
   return (
     <div className="min-h-screen bg-slate-50 pb-8">
-      <div className="bg-[#1a1f5e] text-white px-4 pt-6 pb-6">
+      <div className="bg-[#1a1f5e] text-white px-4 pb-4" style={{ paddingTop: "max(1.25rem, env(safe-area-inset-top, 0px))" }}>
         <div className="flex items-center gap-3">
           <Link to={createPageUrl("EspaceVendeur")}>
             <ChevronLeft className="w-6 h-6 text-white" />
