@@ -38,18 +38,21 @@ export default function Layout({ children, currentPageName }) {
   const [nbCandidatures, setNbCandidatures] = useState(0);
   const [nbKyc, setNbKyc] = useState(0);
   const [nbPaiements, setNbPaiements] = useState(0);
+  const [nbCommandesAttente, setNbCommandesAttente] = useState(0);
 
   useEffect(() => {
     // Charger les badges de notifications admin
     const chargerBadges = async () => {
-      const [cands, kycs, paies] = await Promise.all([
+      const [cands, kycs, paies, cmdAttente] = await Promise.all([
         base44.entities.CandidatureVendeur.filter({ statut: "en_attente" }),
         base44.entities.CompteVendeur.filter({ statut_kyc: "en_attente" }),
         base44.entities.DemandePaiementVendeur.filter({ statut: "en_attente" }),
+        base44.entities.CommandeVendeur.filter({ statut: "en_attente_validation_admin" }),
       ]);
       setNbCandidatures(cands.length);
       setNbKyc(kycs.length);
       setNbPaiements(paies.length);
+      setNbCommandesAttente(cmdAttente.length);
     };
     if (!PAGES_VENDEUR.includes(currentPageName)) chargerBadges();
   }, [currentPageName]);
