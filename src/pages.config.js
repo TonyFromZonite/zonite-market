@@ -67,10 +67,10 @@ import NouvelleVente from './pages/NouvelleVente';
 import PaiementsVendeurs from './pages/PaiementsVendeurs';
 import Produits from './pages/Produits';
 import ProfilVendeur from './pages/ProfilVendeur';
+import RapportsVentes from './pages/RapportsVentes';
 import TableauDeBord from './pages/TableauDeBord';
 import Vendeurs from './pages/Vendeurs';
 import VideoFormation from './pages/VideoFormation';
-import RapportsVentes from './pages/RapportsVentes';
 import __Layout from './Layout.jsx';
 
 
@@ -95,10 +95,10 @@ export const PAGES = {
     "PaiementsVendeurs": PaiementsVendeurs,
     "Produits": Produits,
     "ProfilVendeur": ProfilVendeur,
+    "RapportsVentes": RapportsVentes,
     "TableauDeBord": TableauDeBord,
     "Vendeurs": Vendeurs,
     "VideoFormation": VideoFormation,
-    "RapportsVentes": RapportsVentes,
 }
 
 export const pagesConfig = {
