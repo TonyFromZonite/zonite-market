@@ -159,10 +159,11 @@ export default function CommandesVendeurs() {
         raison: `Échec livraison — commande ${commandeSelectionnee.id}`,
       });
     }
-    const comptes = await base44.entities.CompteVendeur.filter({ id: commandeSelectionnee.vendeur_id });
-    if (comptes.length > 0) {
-      await base44.entities.CompteVendeur.update(comptes[0].id, {
-        ventes_echouees: (comptes[0].ventes_echouees || 0) + 1,
+    const tousComptesEchec = await base44.entities.CompteVendeur.list();
+    const compteEchec = tousComptesEchec.find(c => c.id === commandeSelectionnee.vendeur_id);
+    if (compteEchec) {
+      await base44.entities.CompteVendeur.update(compteEchec.id, {
+        ventes_echouees: (compteEchec.ventes_echouees || 0) + 1,
       });
     }
     await base44.entities.CommandeVendeur.update(commandeSelectionnee.id, { statut: "echec_livraison", notes_admin: notesAdmin || commandeSelectionnee.notes_admin });
