@@ -239,16 +239,16 @@ export default function EspaceVendeur() {
       </div>
 
       {/* Bottom nav */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 flex z-50">
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 flex z-50" style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
         {[
-          { label: "Accueil", page: "EspaceVendeur", icone: "🏠" },
-          { label: "Commandes", page: "MesCommandesVendeur", icone: "📋" },
-          { label: "Catalogue", page: "CatalogueVendeur", icone: "📦" },
-          { label: "Profil", page: "ProfilVendeur", icone: "👤" },
-        ].map(({ label, page, icone }) => (
-          <Link key={page} to={createPageUrl(page)} className="flex-1 flex flex-col items-center py-3 gap-1">
+          { label: "Accueil", page: "EspaceVendeur", icone: "🏠", actif: true },
+          { label: "Commandes", page: "MesCommandesVendeur", icone: "📋", actif: false },
+          { label: "Catalogue", page: "CatalogueVendeur", icone: "📦", actif: false },
+          { label: "Profil", page: "ProfilVendeur", icone: "👤", actif: false },
+        ].map(({ label, page, icone, actif }) => (
+          <Link key={page} to={createPageUrl(page)} className="flex-1 flex flex-col items-center py-2.5 gap-1">
             <span className="text-xl">{icone}</span>
-            <span className="text-[10px] text-slate-600">{label}</span>
+            <span className={`text-[10px] ${actif ? "text-[#1a1f5e] font-bold" : "text-slate-500"}`}>{label}</span>
           </Link>
         ))}
       </div>
