@@ -124,7 +124,7 @@ export default function ProfilVendeur() {
       </div>
 
       {/* Bottom nav */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 flex z-50">
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 flex z-50" style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
         {[
           { label: "Accueil", page: "EspaceVendeur", icone: "🏠" },
           { label: "Commandes", page: "MesCommandesVendeur", icone: "📋" },
