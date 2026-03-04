@@ -8,7 +8,6 @@ import { Save, Facebook, Globe, MessageCircle } from "lucide-react";
 const CONFIGS = [
   { cle: "lien_facebook", label: "Lien Facebook", placeholder: "https://facebook.com/votrepagezone", icone: Facebook, couleur: "text-blue-600" },
   { cle: "lien_tiktok", label: "Lien TikTok", placeholder: "https://tiktok.com/@votrecompte", icone: Globe, couleur: "text-slate-700" },
-  { cle: "video_formation_url", label: "Lien vidéo formation (TikTok/YouTube)", placeholder: "https://www.tiktok.com/@zonite/video/...", icone: Globe, couleur: "text-red-600" },
   { cle: "message_accueil", label: "Message de bienvenue (page connexion)", placeholder: "Chaque vente est une victoire. Allons-y ! 🚀", icone: MessageCircle, couleur: "text-emerald-600" },
   { cle: "nom_app", label: "Nom de l'application (ex: ZONITE Vendeurs)", placeholder: "ZONITE Vendeurs", icone: Globe, couleur: "text-[#1a1f5e]" },
 ];

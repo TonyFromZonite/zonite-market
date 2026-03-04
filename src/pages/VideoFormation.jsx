@@ -7,7 +7,6 @@ import { createPageUrl } from "@/utils";
 
 export default function VideoFormation() {
   const [compteVendeur, setCompteVendeur] = useState(null);
-  const [videoUrl, setVideoUrl] = useState("");
   const [etape, setEtape] = useState(1); // 1: vidéo, 2: confirmation, 3: succès
   const [videoTerminee, setVideoTerminee] = useState(false);
   const [accepte, setAccepte] = useState(false);
@@ -39,12 +38,6 @@ export default function VideoFormation() {
 
       const comptes = await base44.entities.CompteVendeur.filter({ user_email: emailVendeur });
       if (comptes.length > 0) setCompteVendeur(comptes[0]);
-
-      // Charger URL vidéo depuis ConfigApp
-      const configs = await base44.entities.ConfigApp.filter({ cle: "video_formation_url" });
-      if (configs.length > 0 && configs[0].valeur) {
-        setVideoUrl(configs[0].valeur);
-      }
     };
     charger();
   }, []);
@@ -70,31 +63,6 @@ export default function VideoFormation() {
     } finally {
       setEnCours(false);
     }
-  };
-
-  // Convertir les URLs en embed valides
-  const getEmbedUrl = (url) => {
-    if (!url) return null;
-    
-    // YouTube
-    if (url.includes("youtube.com") || url.includes("youtu.be")) {
-      let videoId = "";
-      if (url.includes("youtube.com/watch?v=")) {
-        videoId = url.split("watch?v=")[1]?.split("&")[0];
-      } else if (url.includes("youtu.be/")) {
-        videoId = url.split("youtu.be/")[1]?.split("?")[0];
-      }
-      return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
-    }
-    
-    // TikTok
-    if (url.includes("tiktok.com")) {
-      return url.includes("vm.tiktok.com") || url.includes("vt.tiktok.com") 
-        ? `https://www.tiktok.com/embed/v2/${url.split("/video/")[1]?.split("?")[0] || ""}`
-        : url;
-    }
-    
-    return url;
   };
 
   const sections = [
@@ -126,44 +94,27 @@ export default function VideoFormation() {
           </div>
         ) : (
           <>
-            {/* Vidéo - Embed depuis lien admin */}
+            {/* Vidéo simulée */}
             <div className="bg-[#1a1f5e] rounded-2xl overflow-hidden mb-4 relative">
-              {videoUrl && getEmbedUrl(videoUrl) ? (
-                <div className="aspect-video">
-                  <iframe
-                    src={getEmbedUrl(videoUrl)}
-                    width="100%"
-                    height="100%"
-                    frameBorder="0"
-                    allow="autoplay; encrypted-media"
-                    allowFullScreen
-                    className="w-full h-full"
-                  />
-                </div>
-              ) : (
-                <div className="aspect-video flex items-center justify-center bg-slate-700">
-                  <div className="text-center text-white">
-                    <div className="text-3xl mb-2">🎬</div>
-                    <p className="font-bold text-lg">Vidéo de formation</p>
-                    <p className="text-slate-300 text-sm">
-                      {videoUrl ? "Lien invalide" : "Lien non configuré par l'admin"}
-                    </p>
+              <div className="aspect-video flex items-center justify-center">
+                <div className="text-center text-white">
+                  <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3 cursor-pointer hover:bg-white/30 transition-colors"
+                    onClick={() => setVideoTerminee(true)}>
+                    <Play className="w-8 h-8 text-white fill-white" />
                   </div>
+                  <p className="font-bold text-lg">Présentation ZONITE Dropshipping</p>
+                  <p className="text-slate-300 text-sm">Durée : ~15 minutes</p>
+                  {!videoTerminee && (
+                    <button onClick={() => setVideoTerminee(true)} className="mt-3 text-xs text-[#F5C518] underline">
+                      Marquer comme vue
+                    </button>
+                  )}
                 </div>
-              )}
+              </div>
               {videoTerminee && (
-                <div className="absolute top-3 right-3 bg-emerald-500 text-white text-xs px-2 py-1 rounded-full z-10">✓ Vue</div>
+                <div className="absolute top-3 right-3 bg-emerald-500 text-white text-xs px-2 py-1 rounded-full">✓ Vue</div>
               )}
             </div>
-
-            {/* Marquer comme vue */}
-            {videoUrl && !videoTerminee && (
-              <div className="text-center mb-4">
-                <button onClick={() => setVideoTerminee(true)} className="text-sm text-[#F5C518] underline font-medium">
-                  Marquer la vidéo comme vue ✓
-                </button>
-              </div>
-            )}
 
             {/* Contenu de la formation */}
             <div className="space-y-3 mb-5">
