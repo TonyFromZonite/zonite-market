@@ -58,6 +58,7 @@ function CustomTooltip({ active, payload, label }) {
 }
 
 export default function RapportsVentes() {
+  const [onglet, setOnglet] = useState("global");
   const [periodeJours, setPeriodeJours] = useState(30);
   const [exportEnCours, setExportEnCours] = useState(false);
 
