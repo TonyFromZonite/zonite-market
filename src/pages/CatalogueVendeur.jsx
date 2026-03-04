@@ -90,9 +90,9 @@ export default function CatalogueVendeur() {
                   </div>
                   {p.lien_telegram && (
                     <a href={p.lien_telegram} target="_blank" rel="noopener noreferrer"
-                      className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 text-xs font-medium border-t border-blue-100">
-                      <ExternalLink className="w-3 h-3" />
-                      Voir les visuels marketing sur Telegram
+                      className="flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white text-xs font-bold border-t border-blue-400 hover:shadow-lg transition-shadow">
+                      <ExternalLink className="w-4 h-4" />
+                      📸 Voir images & vidéos Telegram
                     </a>
                   )}
                   {stockOk && (
