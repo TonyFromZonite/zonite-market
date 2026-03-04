@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MessageSquare, Loader2, Search, User, AlertCircle, HelpCircle, Plus, Pencil, Trash2, X, Check, GripVertical } from "lucide-react";
+import { MessageSquare, Loader2, Search, User, AlertCircle, HelpCircle, Plus, Pencil, Trash2, X, Check, GripVertical, Bell, Star, CheckCheck } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
