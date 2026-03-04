@@ -48,44 +48,47 @@ export default function VideoFormation() {
   };
 
   useEffect(() => {
+    let isMounted = true;
+
     const charger = async () => {
       try {
         const u = await base44.auth.me().catch(() => null);
         if (!u?.email) {
-          window.location.href = createPageUrl("Connexion");
+          if (isMounted) window.location.href = createPageUrl("Connexion");
           return;
         }
 
         const comptes = await base44.entities.CompteVendeur.filter({ user_email: u.email });
-        if (comptes.length > 0) setCompteVendeur(comptes[0]);
+        if (isMounted && comptes.length > 0) setCompteVendeur(comptes[0]);
 
-        // Récupérer le lien YouTube depuis la config (avec retry si vide)
+        // Récupérer config vidéo (avec retry)
         let configs = await base44.entities.ConfigApp.filter({ cle: "lien_youtube_formation" });
-        
-        // Retry une fois si résultat vide (race condition)
         if (!configs?.length) {
           await new Promise(r => setTimeout(r, 300));
           configs = await base44.entities.ConfigApp.filter({ cle: "lien_youtube_formation" });
         }
 
+        if (!isMounted) return;
+
         if (configs?.length > 0 && configs[0]?.valeur) {
           const videoId = extractVideoId(configs[0].valeur);
           if (videoId) {
-            const embedUrl = convertToEmbedUrl(videoId);
-            setVideoUrl(embedUrl);
+            setVideoUrl(convertToEmbedUrl(videoId));
           } else {
-            console.error("Invalid video ID extracted from:", configs[0].valeur);
             setErreur("Format vidéo invalide.");
           }
         } else {
           setErreur("Vidéo non configurée.");
         }
       } catch (err) {
-        console.error("Erreur chargement vidéo:", err);
-        setErreur("Erreur de chargement.");
+        if (isMounted) {
+          console.error("Chargement vidéo:", err);
+          setErreur("Erreur réseau.");
+        }
       }
     };
     charger();
+    return () => { isMounted = false; };
   }, []);
 
 
