@@ -168,10 +168,10 @@ export default function VentesVendeurTab() {
                 })}
               </tbody>
               <tfoot>
-                <tr className="bg-slate-50 border-t border-slate-200 font-semibold text-sm">
-                  <td colSpan={5} className="px-4 py-3 text-slate-600">Total ({nbCommandes} commandes)</td>
-                  <td className="px-4 py-3 text-right text-slate-900">{fmt(caTotal)}</td>
-                  <td className="px-4 py-3 text-right text-yellow-700">{fmt(commissionsTotal)}</td>
+                <tr className="bg-slate-50 border-t border-slate-200 font-semibold text-xs md:text-sm">
+                  <td colSpan={5} className="px-2 md:px-4 py-3 text-slate-600 text-xs md:text-sm">Total ({nbCommandes} commandes)</td>
+                  <td className="px-2 md:px-4 py-3 text-right text-slate-900 text-xs md:text-sm">{fmt(caTotal)}</td>
+                  <td className="px-2 md:px-4 py-3 text-right text-yellow-700 text-xs md:text-sm">{fmt(commissionsTotal)}</td>
                   <td></td>
                 </tr>
               </tfoot>
