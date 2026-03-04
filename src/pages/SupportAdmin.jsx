@@ -98,6 +98,28 @@ export default function SupportAdmin() {
 
   const nbOuverts = tickets.filter(t => t.statut === "ouvert").length;
 
+  const { data: toutesNotifs = [], isLoading: notifsLoading } = useQuery({
+    queryKey: ["toutes_notifs_admin"],
+    queryFn: () => base44.entities.NotificationVendeur.list("-created_date", 200),
+    enabled: onglet === "notifications",
+  });
+
+  const notifsFiltrees = toutesNotifs.filter(n => {
+    const matchType = notifFiltreType === "tous" || n.type === notifFiltreType;
+    const matchVendeur = !notifFiltreVendeur || n.vendeur_email?.toLowerCase().includes(notifFiltreVendeur.toLowerCase());
+    return matchType && matchVendeur;
+  });
+
+  const toggleImportante = async (notif) => {
+    await base44.entities.NotificationVendeur.update(notif.id, { importante: !notif.importante });
+    queryClient.invalidateQueries({ queryKey: ["toutes_notifs_admin"] });
+  };
+
+  const marquerLueAdmin = async (notif) => {
+    await base44.entities.NotificationVendeur.update(notif.id, { lue: !notif.lue });
+    queryClient.invalidateQueries({ queryKey: ["toutes_notifs_admin"] });
+  };
+
   const ouvrirTicket = (ticket) => {
     setTicketSelectionne(ticket);
     setReponse(ticket.reponse_admin || "");
