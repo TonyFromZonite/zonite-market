@@ -378,7 +378,7 @@ export default function RapportsVentes() {
 
       {onglet === "vendeurs" && <VentesVendeurTab />}
 
-      {onglet === "global" && <>
+      {onglet === "global" && <div className="space-y-6">
       {/* Header + Filtres */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
