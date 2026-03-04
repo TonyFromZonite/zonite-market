@@ -203,8 +203,8 @@ export default function Connexion() {
       </div>
 
       {/* Formulaire */}
-      <div className="w-full max-w-sm relative z-10 flex-1 flex flex-col justify-center">
-        <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-6 border border-white/20 shadow-2xl">
+      <div className="w-full max-w-sm relative z-10 flex-1 flex flex-col justify-center px-3">
+        <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-5 md:p-6 border border-white/20 shadow-2xl">
 
           {/* MODE VENDEUR */}
           {mode === MODE_VENDEUR && !modeMdpOublie && (
