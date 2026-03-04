@@ -35,7 +35,13 @@ const MODULES = {
 
 const PAR_PAGE = 20;
 
+const ONGLETS = [
+  { key: "journal", label: "Journal d'Audit", icone: Shield },
+  { key: "rapports", label: "Rapports Ventes", icone: TrendingUp },
+];
+
 export default function JournalAudit() {
+  const [ongletActif, setOngletActif] = useState("journal");
   const [recherche, setRecherche] = useState("");
   const [filtreModule, setFiltreModule] = useState("tous");
   const [page, setPage] = useState(0);
