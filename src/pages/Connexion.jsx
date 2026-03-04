@@ -267,7 +267,7 @@ export default function Connexion() {
               <button onClick={() => { setModeMdpOublie(false); setErreur(""); setMdpOublieSucces(false); }} className="text-slate-400 text-xs hover:text-white mb-3 flex items-center gap-1">
                 ← Retour
               </button>
-              <h2 className="text-white font-bold text-lg mb-0.5">Mot de passe oublié</h2>
+              <h2 className="text-white font-bold text-lg md:text-xl mb-0.5">Mot de passe oublié</h2>
               <p className="text-slate-300 text-xs mb-4">Un nouveau mot de passe vous sera envoyé par email.</p>
               {mdpOublieSucces ? (
                 <div className="bg-emerald-500/20 border border-emerald-400/30 rounded-xl px-4 py-4 text-center">
