@@ -79,6 +79,7 @@ import SupportAdmin from './pages/SupportAdmin';
 import TableauDeBord from './pages/TableauDeBord';
 import Vendeurs from './pages/Vendeurs';
 import VideoFormation from './pages/VideoFormation';
+import EnAttenteValidation from './pages/EnAttenteValidation';
 import __Layout from './Layout.jsx';
 
 
@@ -115,6 +116,7 @@ export const PAGES = {
     "TableauDeBord": TableauDeBord,
     "Vendeurs": Vendeurs,
     "VideoFormation": VideoFormation,
+    "EnAttenteValidation": EnAttenteValidation,
 }
 
 export const pagesConfig = {

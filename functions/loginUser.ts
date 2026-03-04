@@ -26,6 +26,15 @@ Deno.serve(async (req) => {
         return Response.json({ error: 'Account suspended' }, { status: 403 });
       }
 
+      // Check if account is pending KYC approval
+      if (compte.statut === 'en_attente_kyc') {
+        return Response.json({
+          success: false,
+          pendingApproval: true,
+          message: 'Votre compte est en attente de validation KYC.'
+        });
+      }
+
       const passwordMatch = await bcrypt.compare(password, compte.mot_de_passe_hash);
       if (!passwordMatch) {
         return Response.json({ error: 'Invalid password' }, { status: 401 });
