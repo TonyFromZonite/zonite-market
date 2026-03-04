@@ -56,9 +56,6 @@ export default function Layout({ children, currentPageName }) {
   }
 
   const getBadge = (page) => {
-    if (page === "GestionCandidatures" && nbCandidatures > 0) return nbCandidatures;
-    if (page === "GestionKYC" && nbKyc > 0) return nbKyc;
-    if (page === "PaiementsVendeurs" && nbPaiements > 0) return nbPaiements;
     if (page === "CommandesVendeurs" && nbCommandesAttente > 0) return nbCommandesAttente;
     return 0;
   };
