@@ -492,7 +492,8 @@ export default function Produits() {
 
       {ongletActif === "categories" && <CategoriesTab />}
       {ongletActif === "retours" && <RetoursTab />}
-      {ongletActif === "produits" && <div className="space-y-4">
+      {ongletActif === "produits" && (
+      <div className="space-y-4">
       {/* Barre de recherche + filtres + bouton */}
       <div className="flex flex-col sm:flex-row gap-3 justify-between">
         <div className="flex flex-1 gap-2 max-w-2xl">
