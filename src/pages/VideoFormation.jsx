@@ -62,14 +62,15 @@ export default function VideoFormation() {
         // Récupérer le lien YouTube depuis la config
         const configs = await base44.entities.ConfigApp.filter({ cle: "lien_youtube_formation" });
         if (configs.length > 0 && configs[0].valeur) {
-          const embedUrl = convertToEmbedUrl(configs[0].valeur);
-          if (embedUrl) {
+          const videoId = extractVideoId(configs[0].valeur);
+          if (videoId) {
+            const embedUrl = convertToEmbedUrl(videoId);
             setVideoUrl(embedUrl);
           } else {
-            setErreur("Format vidéo invalide. Vérifiez l'URL YouTube stockée.");
+            setErreur("Format vidéo invalide. URL YouTube attendue.");
           }
         } else {
-          setErreur("Aucune vidéo de formation configurée. Contactez l'administrateur.");
+          setErreur("Aucune vidéo de formation configurée.");
         }
       } catch (err) {
         console.error("Erreur chargement vidéo:", err);
