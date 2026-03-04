@@ -77,6 +77,7 @@ import VideoFormation from './pages/VideoFormation';
 import GestionSousAdmins from './pages/GestionSousAdmins';
 import Connexion from './pages/Connexion';
 import ConfigurationApp from './pages/ConfigurationApp';
+import EspaceSousAdmin from './pages/EspaceSousAdmin';
 import __Layout from './Layout.jsx';
 
 
@@ -111,6 +112,7 @@ export const PAGES = {
     "GestionSousAdmins": GestionSousAdmins,
     "Connexion": Connexion,
     "ConfigurationApp": ConfigurationApp,
+    "EspaceSousAdmin": EspaceSousAdmin,
 }
 
 export const pagesConfig = {
