@@ -44,7 +44,7 @@ export default function VideoFormation() {
 
   const convertToEmbedUrl = (videoId) => {
     if (!videoId) return null;
-    return `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1&fs=1`;
+    return `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1&fs=1&controls=1&showinfo=0`;
   };
 
   useEffect(() => {
