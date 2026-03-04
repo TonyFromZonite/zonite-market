@@ -16,8 +16,12 @@ Deno.serve(async (req) => {
 
     const { oldPassword, newPassword, userType } = await req.json();
 
-    if (!oldPassword || !newPassword || newPassword.length < 6) {
-      return Response.json({ error: 'Invalid password format' }, { status: 400 });
+    // Validation robuste du mot de passe (8 chars min, 1 majuscule, 1 chiffre)
+    if (!oldPassword || !newPassword || newPassword.length < 8) {
+      return Response.json({ error: 'Password must be at least 8 characters' }, { status: 400 });
+    }
+    if (!/[A-Z]/.test(newPassword) || !/[0-9]/.test(newPassword)) {
+      return Response.json({ error: 'Password must contain uppercase letter and number' }, { status: 400 });
     }
 
     // Vendeur password change
@@ -36,6 +40,15 @@ Deno.serve(async (req) => {
       const hashedPassword = await bcrypt.hash(newPassword, 10);
       await base44.entities.CompteVendeur.update(compte.id, { mot_de_passe_hash: hashedPassword });
 
+      // Audit log
+      await base44.asServiceRole.entities.JournalAudit.create({
+        action: 'password_change',
+        module: 'vendeur',
+        details: `Vendeur ${compte.nom_complet} a changé son mot de passe`,
+        utilisateur: user.email,
+        entite_id: compte.id,
+      });
+
       return Response.json({ success: true, message: 'Password changed successfully' });
     }
 
@@ -53,6 +66,14 @@ Deno.serve(async (req) => {
 
       const hashedPassword = await bcrypt.hash(newPassword, 10);
       await base44.asServiceRole.entities.ConfigApp.update(configs[0].id, { valeur: hashedPassword });
+
+      // Audit log
+      await base44.asServiceRole.entities.JournalAudit.create({
+        action: 'admin_password_change',
+        module: 'systeme',
+        details: `Admin principal a changé le mot de passe administrateur`,
+        utilisateur: user.email,
+      });
 
       return Response.json({ success: true, message: 'Password changed successfully' });
     }
