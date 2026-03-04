@@ -29,12 +29,17 @@ const PRIORITES = {
 };
 
 export default function SupportAdmin() {
+  const [onglet, setOnglet] = useState("tickets");
   const [recherche, setRecherche] = useState("");
   const [filtreStatut, setFiltreStatut] = useState("tous");
   const [ticketSelectionne, setTicketSelectionne] = useState(null);
   const [reponse, setReponse] = useState("");
   const [nouveauStatut, setNouveauStatut] = useState("");
   const [enCours, setEnCours] = useState(false);
+  // FAQ state
+  const [faqEdit, setFaqEdit] = useState(null); // null | "new" | {id, question, reponse}
+  const [faqForm, setFaqForm] = useState({ question: "", reponse: "" });
+  const [faqEnCours, setFaqEnCours] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: tickets = [], isLoading } = useQuery({
