@@ -444,13 +444,13 @@ export default function RapportsVentes() {
             <div className="p-8 text-center text-slate-400 text-sm">Aucune donnée</div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead><tr className="bg-slate-50 text-slate-500 text-xs uppercase">
-                  <th className="text-left px-4 py-2 font-medium">Produit</th>
-                  <th className="text-right px-4 py-2 font-medium">Qté</th>
-                  <th className="text-right px-4 py-2 font-medium">CA</th>
-                  <th className="text-right px-4 py-2 font-medium">Marge</th>
-                </tr></thead>
+                      <table className="w-full text-xs md:text-sm">
+                        <thead><tr className="bg-slate-50 text-slate-500 text-[10px] md:text-xs uppercase">
+                          <th className="text-left px-2 md:px-4 py-2 font-medium">Produit</th>
+                          <th className="text-right px-2 md:px-4 py-2 font-medium">Qté</th>
+                          <th className="text-right px-2 md:px-4 py-2 font-medium">CA</th>
+                          <th className="text-right px-2 md:px-4 py-2 font-medium">Marge</th>
+                        </tr></thead>
                 <tbody>
                   {topProduits.map((l, i) => (
                     <tr key={i} className="border-t border-slate-50 hover:bg-slate-50">
