@@ -13,7 +13,8 @@ import RechercheGlobale from "@/components/RechercheGlobale";
 const PAGES_VENDEUR = [
   "EspaceVendeur", "InscriptionVendeur", "VideoFormation", "CatalogueVendeur",
   "NouvelleCommandeVendeur", "MesCommandesVendeur", "ProfilVendeur",
-  "DemandePaiement", "NotificationsVendeur", "Candidature", "AideVendeur"
+  "DemandePaiement", "NotificationsVendeur", "Candidature", "AideVendeur",
+  "Connexion"
 ];
 
 const menuItems = [
