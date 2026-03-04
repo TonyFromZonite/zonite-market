@@ -76,6 +76,7 @@ import Vendeurs from './pages/Vendeurs';
 import VideoFormation from './pages/VideoFormation';
 import GestionSousAdmins from './pages/GestionSousAdmins';
 import Connexion from './pages/Connexion';
+import ConfigurationApp from './pages/ConfigurationApp';
 import __Layout from './Layout.jsx';
 
 
@@ -109,6 +110,7 @@ export const PAGES = {
     "VideoFormation": VideoFormation,
     "GestionSousAdmins": GestionSousAdmins,
     "Connexion": Connexion,
+    "ConfigurationApp": ConfigurationApp,
 }
 
 export const pagesConfig = {
