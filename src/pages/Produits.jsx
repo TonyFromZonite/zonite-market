@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import { useCachedQuery } from "@/components/CacheManager";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -326,15 +327,17 @@ export default function Produits() {
   const [uploadEnCours, setUploadEnCours] = useState(false);
   const queryClient = useQueryClient();
 
-  const { data: produits = [], isLoading } = useQuery({
-    queryKey: ["produits"],
-    queryFn: () => base44.entities.Produit.list("-created_date"),
-  });
+  const { data: produits = [], isLoading } = useCachedQuery(
+    'PRODUITS',
+    () => base44.entities.Produit.list("-created_date"),
+    { ttl: 30 * 60 * 1000 }
+  );
 
-  const { data: categories = [] } = useQuery({
-    queryKey: ["categories"],
-    queryFn: () => base44.entities.Categorie.list("nom"),
-  });
+  const { data: categories = [] } = useCachedQuery(
+    'CATEGORIES',
+    () => base44.entities.Categorie.list("nom"),
+    { ttl: 60 * 60 * 1000 }
+  );
 
   const modifier = (champ, valeur) => setForm((p) => ({ ...p, [champ]: valeur }));
 
@@ -463,10 +466,11 @@ export default function Produits() {
   const commissionVendeur = (p) => (p.prix_vente || 0) - (p.prix_gros || 0);
   const beneficeZonite = (p) => (p.prix_gros || 0) - (p.prix_achat || 0);
 
-  const { data: retoursEnAttente = [] } = useQuery({
-    queryKey: ["retours_badge"],
-    queryFn: () => base44.entities.RetourProduit.filter({ statut: "en_attente" }),
-  });
+  const { data: retoursEnAttente = [] } = useCachedQuery(
+    'RETOURS',
+    () => base44.entities.RetourProduit.filter({ statut: "en_attente" }),
+    { ttl: 10 * 60 * 1000 }
+  );
 
   if (isLoading) {
     return <div className="space-y-3">{Array(6).fill(0).map((_, i) => <Skeleton key={i} className="h-12 rounded-lg" />)}</div>;
