@@ -167,8 +167,9 @@ export default function EspaceVendeur() {
         {/* Solde */}
         <div className="mt-4 bg-white/10 rounded-2xl p-4">
           <p className="text-slate-300 text-xs mb-1">Solde commissions disponible</p>
-          <p className="text-3xl font-bold text-[#F5C518]">{formater(compteVendeur.solde_commission)}</p>
-          {(compteVendeur.solde_commission || 0) >= 5000 ? (
+          <p className="text-3xl font-bold text-[#F5C518]">{formater(soldeAffiche.solde_commission)}</p>
+          <p className="text-xs text-slate-300 mt-1">Total gagné : {formater(soldeAffiche.total_commissions_gagnees)}</p>
+          {(soldeAffiche.solde_commission || 0) >= 5000 ? (
             <Link to={createPageUrl("DemandePaiement")}>
               <Button size="sm" className="mt-3 bg-[#F5C518] text-[#1a1f5e] hover:bg-[#e0b010] font-bold">
                 Demander un paiement →
