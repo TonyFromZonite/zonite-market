@@ -305,7 +305,7 @@ export default function Connexion() {
           {/* MODE ADMIN */}
           {mode === MODE_ADMIN && (
             <div>
-              <h2 className="text-white font-bold text-lg mb-0.5">Connexion Administrateur</h2>
+              <h2 className="text-white font-bold text-lg md:text-xl mb-0.5">Connexion Administrateur</h2>
               <p className="text-slate-300 text-xs mb-4">Sous-admins : utilisez vos identifiants attribués.</p>
               <form onSubmit={connexionSousAdmin} className="space-y-4">
                 <div>
