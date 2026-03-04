@@ -42,6 +42,45 @@ export default function SupportAdmin() {
   const [faqEnCours, setFaqEnCours] = useState(false);
   const queryClient = useQueryClient();
 
+  const { data: faqItems = [], isLoading: faqLoading } = useQuery({
+    queryKey: ["faq_items"],
+    queryFn: () => base44.entities.FaqItem.list("ordre"),
+  });
+
+  const ouvrirFaqEdit = (item) => {
+    setFaqEdit(item);
+    setFaqForm({ question: item.question, reponse: item.reponse, actif: item.actif ?? true });
+  };
+
+  const nouveauFaq = () => {
+    setFaqEdit("new");
+    setFaqForm({ question: "", reponse: "", actif: true });
+  };
+
+  const sauvegarderFaq = async () => {
+    if (!faqForm.question.trim() || !faqForm.reponse.trim()) return;
+    setFaqEnCours(true);
+    if (faqEdit === "new") {
+      await base44.entities.FaqItem.create({ ...faqForm, ordre: faqItems.length });
+    } else {
+      await base44.entities.FaqItem.update(faqEdit.id, faqForm);
+    }
+    queryClient.invalidateQueries({ queryKey: ["faq_items"] });
+    setFaqEdit(null);
+    setFaqEnCours(false);
+  };
+
+  const supprimerFaq = async (id) => {
+    if (!confirm("Supprimer cette question ?")) return;
+    await base44.entities.FaqItem.delete(id);
+    queryClient.invalidateQueries({ queryKey: ["faq_items"] });
+  };
+
+  const toggleFaqActif = async (item) => {
+    await base44.entities.FaqItem.update(item.id, { actif: !item.actif });
+    queryClient.invalidateQueries({ queryKey: ["faq_items"] });
+  };
+
   const { data: tickets = [], isLoading } = useQuery({
     queryKey: ["tickets_support"],
     queryFn: () => base44.entities.TicketSupport.list("-created_date", 200),
