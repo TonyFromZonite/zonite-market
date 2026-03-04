@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from "react";
+import VentesVendeurTab from "@/components/rapports/VentesVendeurTab";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Skeleton } from "@/components/ui/skeleton";
