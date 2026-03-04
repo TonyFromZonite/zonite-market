@@ -120,7 +120,13 @@ export default function Layout({ children, currentPageName }) {
           </button>
         </div>
 
-        {/* Bandeau sous-admin */}
+        {/* Bandeau admin/sous-admin */}
+        {adminSession && (
+          <div className="px-3 py-2 bg-[#F5C518]/10 border-b border-white/10">
+            <p className="text-[10px] text-yellow-300 font-semibold">Connecté en tant que :</p>
+            <p className="text-xs text-white font-medium">Administrateur Principal</p>
+          </div>
+        )}
         {sousAdmin && (
           <div className="px-3 py-2 bg-[#F5C518]/10 border-b border-white/10">
             <p className="text-[10px] text-yellow-300 font-semibold">Connecté en tant que :</p>
