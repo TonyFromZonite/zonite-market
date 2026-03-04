@@ -127,7 +127,8 @@ export default function VideoFormation() {
                     title="Formation ZONITE"
                     frameBorder="0"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-                    allowFullScreen
+                    allowFullScreen={true}
+                    referrerPolicy="strict-origin-when-cross-origin"
                     style={{ 
                       position: 'absolute',
                       top: 0,
