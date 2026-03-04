@@ -14,27 +14,34 @@ export default function VideoFormation() {
   const [erreur, setErreur] = useState("");
   const navigate = useNavigate();
 
-  // Extraire videoId et convertir en URL embed YouTube
+  // Extraire videoId robustement de tous formats YouTube et convertir en URL embed
   const convertToEmbedUrl = (rawUrl) => {
-    if (!rawUrl) return null;
+    if (!rawUrl || typeof rawUrl !== "string") return null;
     
     let videoId = null;
     
-    // Si déjà en format embed, retourner directement
-    if (rawUrl.includes("/embed/")) {
-      videoId = rawUrl.split("/embed/")[1]?.split("?")[0];
-    }
-    // Format youtube.com/watch?v=...
-    else if (rawUrl.includes("youtube.com/watch")) {
-      videoId = new URLSearchParams(rawUrl.split("?")[1]).get("v");
-    }
-    // Format youtu.be/... (short URL)
-    else if (rawUrl.includes("youtu.be/")) {
-      videoId = rawUrl.split("youtu.be/")[1]?.split("?")[0];
-    }
-    
-    if (videoId && videoId.length === 11) {
-      return `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1&fs=1`;
+    try {
+      // Si déjà en format embed
+      if (rawUrl.includes("/embed/")) {
+        videoId = rawUrl.split("/embed/")[1]?.split("?")[0]?.split("&")[0];
+      } 
+      // Format youtu.be/xxxxx (short URL avec ou sans params)
+      else if (rawUrl.includes("youtu.be/")) {
+        const url = new URL(rawUrl);
+        videoId = url.pathname.replace(/\//g, "");
+      } 
+      // Format youtube.com/watch?v=xxxxx
+      else if (rawUrl.includes("youtube.com/watch")) {
+        const url = new URL(rawUrl);
+        videoId = url.searchParams.get("v");
+      }
+      
+      // Valider que c'est un vrai videoId YouTube (11 caractères alphanumériques/tirets/underscores)
+      if (videoId && /^[a-zA-Z0-9_-]{11}$/.test(videoId)) {
+        return `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1&fs=1&autoplay=0`;
+      }
+    } catch (e) {
+      console.error("Erreur parsing URL YouTube:", e, rawUrl);
     }
     
     return null;
