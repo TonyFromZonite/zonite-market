@@ -24,14 +24,28 @@ Deno.serve(async (req) => {
 
       const nouveau_statut = statusLabels[data.statut] || data.statut;
       
-      await base44.asServiceRole.entities.NotificationVendeur.create({
+      // Vérifier que la notification n'existe pas (éviter doublons)
+      const existing = await base44.asServiceRole.entities.NotificationVendeur.filter({
         vendeur_email: data.vendeur_email,
-        titre: `Commande mise à jour`,
-        message: `${data.produit_nom} - Statut: ${nouveau_statut}`,
-        type: data.statut === "livree" ? "succes" : data.statut === "echec_livraison" ? "alerte" : "info",
-        lien: `/MesCommandesVendeur?cmd_id=${event.entity_id}`,
-        lue: false,
+        titre: "Commande mise à jour",
+        lue: false
       });
+      
+      const recentNotif = existing.find(n => 
+        n.message.includes(data.produit_nom) && 
+        new Date(n.created_date).getTime() > Date.now() - 60000 // moins de 1 min
+      );
+
+      if (!recentNotif) {
+        await base44.asServiceRole.entities.NotificationVendeur.create({
+          vendeur_email: data.vendeur_email,
+          titre: `Commande mise à jour`,
+          message: `${data.produit_nom} - Statut: ${nouveau_statut}`,
+          type: data.statut === "livree" ? "succes" : data.statut === "echec_livraison" ? "alerte" : "info",
+          lien: `/MesCommandesVendeur?cmd_id=${event.entity_id}`,
+          lue: false,
+        });
+      }
 
       // Email au vendeur
       const messages = {
