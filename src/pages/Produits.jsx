@@ -24,6 +24,7 @@ const initProduit = {
   image_url: "",
   images_urls: [],
   variations: [],
+  lien_telegram: "",
 };
 
 const initLocalisation = { ville: "", zone: "", quantite: 0, seuil_alerte: 5 };
@@ -676,7 +677,20 @@ export default function Produits() {
                   <div className="space-y-2"><Label>Délai d'Acquisition</Label><Input value={form.delai_acquisition} onChange={(e) => modifier("delai_acquisition", e.target.value)} placeholder="ex: 15 jours" /></div>
                 </div>
               </div>
-            </TabsContent>
+
+              <div>
+                <p className="text-sm font-semibold text-slate-700 mb-3 border-b pb-1">Marketing</p>
+                <div className="space-y-2">
+                  <Label>Lien Telegram (images et vidéos publicitaires)</Label>
+                  <Input
+                    value={form.lien_telegram}
+                    onChange={(e) => modifier("lien_telegram", e.target.value)}
+                    placeholder="https://t.me/votre_groupe_ou_canal_privé"
+                  />
+                  <p className="text-xs text-slate-400">Collez le lien du groupe/canal Telegram privé avec les visuels marketing de ce produit</p>
+                </div>
+              </div>
+              </TabsContent>
 
             {/* ─ Onglet Images ─ */}
             <TabsContent value="images" className="space-y-4">
