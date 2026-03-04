@@ -88,7 +88,8 @@ export default function JournalAudit() {
       </div>
 
       {ongletActif === "rapports" && <RapportsVentes />}
-      {ongletActif === "journal" && <>
+      {ongletActif === "journal" && (
+      <div className="space-y-4">
       {/* Filtres */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
