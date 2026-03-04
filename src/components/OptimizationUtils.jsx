@@ -1,3 +1,5 @@
+import React from "react";
+
 /**
  * AUDIT & OPTIMISATIONS - Réduction consommation 70%+
  * 
