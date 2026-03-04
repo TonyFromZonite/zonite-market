@@ -366,6 +366,19 @@ export default function RapportsVentes() {
 
   return (
     <div className="space-y-6">
+      {/* Onglets */}
+      <div className="flex gap-2 border-b border-slate-200">
+        {[{ id: "global", label: "Vue Globale" }, { id: "vendeurs", label: "Ventes Vendeurs" }].map(o => (
+          <button key={o.id} onClick={() => setOnglet(o.id)}
+            className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px ${onglet === o.id ? "border-[#1a1f5e] text-[#1a1f5e]" : "border-transparent text-slate-500 hover:text-slate-700"}`}>
+            {o.label}
+          </button>
+        ))}
+      </div>
+
+      {onglet === "vendeurs" && <VentesVendeurTab />}
+
+      {onglet === "global" && <>
       {/* Header + Filtres */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
