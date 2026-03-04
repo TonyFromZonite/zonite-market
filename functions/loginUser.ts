@@ -68,7 +68,8 @@ Deno.serve(async (req) => {
     } else if (userType === 'admin') {
       // Connexion ADMIN/SOUS-ADMIN
       
-      // Vérifier si c'est un sous-admin
+      // PRIORITÉ 1: Vérifier si c'est un sous-admin avec un mot de passe personnalisé
+      // Ne pas faire d'authentification Base44 avant - risque de confusion
       const sousAdmins = await base44.asServiceRole.entities.SousAdmin.filter({ 
         $or: [
           { email: email },
@@ -83,10 +84,19 @@ Deno.serve(async (req) => {
           return Response.json({ error: 'Compte suspendu.' }, { status: 403 });
         }
 
+        // Vérifier le mot de passe du sous-admin (AVANT toute auth Base44)
         const passwordMatch = await bcrypt.compare(password, sousAdmin.mot_de_passe_hash || '');
         if (!passwordMatch) {
           return Response.json({ error: 'Identifiants incorrects.' }, { status: 401 });
         }
+
+        // Audit log
+        await base44.asServiceRole.entities.JournalAudit.create({
+          action: 'sous_admin_login',
+          module: 'systeme',
+          details: `Connexion sous-admin: ${sousAdmin.nom_complet}`,
+          utilisateur: sousAdmin.email,
+        }).catch(() => {});
 
         return Response.json({
           success: true,
@@ -102,12 +112,21 @@ Deno.serve(async (req) => {
         });
       }
 
-      // Si pas de sous-admin, c'est l'admin principal via Base44
+      // PRIORITÉ 2: Si pas de sous-admin trouvé, vérifier l'admin principal via Base44
+      // À ce stade, on sait que ce n'est pas un sous-admin, donc on peut faire l'auth Base44
       const user = await base44.auth.me().catch(() => null);
       
       if (!user || user.role !== 'admin') {
         return Response.json({ error: 'Identifiants incorrects ou accès admin refusé.' }, { status: 401 });
       }
+
+      // Audit log
+      await base44.asServiceRole.entities.JournalAudit.create({
+        action: 'admin_login',
+        module: 'systeme',
+        details: `Connexion admin principal: ${user.full_name}`,
+        utilisateur: user.email,
+      }).catch(() => {});
 
       return Response.json({
         success: true,
