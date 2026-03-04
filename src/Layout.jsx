@@ -7,6 +7,7 @@ import {
   LogOut, Tag, Bell, TrendingUp
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
+import RechercheGlobale from "@/components/RechercheGlobale";
 
 // Pages de l'Application Vendeur (interface vendeur mobile, sans sidebar admin)
 const PAGES_VENDEUR = [
