@@ -17,6 +17,11 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // STRICT: Seuls les admins/sous-admins peuvent manipuler les stocks
+    if (!['admin', 'sous_admin'].includes(user.role)) {
+      return Response.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
+    }
+
     const { commande_id, produit_id, quantite } = await req.json();
 
     if (!commande_id || !produit_id || quantite < 1) {
@@ -27,6 +32,11 @@ Deno.serve(async (req) => {
     const commande = await base44.asServiceRole.entities.CommandeVendeur.filter({ id: commande_id });
     if (commande.length === 0) {
       return Response.json({ error: 'Order not found' }, { status: 404 });
+    }
+
+    // AUTHORIZATION: Vérifier que l'admin ne manipule que les commandes légitimes
+    if (commande[0].statut !== 'validee_admin' && commande[0].statut !== 'en_attente_validation_admin') {
+      return Response.json({ error: 'Forbidden: Cannot modify stock for this order status' }, { status: 403 });
     }
 
     const produit = await base44.asServiceRole.entities.Produit.filter({ id: produit_id });
