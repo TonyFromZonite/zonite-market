@@ -454,15 +454,15 @@ export default function RapportsVentes() {
                 <tbody>
                   {topProduits.map((l, i) => (
                     <tr key={i} className="border-t border-slate-50 hover:bg-slate-50">
-                      <td className="px-4 py-2.5 font-medium text-slate-800">
-                        <span className="flex items-center gap-1.5">
-                          <span className={`w-5 h-5 rounded-full text-[10px] font-bold flex items-center justify-center flex-shrink-0 ${badgeRank(i)}`}>{i + 1}</span>
-                          <span className="truncate max-w-[130px]">{l.nom}</span>
+                      <td className="px-2 md:px-4 py-2.5 font-medium text-slate-800">
+                        <span className="flex items-center gap-1">
+                          <span className={`w-5 h-5 rounded-full text-[9px] md:text-[10px] font-bold flex items-center justify-center flex-shrink-0 ${badgeRank(i)}`}>{i + 1}</span>
+                          <span className="truncate max-w-[80px] md:max-w-[130px] text-[11px] md:text-sm">{l.nom}</span>
                         </span>
                       </td>
-                      <td className="px-4 py-2.5 text-right text-slate-600">{l.qte}</td>
-                      <td className="px-4 py-2.5 text-right font-medium text-slate-800">{fmt(l.ca)}</td>
-                      <td className={`px-4 py-2.5 text-right font-semibold ${l.marge >= 0 ? "text-emerald-600" : "text-red-500"}`}>{fmt(l.marge)}</td>
+                      <td className="px-2 md:px-4 py-2.5 text-right text-slate-600 text-xs md:text-sm">{l.qte}</td>
+                      <td className="px-2 md:px-4 py-2.5 text-right font-medium text-slate-800 text-xs md:text-sm">{fmt(l.ca)}</td>
+                      <td className={`px-2 md:px-4 py-2.5 text-right font-semibold text-xs md:text-sm ${l.marge >= 0 ? "text-emerald-600" : "text-red-500"}`}>{fmt(l.marge)}</td>
                     </tr>
                   ))}
                 </tbody>
