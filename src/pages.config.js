@@ -124,7 +124,7 @@ export const PAGES = {
 }
 
 export const pagesConfig = {
-    mainPage: "TableauDeBord",
+    mainPage: "Connexion",
     Pages: PAGES,
     Layout: __Layout,
 };
