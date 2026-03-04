@@ -108,6 +108,23 @@ export default function VideoFormation() {
               </Button>
             )}
 
+            {/* Contenu de la formation */}
+            <div className="space-y-3 mb-5">
+              {[
+                { emoji: "🏢", titre: "Présentation ZONITE", desc: "Découvrez notre entreprise et notre vision du dropshipping au Cameroun." },
+                { emoji: "💰", titre: "Système de commissions", desc: "Comprenez comment sont calculées vos commissions sur chaque vente." },
+                { emoji: "📦", titre: "Fonctionnement Dropshipping", desc: "Comment passer des commandes, la livraison et le suivi client." },
+              ].map((s, i) => (
+                <div key={i} className="bg-white rounded-2xl p-4 shadow-sm flex items-start gap-3">
+                  <span className="text-2xl">{s.emoji}</span>
+                  <div>
+                    <p className="font-semibold text-slate-900 text-sm">{s.titre}</p>
+                    <p className="text-xs text-slate-500 mt-1">{s.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
             {/* Acceptation politiques + confirmation */}
             {videoTerminee && !accepte && (
               <div className="bg-white rounded-2xl p-5 shadow-sm space-y-4">
