@@ -78,6 +78,7 @@ import GestionSousAdmins from './pages/GestionSousAdmins';
 import Connexion from './pages/Connexion';
 import ConfigurationApp from './pages/ConfigurationApp';
 import EspaceSousAdmin from './pages/EspaceSousAdmin';
+import ConfigurationAdminPassword from './pages/ConfigurationAdminPassword';
 import __Layout from './Layout.jsx';
 
 
@@ -113,6 +114,7 @@ export const PAGES = {
     "Connexion": Connexion,
     "ConfigurationApp": ConfigurationApp,
     "EspaceSousAdmin": EspaceSousAdmin,
+    "ConfigurationAdminPassword": ConfigurationAdminPassword,
 }
 
 export const pagesConfig = {
