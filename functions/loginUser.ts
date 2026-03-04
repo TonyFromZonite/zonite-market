@@ -11,6 +11,23 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Email, password, and userType are required' }, { status: 400 });
     }
 
+    // Rate limiting: max 5 tentatives par 15 min par email
+    const rateCheck = checkRateLimit(`login:${email}`, 5, 900000);
+    if (!rateCheck.allowed) {
+      await logAudit(base44, {
+        action: 'login_rate_limit_exceeded',
+        module: 'systeme',
+        details: `Trop de tentatives de connexion pour ${email}`,
+        utilisateur: email,
+      });
+      return Response.json({ error: 'Too many login attempts. Try again later.' }, { status: 429 });
+    }
+
+    // Validation email
+    if (!validateEmail(email)) {
+      return Response.json({ error: 'Invalid email format' }, { status: 400 });
+    }
+
     if (userType === 'vendeur') {
       // Connexion VENDEUR via CompteVendeur
       const comptes = await base44.asServiceRole.entities.CompteVendeur.filter({ user_email: email });
