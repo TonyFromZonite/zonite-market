@@ -6,13 +6,19 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CheckCircle2, XCircle, Eye, User } from "lucide-react";
+import { CheckCircle2, XCircle, Eye } from "lucide-react";
 
 const STATUTS_KYC = {
   en_attente: { label: "En attente", couleur: "bg-yellow-100 text-yellow-800" },
   valide: { label: "Validé", couleur: "bg-emerald-100 text-emerald-800" },
   rejete: { label: "Rejeté", couleur: "bg-red-100 text-red-800" },
 };
+
+// Générer un mot de passe aléatoire lisible
+function genererMdp(longueur = 8) {
+  const chars = "ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
+  return Array.from({ length: longueur }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
+}
 
 export default function GestionKYC() {
   const [compteSelectionne, setCompteSelectionne] = useState(null);
@@ -34,8 +40,14 @@ export default function GestionKYC() {
       statut: statut === "valide" ? "actif" : "suspendu",
     });
 
-    // Si validé, créer automatiquement le vendeur dans l'entité Vendeur (si pas déjà existant)
     if (statut === "valide") {
+      // Générer les identifiants par défaut et les envoyer par email
+      const mdpDefaut = genererMdp();
+      await base44.entities.CompteVendeur.update(compteSelectionne.id, {
+        mot_de_passe_hash: btoa(mdpDefaut),
+      });
+
+      // Créer le vendeur dans l'entité Vendeur si pas encore existant
       const vendeurs = await base44.entities.Vendeur.list();
       const dejaExistant = vendeurs.find(v => v.email === compteSelectionne.user_email);
       if (!dejaExistant) {
@@ -58,16 +70,29 @@ export default function GestionKYC() {
           entite_id: compteSelectionne.id,
         });
       }
-    }
 
-    await base44.entities.NotificationVendeur.create({
-      vendeur_email: compteSelectionne.user_email,
-      titre: statut === "valide" ? "Compte validé !" : "Dossier rejeté",
-      message: statut === "valide"
-        ? "Votre compte a été validé. Regardez la vidéo de formation pour débloquer le catalogue !"
-        : `Votre dossier a été rejeté. ${notes || "Contactez notre équipe pour plus d'informations."}`,
-      type: statut === "valide" ? "succes" : "alerte",
-    });
+      // Envoyer email avec identifiants
+      await base44.integrations.Core.SendEmail({
+        to: compteSelectionne.user_email,
+        subject: "🎉 Bienvenue chez ZONITE – Vos identifiants de connexion",
+        body: `Bonjour ${compteSelectionne.nom_complet},\n\nFélicitations ! Votre compte vendeur ZONITE a été validé avec succès. 🚀\n\nVoici vos identifiants de connexion :\n\n📧 Email : ${compteSelectionne.user_email}\n🔐 Mot de passe : ${mdpDefaut}\n\nConnectez-vous dès maintenant sur l'application ZONITE et pensez à changer votre mot de passe depuis votre profil.\n\nBon courage et bonne vente !\n\nL'équipe ZONITE`,
+      });
+
+      // Notification in-app
+      await base44.entities.NotificationVendeur.create({
+        vendeur_email: compteSelectionne.user_email,
+        titre: "✅ Compte validé ! Vos identifiants ont été envoyés",
+        message: `Félicitations ${compteSelectionne.nom_complet} ! Votre compte a été validé. Consultez votre email pour récupérer vos identifiants de connexion, puis regardez la vidéo de formation.`,
+        type: "succes",
+      });
+    } else {
+      await base44.entities.NotificationVendeur.create({
+        vendeur_email: compteSelectionne.user_email,
+        titre: "Dossier rejeté",
+        message: `Votre dossier a été rejeté. ${notes || "Contactez notre équipe pour plus d'informations."}`,
+        type: "alerte",
+      });
+    }
 
     queryClient.invalidateQueries({ queryKey: ["comptes_vendeurs"] });
     queryClient.invalidateQueries({ queryKey: ["vendeurs"] });
@@ -153,6 +178,11 @@ export default function GestionKYC() {
           </DialogHeader>
           {compteSelectionne && (
             <div className="space-y-4">
+              {compteSelectionne.statut_kyc === "en_attente" && (
+                <div className="bg-blue-50 rounded-lg p-3 text-xs text-blue-700">
+                  ℹ️ En validant ce dossier, un email avec les identifiants de connexion sera automatiquement envoyé au vendeur.
+                </div>
+              )}
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div><p className="text-slate-400">Email</p><p className="font-medium">{compteSelectionne.user_email}</p></div>
                 <div><p className="text-slate-400">Téléphone</p><p className="font-medium">{compteSelectionne.telephone}</p></div>
@@ -189,7 +219,7 @@ export default function GestionKYC() {
                 <XCircle className="w-4 h-4 mr-1" /> Rejeter
               </Button>
               <Button onClick={() => validerKYC("valide")} disabled={enCours} className="bg-emerald-600 hover:bg-emerald-700">
-                <CheckCircle2 className="w-4 h-4 mr-1" /> Valider le KYC
+                <CheckCircle2 className="w-4 h-4 mr-1" /> {enCours ? "Envoi en cours..." : "Valider & Envoyer identifiants"}
               </Button>
             </DialogFooter>
           )}

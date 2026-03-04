@@ -2,14 +2,27 @@ import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { LogOut, ChevronLeft, User, Phone, MapPin, Wallet, TrendingUp, ShoppingBag } from "lucide-react";
+import { LogOut, ChevronLeft, User, Phone, MapPin, Wallet, TrendingUp, ShoppingBag, KeyRound, Eye, EyeOff, CheckCircle2 } from "lucide-react";
+
+const LOGO = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69a304769dda004762ee3a57/be2e82d8c_410287629_332500566218921_7304714630055582730_n.jpg";
 
 export default function ProfilVendeur() {
   const [compteVendeur, setCompteVendeur] = useState(null);
   const [chargement, setChargement] = useState(true);
+
+  // Changement de mot de passe
+  const [ouvrirChangeMdp, setOuvrirChangeMdp] = useState(false);
+  const [ancienMdp, setAncienMdp] = useState("");
+  const [nouveauMdp, setNouveauMdp] = useState("");
+  const [confirmerMdp, setConfirmerMdp] = useState("");
+  const [afficherMdp, setAfficherMdp] = useState(false);
+  const [erreurMdp, setErreurMdp] = useState("");
+  const [succesMdp, setSuccesMdp] = useState(false);
+  const [saveMdpEnCours, setSaveMdpEnCours] = useState(false);
 
   useEffect(() => {
     const charger = async () => {
@@ -23,18 +36,33 @@ export default function ProfilVendeur() {
 
   const formater = n => `${Math.round(n || 0).toLocaleString("fr-FR")} FCFA`;
 
+  const changerMotDePasse = async (e) => {
+    e.preventDefault();
+    setErreurMdp("");
+    if (!ancienMdp || !nouveauMdp || !confirmerMdp) { setErreurMdp("Tous les champs sont requis."); return; }
+    if (compteVendeur.mot_de_passe_hash !== btoa(ancienMdp)) { setErreurMdp("Ancien mot de passe incorrect."); return; }
+    if (nouveauMdp.length < 6) { setErreurMdp("Le nouveau mot de passe doit faire au moins 6 caractères."); return; }
+    if (nouveauMdp !== confirmerMdp) { setErreurMdp("Les mots de passe ne correspondent pas."); return; }
+    setSaveMdpEnCours(true);
+    await base44.entities.CompteVendeur.update(compteVendeur.id, { mot_de_passe_hash: btoa(nouveauMdp) });
+    setSuccesMdp(true);
+    setSaveMdpEnCours(false);
+    setAncienMdp(""); setNouveauMdp(""); setConfirmerMdp("");
+    setTimeout(() => { setSuccesMdp(false); setOuvrirChangeMdp(false); }, 2500);
+  };
+
   if (chargement) return (
     <div className="p-4 space-y-4">{Array(4).fill(0).map((_, i) => <Skeleton key={i} className="h-20 rounded-2xl" />)}</div>
   );
 
   return (
-    <div className="min-h-screen bg-slate-50 pb-20">
+    <div className="min-h-screen bg-slate-50 pb-24">
       <div className="bg-[#1a1f5e] text-white px-4 pb-8" style={{ paddingTop: "max(1.25rem, env(safe-area-inset-top, 0px))" }}>
         <div className="flex items-center gap-3 mb-4">
           <Link to={createPageUrl("EspaceVendeur")}>
             <ChevronLeft className="w-6 h-6 text-white" />
           </Link>
-          <img src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69a304769dda004762ee3a57/be2e82d8c_410287629_332500566218921_7304714630055582730_n.jpg" alt="Zonite" className="h-7 w-7 rounded-lg object-contain bg-white p-0.5" />
+          <img src={LOGO} alt="Zonite" className="h-7 w-7 rounded-lg object-contain bg-white p-0.5" />
           <h1 className="text-lg font-bold">Mon Profil</h1>
         </div>
         <div className="flex items-center gap-4">
@@ -105,6 +133,61 @@ export default function ProfilVendeur() {
           </div>
         </div>
 
+        {/* Changer mot de passe */}
+        <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+          <button
+            onClick={() => { setOuvrirChangeMdp(!ouvrirChangeMdp); setErreurMdp(""); setSuccesMdp(false); }}
+            className="w-full flex items-center justify-between p-4"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-blue-50 rounded-xl flex items-center justify-center">
+                <KeyRound className="w-4 h-4 text-blue-600" />
+              </div>
+              <span className="font-medium text-slate-900 text-sm">Changer mon mot de passe</span>
+            </div>
+            <span className="text-slate-400 text-xs">{ouvrirChangeMdp ? "▲" : "▼"}</span>
+          </button>
+
+          {ouvrirChangeMdp && (
+            <div className="px-4 pb-4">
+              {succesMdp ? (
+                <div className="flex items-center gap-2 bg-emerald-50 rounded-xl p-3">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-500 flex-shrink-0" />
+                  <p className="text-emerald-700 text-sm font-medium">Mot de passe changé avec succès !</p>
+                </div>
+              ) : (
+                <form onSubmit={changerMotDePasse} className="space-y-3">
+                  {[
+                    { label: "Ancien mot de passe", val: ancienMdp, setter: setAncienMdp },
+                    { label: "Nouveau mot de passe", val: nouveauMdp, setter: setNouveauMdp },
+                    { label: "Confirmer le nouveau", val: confirmerMdp, setter: setConfirmerMdp },
+                  ].map(({ label, val, setter }) => (
+                    <div key={label}>
+                      <label className="text-xs text-slate-500 block mb-1">{label}</label>
+                      <div className="relative">
+                        <Input
+                          type={afficherMdp ? "text" : "password"}
+                          value={val}
+                          onChange={(e) => setter(e.target.value)}
+                          placeholder="••••••••"
+                          className="h-10 pr-10"
+                        />
+                        <button type="button" onClick={() => setAfficherMdp(!afficherMdp)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
+                          {afficherMdp ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                  {erreurMdp && <p className="text-red-500 text-xs">{erreurMdp}</p>}
+                  <Button type="submit" disabled={saveMdpEnCours} className="w-full bg-[#1a1f5e] hover:bg-[#141952] h-10 text-sm">
+                    {saveMdpEnCours ? "Enregistrement..." : "Mettre à jour le mot de passe"}
+                  </Button>
+                </form>
+              )}
+            </div>
+          )}
+        </div>
+
         {/* Actions */}
         {(compteVendeur?.solde_commission || 0) >= 5000 && (
           <Link to={createPageUrl("DemandePaiement")}>
@@ -114,13 +197,8 @@ export default function ProfilVendeur() {
           </Link>
         )}
 
-        <Button
-          variant="outline"
-          onClick={() => base44.auth.logout()}
-          className="w-full border-red-200 text-red-600 hover:bg-red-50"
-        >
-          <LogOut className="w-4 h-4 mr-2" />
-          Se déconnecter
+        <Button variant="outline" onClick={() => base44.auth.logout(createPageUrl("Connexion"))} className="w-full border-red-200 text-red-600 hover:bg-red-50">
+          <LogOut className="w-4 h-4 mr-2" /> Se déconnecter
         </Button>
       </div>
 
