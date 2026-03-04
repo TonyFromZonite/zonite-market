@@ -14,6 +14,32 @@ export default function VideoFormation() {
   const [erreur, setErreur] = useState("");
   const navigate = useNavigate();
 
+  // Extraire videoId et convertir en URL embed YouTube
+  const convertToEmbedUrl = (rawUrl) => {
+    if (!rawUrl) return null;
+    
+    let videoId = null;
+    
+    // Si déjà en format embed, retourner directement
+    if (rawUrl.includes("/embed/")) {
+      videoId = rawUrl.split("/embed/")[1]?.split("?")[0];
+    }
+    // Format youtube.com/watch?v=...
+    else if (rawUrl.includes("youtube.com/watch")) {
+      videoId = new URLSearchParams(rawUrl.split("?")[1]).get("v");
+    }
+    // Format youtu.be/... (short URL)
+    else if (rawUrl.includes("youtu.be/")) {
+      videoId = rawUrl.split("youtu.be/")[1]?.split("?")[0];
+    }
+    
+    if (videoId && videoId.length === 11) {
+      return `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1&fs=1`;
+    }
+    
+    return null;
+  };
+
   useEffect(() => {
     const charger = async () => {
       try {
@@ -29,18 +55,18 @@ export default function VideoFormation() {
         // Récupérer le lien YouTube depuis la config
         const configs = await base44.entities.ConfigApp.filter({ cle: "lien_youtube_formation" });
         if (configs.length > 0 && configs[0].valeur) {
-          let url = configs[0].valeur;
-          // Convertir URL normale en URL embed si nécessaire
-          if (url.includes("youtube.com/watch?v=")) {
-            const videoId = url.split("v=")[1]?.split("&")[0];
-            if (videoId) url = `https://www.youtube.com/embed/${videoId}`;
+          const embedUrl = convertToEmbedUrl(configs[0].valeur);
+          if (embedUrl) {
+            setVideoUrl(embedUrl);
+          } else {
+            setErreur("Format vidéo invalide. Vérifiez l'URL YouTube stockée.");
           }
-          setVideoUrl(url);
         } else {
           setErreur("Aucune vidéo de formation configurée. Contactez l'administrateur.");
         }
       } catch (err) {
-        setErreur("Erreur lors du chargement");
+        console.error("Erreur chargement vidéo:", err);
+        setErreur("Erreur lors du chargement de la vidéo");
       }
     };
     charger();
