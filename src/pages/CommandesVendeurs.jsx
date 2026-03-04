@@ -8,7 +8,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Search, Eye, CheckCircle2, Truck, XCircle, PackageCheck } from "lucide-react";
+import { Search, Eye, CheckCircle2, Truck, XCircle, PackageCheck, RotateCcw } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { createPageUrl } from "@/utils";
 
 const STATUTS = {
   en_attente_validation_admin: { label: "En attente validation", couleur: "bg-yellow-100 text-yellow-800 border-yellow-200" },
@@ -27,7 +29,10 @@ export default function CommandesVendeurs() {
   const [notesAdmin, setNotesAdmin] = useState("");
   const [livreurNom, setLivreurNom] = useState("");
   const [enCours, setEnCours] = useState(false);
+  const [modalRetour, setModalRetour] = useState(false);
+  const [retourForm, setRetourForm] = useState({ raison: "client_refuse", raison_detail: "", quantite: 1 });
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const { data: commandes = [], isLoading } = useQuery({
     queryKey: ["commandes_vendeurs_admin"],
