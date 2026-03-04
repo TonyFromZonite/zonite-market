@@ -358,19 +358,19 @@ export default function Connexion() {
       </div>
 
       {/* Réseaux sociaux */}
-      <div className="relative z-10 flex flex-col items-center gap-3 mt-5">
-        <p className="text-slate-400 text-xs">Suivez-nous sur</p>
-        <div className="flex items-center gap-3">
+      <div className="relative z-10 flex flex-col items-center gap-3 md:gap-4 mt-5 md:mt-8 px-3">
+        <p className="text-slate-400 text-xs md:text-sm">Suivez-nous sur</p>
+        <div className="flex items-center gap-2 md:gap-3">
           <a href={lienFacebook} target="_blank" rel="noopener noreferrer"
-            className="flex items-center gap-2 bg-white/10 hover:bg-[#1877F2]/30 border border-white/20 rounded-2xl px-4 py-2 text-white text-sm font-medium transition-all active:scale-95">
-            <Facebook className="w-4 h-4 text-[#1877F2]" /> Facebook
+            className="flex items-center gap-2 bg-white/10 hover:bg-[#1877F2]/30 border border-white/20 rounded-2xl px-3 md:px-4 py-1.5 md:py-2 text-white text-xs md:text-sm font-medium transition-all active:scale-95">
+            <Facebook className="w-3 h-3 md:w-4 md:h-4 text-[#1877F2]" /> <span className="hidden sm:inline">Facebook</span>
           </a>
           <a href={lienTiktok} target="_blank" rel="noopener noreferrer"
-            className="flex items-center gap-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-2xl px-4 py-2 text-white text-sm font-medium transition-all active:scale-95">
-            <TikTokIcon size={16} /> TikTok
+            className="flex items-center gap-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-2xl px-3 md:px-4 py-1.5 md:py-2 text-white text-xs md:text-sm font-medium transition-all active:scale-95">
+            <TikTokIcon size={14} /> <span className="hidden sm:inline">TikTok</span>
           </a>
         </div>
-        <p className="text-slate-500 text-[10px]">© {new Date().getFullYear()} ZONITE — Tous droits réservés</p>
+        <p className="text-slate-500 text-[10px] md:text-xs">© {new Date().getFullYear()} ZONITE — Tous droits réservés</p>
       </div>
     </div>
   );
