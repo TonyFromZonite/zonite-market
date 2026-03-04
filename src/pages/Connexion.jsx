@@ -340,7 +340,7 @@ export default function Connexion() {
                     <p className="text-red-300 text-xs">{erreur}</p>
                   </div>
                 )}
-                <Button type="submit" disabled={chargement} className="w-full h-11 bg-white hover:bg-slate-100 text-[#1a1f5e] font-black text-sm rounded-xl transition-all active:scale-95">
+                <Button type="submit" disabled={chargement} className="w-full h-11 md:h-12 bg-white hover:bg-slate-100 text-[#1a1f5e] font-black text-sm md:text-base rounded-xl transition-all active:scale-95">
                   {chargement ? "Vérification..." : "Accéder au panneau admin →"}
                 </Button>
               </form>
