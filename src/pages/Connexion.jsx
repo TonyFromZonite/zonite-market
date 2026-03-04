@@ -86,8 +86,7 @@ export default function Connexion() {
       }
       // Stocker la session vendeur
       sessionStorage.setItem("vendeur_session", JSON.stringify({ email: compte.user_email, id: compte.id }));
-      // Connexion Base44 pour avoir accès aux entités
-      base44.auth.redirectToLogin(createPageUrl("EspaceVendeur"));
+      window.location.href = createPageUrl("EspaceVendeur");
     } catch (_) {
       setErreur("Erreur lors de la connexion. Réessayez.");
     }
