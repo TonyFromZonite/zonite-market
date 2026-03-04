@@ -144,25 +144,25 @@ export default function VentesVendeurTab() {
                   const ca = (c.prix_final_client || 0) * (c.quantite || 0);
                   return (
                     <tr key={c.id} className="hover:bg-slate-50 transition-colors">
-                      <td className="px-4 py-3 text-slate-500 text-xs whitespace-nowrap">{fmtDate(c.created_date)}</td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          <span className="w-6 h-6 rounded-full bg-[#1a1f5e] text-white text-[10px] font-bold flex items-center justify-center flex-shrink-0">
+                      <td className="px-2 md:px-4 py-3 text-slate-500 text-[11px] md:text-xs whitespace-nowrap">{fmtDate(c.created_date)}</td>
+                      <td className="px-2 md:px-4 py-3">
+                        <div className="flex items-center gap-1.5">
+                          <span className="w-6 h-6 rounded-full bg-[#1a1f5e] text-white text-[9px] font-bold flex items-center justify-center flex-shrink-0">
                             {(c.vendeur_nom || "?").charAt(0).toUpperCase()}
                           </span>
-                          <span className="font-medium text-slate-800 text-xs truncate max-w-[100px]">{c.vendeur_nom || "—"}</span>
+                          <span className="font-medium text-slate-800 text-[11px] md:text-xs truncate max-w-[70px] md:max-w-[100px]">{c.vendeur_nom || "—"}</span>
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-slate-700 truncate max-w-[130px]">{c.produit_nom}</td>
-                      <td className="px-4 py-3 text-right text-slate-600">{c.quantite}</td>
-                      <td className="px-4 py-3 text-right text-slate-700">{fmt(c.prix_final_client)}</td>
-                      <td className="px-4 py-3 text-right font-semibold text-slate-900">{fmt(ca)}</td>
-                      <td className="px-4 py-3 text-right">
-                        <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200 border font-semibold">
+                      <td className="px-2 md:px-4 py-3 text-slate-700 truncate max-w-[70px] md:max-w-[130px] text-[11px] md:text-sm">{c.produit_nom}</td>
+                      <td className="px-2 md:px-4 py-3 text-right text-slate-600 text-xs md:text-sm">{c.quantite}</td>
+                      <td className="px-2 md:px-4 py-3 text-right text-slate-700 text-xs md:text-sm hidden sm:table-cell">{fmt(c.prix_final_client)}</td>
+                      <td className="px-2 md:px-4 py-3 text-right font-semibold text-slate-900 text-xs md:text-sm">{fmt(ca)}</td>
+                      <td className="px-2 md:px-4 py-3 text-right">
+                        <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200 border font-semibold text-[10px] md:text-xs whitespace-nowrap">
                           {fmt(c.commission_vendeur)}
                         </Badge>
                       </td>
-                      <td className="px-4 py-3 text-slate-500 text-xs">{c.client_ville || "—"}</td>
+                      <td className="px-2 md:px-4 py-3 text-slate-500 text-xs hidden md:table-cell">{c.client_ville || "—"}</td>
                     </tr>
                   );
                 })}
