@@ -26,9 +26,33 @@ export default function NouvelleCommandeVendeur() {
 
   useEffect(() => {
     const charger = async () => {
-      const u = await base44.auth.me();
-      const comptes = await base44.entities.CompteVendeur.filter({ user_email: u.email });
+      let emailVendeur = null;
+      
+      // Récupérer email depuis session vendeur (priorité)
+      try {
+        const session = sessionStorage.getItem("vendeur_session");
+        if (session) {
+          const parsed = JSON.parse(session);
+          emailVendeur = parsed.email;
+        }
+      } catch (_) {}
+
+      if (!emailVendeur) {
+        // Fallback Base44 auth
+        const u = await base44.auth.me().catch(() => null);
+        if (u?.email) emailVendeur = u.email;
+      }
+
+      if (!emailVendeur) {
+        window.location.href = createPageUrl("Connexion");
+        return;
+      }
+
+      const comptes = await base44.entities.CompteVendeur.filter({ user_email: emailVendeur });
       if (comptes.length > 0) setCompteVendeur(comptes[0]);
+      else {
+        setErreur("Compte vendeur introuvable");
+      }
 
       // Pré-remplir produit depuis URL
       const params = new URLSearchParams(window.location.search);
@@ -58,6 +82,7 @@ export default function NouvelleCommandeVendeur() {
   const stockDisponible = produitSelectionne ? (produitSelectionne.stock_global || 0) : 0;
 
   const soumettre = async () => {
+    if (!compteVendeur) return setErreur("Compte vendeur non chargé.");
     if (!form.produit_id) return setErreur("Sélectionnez un produit.");
     if (qte < 1) return setErreur("La quantité doit être au moins 1.");
     if (qte > stockDisponible) return setErreur(`Stock insuffisant. Stock disponible : ${stockDisponible} unité(s).`);
@@ -67,8 +92,9 @@ export default function NouvelleCommandeVendeur() {
     setEnCours(true);
     setErreur("");
 
-    // Créer la commande avec le nouveau statut
-    await base44.entities.CommandeVendeur.create({
+    try {
+      // Créer la commande avec le nouveau statut
+      await base44.entities.CommandeVendeur.create({
       vendeur_id: compteVendeur.id,
       vendeur_nom: compteVendeur.nom_complet,
       vendeur_email: compteVendeur.user_email,
@@ -116,6 +142,10 @@ export default function NouvelleCommandeVendeur() {
     queryClient.invalidateQueries({ queryKey: ["commandes_vendeur"] });
     setEnCours(false);
     setSucces(true);
+    } catch (err) {
+      setErreur(err.message || "Erreur lors de la création de la commande");
+      setEnCours(false);
+    }
   };
 
   if (succes) {
