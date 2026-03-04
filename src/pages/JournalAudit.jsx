@@ -19,8 +19,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Search, ChevronLeft, ChevronRight, Shield } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, Shield, TrendingUp } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import RapportsVentes from "./RapportsVentes";
 
 const MODULES = {
   vente: { label: "Vente", couleur: "bg-blue-100 text-blue-700" },
