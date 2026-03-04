@@ -29,6 +29,7 @@ const menuItems = [
   { nom: "Paiements Vendeurs",   page: "PaiementsVendeurs",    icone: DollarSign },
   { nom: "Livraisons",           page: "Livraisons",           icone: Truck },
   { nom: "Commissions",          page: "Commissions",          icone: DollarSign },
+  { nom: "Retours Produits",     page: "RetoursAdmin",         icone: RotateCcw },
   { nom: "Rapports Ventes",      page: "RapportsVentes",       icone: TrendingUp },
   { nom: "Journal d'Audit",      page: "JournalAudit",         icone: Shield },
 ];
