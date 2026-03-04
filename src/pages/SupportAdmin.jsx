@@ -131,7 +131,7 @@ export default function SupportAdmin() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Support Vendeurs</h1>
-          <p className="text-sm text-slate-500">Gérez les tickets de support des vendeurs</p>
+          <p className="text-sm text-slate-500">Gérez les tickets et la FAQ</p>
         </div>
         {nbOuverts > 0 && (
           <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 text-blue-700 px-3 py-1.5 rounded-lg text-sm font-medium">
@@ -139,6 +139,18 @@ export default function SupportAdmin() {
             {nbOuverts} ticket{nbOuverts > 1 ? "s" : ""} ouvert{nbOuverts > 1 ? "s" : ""}
           </div>
         )}
+      </div>
+
+      {/* Onglets */}
+      <div className="flex gap-1 border-b border-slate-200">
+        <button onClick={() => setOnglet("tickets")}
+          className={`px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors ${onglet === "tickets" ? "border-[#1a1f5e] text-[#1a1f5e]" : "border-transparent text-slate-500 hover:text-slate-700"}`}>
+          <MessageSquare className="w-4 h-4 inline mr-1.5" />Tickets {nbOuverts > 0 && <span className="ml-1 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{nbOuverts}</span>}
+        </button>
+        <button onClick={() => setOnglet("faq")}
+          className={`px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors ${onglet === "faq" ? "border-[#1a1f5e] text-[#1a1f5e]" : "border-transparent text-slate-500 hover:text-slate-700"}`}>
+          <HelpCircle className="w-4 h-4 inline mr-1.5" />FAQ ({faqItems.length})
+        </button>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3">
