@@ -333,8 +333,28 @@ export default function CommandesVendeurs() {
                 )}
                 {(commandeSelectionnee.statut === "validee_admin") && (
                   <div className="space-y-2">
+                    {/* Livreurs suggérés selon la ville du client */}
+                    {(() => {
+                      const villeClient = (commandeSelectionnee.client_ville || "").toLowerCase().trim();
+                      const livreursVille = livreurs.filter(l =>
+                        l.zones_couvertes?.some(z => z.ville?.toLowerCase().trim() === villeClient)
+                      );
+                      return livreursVille.length > 0 ? (
+                        <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3 space-y-2">
+                          <p className="text-xs font-semibold text-emerald-700">Livreurs disponibles à {commandeSelectionnee.client_ville} :</p>
+                          {livreursVille.map(l => (
+                            <button key={l.id} onClick={() => setLivreurNom(l.nom)} className={`w-full text-left px-3 py-2 rounded-lg border text-sm transition-colors ${livreurNom === l.nom ? "bg-emerald-600 text-white border-emerald-600" : "bg-white border-emerald-200 hover:bg-emerald-100 text-slate-800"}`}>
+                              <span className="font-medium">{l.nom}</span>
+                              {l.vehicule && <span className="ml-2 text-xs opacity-70">· {l.vehicule}</span>}
+                            </button>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-xs text-orange-600 bg-orange-50 border border-orange-200 rounded-xl p-2">Aucun livreur enregistré pour <strong>{commandeSelectionnee.client_ville}</strong></p>
+                      );
+                    })()}
                     <div className="space-y-1">
-                      <label className="text-slate-500 text-xs font-medium">Nom du livreur *</label>
+                      <label className="text-slate-500 text-xs font-medium">Ou saisir manuellement *</label>
                       <Input value={livreurNom} onChange={e => setLivreurNom(e.target.value)} placeholder="Nom du livreur..." />
                     </div>
                     <Button onClick={attribuerLivreur} disabled={enCours || !livreurNom.trim()} className="w-full bg-indigo-600 hover:bg-indigo-700 gap-2">
