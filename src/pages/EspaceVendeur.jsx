@@ -45,7 +45,19 @@ export default function EspaceVendeur() {
     queryKey: ["commandes_vendeur", compteVendeur?.id],
     queryFn: () => base44.entities.CommandeVendeur.filter({ vendeur_id: compteVendeur.id }, "-created_date", 50),
     enabled: !!compteVendeur?.id,
+    refetchInterval: 30000, // rafraîchissement toutes les 30s
   });
+
+  // Recharger le compte vendeur pour avoir le solde à jour
+  const { data: compteActualise } = useQuery({
+    queryKey: ["compte_vendeur_solde", compteVendeur?.id],
+    queryFn: () => base44.entities.CompteVendeur.filter({ user_email: utilisateur?.email }),
+    enabled: !!compteVendeur?.id && !!utilisateur?.email,
+    refetchInterval: 30000,
+    select: (data) => data[0] || compteVendeur,
+  });
+
+  const soldeAffiche = compteActualise || compteVendeur;
 
   const { data: notifications = [] } = useQuery({
     queryKey: ["notifs_vendeur", utilisateur?.email],
