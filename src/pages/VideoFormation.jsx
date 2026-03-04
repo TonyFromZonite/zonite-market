@@ -1,23 +1,47 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, Play, Loader2 } from "lucide-react";
+import { CheckCircle2, Loader2, AlertCircle } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 
 export default function VideoFormation() {
   const [compteVendeur, setCompteVendeur] = useState(null);
-  const [etape, setEtape] = useState(1); // 1: vidéo, 2: confirmation, 3: succès
+  const [videoUrl, setVideoUrl] = useState("");
   const [videoTerminee, setVideoTerminee] = useState(false);
   const [accepte, setAccepte] = useState(false);
   const [enCours, setEnCours] = useState(false);
+  const [erreur, setErreur] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
     const charger = async () => {
-      const u = await base44.auth.me();
-      const comptes = await base44.entities.CompteVendeur.filter({ user_email: u.email });
-      if (comptes.length > 0) setCompteVendeur(comptes[0]);
+      try {
+        const u = await base44.auth.me().catch(() => null);
+        if (!u?.email) {
+          window.location.href = createPageUrl("Connexion");
+          return;
+        }
+
+        const comptes = await base44.entities.CompteVendeur.filter({ user_email: u.email });
+        if (comptes.length > 0) setCompteVendeur(comptes[0]);
+
+        // Récupérer le lien YouTube depuis la config
+        const configs = await base44.entities.ConfigApp.filter({ cle: "lien_youtube_formation" });
+        if (configs.length > 0 && configs[0].valeur) {
+          let url = configs[0].valeur;
+          // Convertir URL normale en URL embed si nécessaire
+          if (url.includes("youtube.com/watch?v=")) {
+            const videoId = url.split("v=")[1]?.split("&")[0];
+            if (videoId) url = `https://www.youtube.com/embed/${videoId}`;
+          }
+          setVideoUrl(url);
+        } else {
+          setErreur("Aucune vidéo de formation configurée. Contactez l'administrateur.");
+        }
+      } catch (err) {
+        setErreur("Erreur lors du chargement");
+      }
     };
     charger();
   }, []);
@@ -104,22 +128,53 @@ export default function VideoFormation() {
               ))}
             </div>
 
-            {/* Acceptation */}
-            {videoTerminee && (
-              <div className="bg-white rounded-2xl p-5 shadow-sm">
-                <h3 className="font-semibold text-slate-900 mb-3">Conditions d'utilisation</h3>
-                <div className="bg-slate-50 rounded-xl p-3 text-xs text-slate-600 mb-4 space-y-1.5">
-                  <p>• Je m'engage à ne pas révéler les prix internes ZONITE à des tiers.</p>
-                  <p>• Je comprends que mes commissions sont basées sur la différence entre le prix de gros et mon prix de vente.</p>
-                  <p>• Je m'engage à traiter les clients avec professionnalisme.</p>
-                  <p>• Je comprends que tout abus entraîne la suspension de mon compte.</p>
+            {/* Acceptation politiques + confirmation */}
+            {videoTerminee && !accepte && (
+              <div className="bg-white rounded-2xl p-5 shadow-sm space-y-4">
+                <div>
+                  <h3 className="font-semibold text-slate-900 mb-3">Politiques de confidentialité et conditions</h3>
+                  <div className="bg-slate-50 rounded-xl p-3 text-xs text-slate-600 space-y-2">
+                    <p><strong>🔒 Confidentialité :</strong> Je m'engage à ne pas révéler les prix internes ZONITE à des tiers.</p>
+                    <p><strong>💰 Commissions :</strong> Je comprends que mes commissions sont basées sur la différence entre le prix de gros et mon prix de vente.</p>
+                    <p><strong>👥 Professionnalisme :</strong> Je m'engage à traiter les clients avec respect et professionnalisme.</p>
+                    <p><strong>⚖️ Sanctions :</strong> Je comprends que tout abus ou violation entraîne la suspension de mon compte.</p>
+                  </div>
                 </div>
-                <label className="flex items-start gap-3 cursor-pointer mb-4">
-                  <input type="checkbox" checked={accepte} onChange={e => setAccepte(e.target.checked)} className="mt-0.5 w-4 h-4" />
-                  <span className="text-sm text-slate-700">J'ai compris le fonctionnement et j'accepte les conditions ZONITE.</span>
+
+                <label className="flex items-start gap-3 cursor-pointer p-3 bg-blue-50 rounded-xl border border-blue-200">
+                  <input
+                    type="checkbox"
+                    checked={accepte}
+                    onChange={e => setAccepte(e.target.checked)}
+                    className="mt-1 w-4 h-4 accent-blue-600"
+                  />
+                  <span className="text-sm text-slate-700 font-medium">
+                    J'ai lu et j'accepte les politiques de confidentialité et les conditions d'utilisation ZONITE
+                  </span>
                 </label>
+
                 <Button
-                  onClick={confirmer}
+                  onClick={async () => {
+                    if (!accepte) return;
+                    setEnCours(true);
+                    try {
+                      await base44.entities.CompteVendeur.update(compteVendeur.id, {
+                        video_vue: true,
+                        conditions_acceptees: true,
+                        catalogue_debloque: true,
+                      });
+                      await base44.entities.NotificationVendeur.create({
+                        vendeur_email: compteVendeur.user_email,
+                        titre: "Catalogue débloqué !",
+                        message: "Félicitations ! Vous avez accès au catalogue produits ZONITE. Créez votre première commande !",
+                        type: "succes",
+                      });
+                      setEnCours(false);
+                    } catch (err) {
+                      setErreur("Erreur lors de la finalisation");
+                      setEnCours(false);
+                    }
+                  }}
                   disabled={!accepte || enCours}
                   className="w-full bg-[#F5C518] hover:bg-[#e0b010] text-[#1a1f5e] font-bold h-12"
                 >
