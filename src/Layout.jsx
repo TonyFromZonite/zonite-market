@@ -167,7 +167,7 @@ export default function Layout({ children, currentPageName }) {
         {/* Déconnexion */}
         <div className="p-2 border-t border-white/10 flex-shrink-0">
           <button
-            onClick={sousAdmin ? deconnexionSousAdmin : deconnexion}
+            onClick={adminSession ? deconnexionAdmin : (sousAdmin ? deconnexionSousAdmin : deconnexion)}
             className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:bg-white/10 hover:text-white transition-all w-full"
           >
             <LogOut className="w-4 h-4" />
