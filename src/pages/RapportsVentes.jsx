@@ -401,7 +401,7 @@ export default function RapportsVentes() {
       </div>
 
       {/* KPIs */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <KPICard titre="Chiffre d'Affaires Total" valeur={fmt(caTotal)} sous={`Direct: ${fmt(caVentes)} | Vendeurs: ${fmt(caCmds)}`} icone={DollarSign} couleurBg="bg-blue-50" couleurTexte="text-blue-600" />
         <KPICard titre="Marge Brute Globale" valeur={fmt(margeTotal)} sous={`Taux: ${tauxMarge}%`} icone={TrendingUp} couleurBg="bg-emerald-50" couleurTexte="text-emerald-600" />
         <KPICard titre="Transactions" valeur={nbTransactions} sous={`${ventesFiltrees.length} directes • ${cmdsFiltrees.length} vendeurs`} icone={ShoppingCart} couleurBg="bg-purple-50" couleurTexte="text-purple-600" />
