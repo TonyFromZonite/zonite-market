@@ -1,0 +1,222 @@
+import React, { useState } from "react";
+import { base44 } from "@/api/base44Client";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { MessageSquare, Clock, CheckCircle2, Loader2, Search, User, Tag, AlertCircle } from "lucide-react";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
+
+const STATUTS = {
+  ouvert: { label: "Ouvert", color: "bg-blue-100 text-blue-700 border-blue-200" },
+  en_cours: { label: "En cours", color: "bg-yellow-100 text-yellow-700 border-yellow-200" },
+  resolu: { label: "Résolu", color: "bg-green-100 text-green-700 border-green-200" },
+  ferme: { label: "Fermé", color: "bg-slate-100 text-slate-600 border-slate-200" }
+};
+
+const CATEGORIES = {
+  commande: "Commande", paiement: "Paiement", produit: "Produit",
+  compte: "Compte", livraison: "Livraison", autre: "Autre"
+};
+
+const PRIORITES = {
+  basse: { label: "Basse", color: "text-slate-500" },
+  normale: { label: "Normale", color: "text-blue-600" },
+  haute: { label: "Haute", color: "text-orange-600" },
+  urgente: { label: "Urgente", color: "text-red-600" }
+};
+
+export default function SupportAdmin() {
+  const [recherche, setRecherche] = useState("");
+  const [filtreStatut, setFiltreStatut] = useState("tous");
+  const [ticketSelectionne, setTicketSelectionne] = useState(null);
+  const [reponse, setReponse] = useState("");
+  const [nouveauStatut, setNouveauStatut] = useState("");
+  const [enCours, setEnCours] = useState(false);
+  const queryClient = useQueryClient();
+
+  const { data: tickets = [], isLoading } = useQuery({
+    queryKey: ["tickets_support"],
+    queryFn: () => base44.entities.TicketSupport.list("-created_date", 200),
+    refetchInterval: 30000,
+  });
+
+  const ticketsFiltres = tickets.filter(t => {
+    const matchStatut = filtreStatut === "tous" || t.statut === filtreStatut;
+    const matchRecherche = !recherche || t.sujet?.toLowerCase().includes(recherche.toLowerCase()) || t.vendeur_nom?.toLowerCase().includes(recherche.toLowerCase());
+    return matchStatut && matchRecherche;
+  });
+
+  const nbOuverts = tickets.filter(t => t.statut === "ouvert").length;
+
+  const ouvrirTicket = (ticket) => {
+    setTicketSelectionne(ticket);
+    setReponse(ticket.reponse_admin || "");
+    setNouveauStatut(ticket.statut);
+  };
+
+  const envoyerReponse = async () => {
+    if (!reponse.trim()) return;
+    setEnCours(true);
+    const user = await base44.auth.me();
+    await base44.entities.TicketSupport.update(ticketSelectionne.id, {
+      reponse_admin: reponse,
+      statut: nouveauStatut || "en_cours",
+      admin_email: user.email,
+      date_reponse: new Date().toISOString(),
+      lu_par_vendeur: false,
+    });
+
+    // Notifier le vendeur
+    await base44.entities.NotificationVendeur.create({
+      vendeur_email: ticketSelectionne.vendeur_email,
+      titre: "Réponse à votre ticket",
+      message: `Votre ticket "${ticketSelectionne.sujet}" a reçu une réponse. Consultez votre espace Aide.`,
+      type: "info",
+    });
+
+    queryClient.invalidateQueries({ queryKey: ["tickets_support"] });
+    setTicketSelectionne(prev => ({ ...prev, reponse_admin: reponse, statut: nouveauStatut || "en_cours" }));
+    setEnCours(false);
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Support Vendeurs</h1>
+          <p className="text-sm text-slate-500">Gérez les tickets de support des vendeurs</p>
+        </div>
+        {nbOuverts > 0 && (
+          <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 text-blue-700 px-3 py-1.5 rounded-lg text-sm font-medium">
+            <AlertCircle className="w-4 h-4" />
+            {nbOuverts} ticket{nbOuverts > 1 ? "s" : ""} ouvert{nbOuverts > 1 ? "s" : ""}
+          </div>
+        )}
+      </div>
+
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <input
+            className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+            placeholder="Rechercher par vendeur ou sujet..."
+            value={recherche}
+            onChange={e => setRecherche(e.target.value)}
+          />
+        </div>
+        <Select value={filtreStatut} onValueChange={setFiltreStatut}>
+          <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="tous">Tous</SelectItem>
+            {Object.entries(STATUTS).map(([k, v]) => <SelectItem key={k} value={k}>{v.label}</SelectItem>)}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Liste des tickets */}
+        <div className="space-y-2">
+          {isLoading ? (
+            <div className="text-center py-12 text-slate-400"><Loader2 className="w-6 h-6 animate-spin mx-auto" /></div>
+          ) : ticketsFiltres.length === 0 ? (
+            <div className="text-center py-12 text-slate-400">
+              <MessageSquare className="w-10 h-10 mx-auto mb-2 opacity-40" />
+              <p className="text-sm">Aucun ticket</p>
+            </div>
+          ) : ticketsFiltres.map(ticket => (
+            <div
+              key={ticket.id}
+              onClick={() => ouvrirTicket(ticket)}
+              className={`bg-white rounded-xl border p-4 cursor-pointer hover:shadow-sm transition-all ${ticketSelectionne?.id === ticket.id ? "border-[#1a1f5e] ring-1 ring-[#1a1f5e]/10" : "border-slate-200"}`}
+            >
+              <div className="flex items-start justify-between gap-2 mb-2">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${STATUTS[ticket.statut]?.color}`}>
+                    {STATUTS[ticket.statut]?.label}
+                  </span>
+                  <span className="text-[10px] text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
+                    {CATEGORIES[ticket.categorie] || ticket.categorie}
+                  </span>
+                  {!ticket.reponse_admin && ticket.statut === "ouvert" && (
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-600 border border-red-200">Sans réponse</span>
+                  )}
+                </div>
+              </div>
+              <p className="text-sm font-semibold text-slate-900 mb-1 line-clamp-1">{ticket.sujet}</p>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5 text-xs text-slate-500">
+                  <User className="w-3 h-3" />
+                  <span>{ticket.vendeur_nom || ticket.vendeur_email}</span>
+                </div>
+                <span className="text-xs text-slate-400">
+                  {format(new Date(ticket.created_date), "d MMM", { locale: fr })}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Détail du ticket */}
+        {ticketSelectionne ? (
+          <div className="bg-white rounded-xl border border-slate-200 p-5 space-y-4 sticky top-4 self-start">
+            <div>
+              <div className="flex items-center gap-2 mb-2 flex-wrap">
+                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${STATUTS[ticketSelectionne.statut]?.color}`}>
+                  {STATUTS[ticketSelectionne.statut]?.label}
+                </span>
+                <span className="text-[10px] text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
+                  {CATEGORIES[ticketSelectionne.categorie]}
+                </span>
+              </div>
+              <h3 className="font-bold text-slate-900 text-base mb-1">{ticketSelectionne.sujet}</h3>
+              <div className="flex items-center gap-1.5 text-xs text-slate-500">
+                <User className="w-3 h-3" />
+                <span>{ticketSelectionne.vendeur_nom} — {ticketSelectionne.vendeur_email}</span>
+              </div>
+              <p className="text-xs text-slate-400 mt-0.5">
+                {format(new Date(ticketSelectionne.created_date), "d MMMM yyyy à HH:mm", { locale: fr })}
+              </p>
+            </div>
+
+            <div className="bg-slate-50 rounded-xl p-4">
+              <p className="text-xs text-slate-500 font-medium mb-2">Message du vendeur</p>
+              <p className="text-sm text-slate-700 whitespace-pre-line">{ticketSelectionne.message}</p>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-xs font-medium text-slate-700">Votre réponse</label>
+              <Textarea value={reponse} onChange={e => setReponse(e.target.value)} rows={4} placeholder="Rédigez votre réponse..." />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-xs font-medium text-slate-700">Statut</label>
+              <Select value={nouveauStatut} onValueChange={setNouveauStatut}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(STATUTS).map(([k, v]) => <SelectItem key={k} value={k}>{v.label}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <Button onClick={envoyerReponse} disabled={enCours || !reponse.trim()} className="w-full bg-[#1a1f5e] hover:bg-[#141952]">
+              {enCours ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <MessageSquare className="w-4 h-4 mr-2" />}
+              Envoyer la réponse
+            </Button>
+          </div>
+        ) : (
+          <div className="hidden lg:flex items-center justify-center bg-slate-50 rounded-xl border border-dashed border-slate-200 p-12 text-slate-400">
+            <div className="text-center">
+              <MessageSquare className="w-10 h-10 mx-auto mb-2 opacity-40" />
+              <p className="text-sm">Sélectionnez un ticket</p>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
