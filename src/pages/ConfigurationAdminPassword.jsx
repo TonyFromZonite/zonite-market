@@ -119,27 +119,36 @@ export default function ConfigurationAdminPassword() {
         <h1 className="text-2xl font-bold text-slate-900 mb-2">Sécurité Admin</h1>
         <p className="text-slate-500 text-sm mb-6">Gérez votre mot de passe pour l'accès mobile et web.</p>
 
-        <form onSubmit={changerMotDePasse} className="space-y-5">
-          {/* Mot de passe actuel */}
-          <div>
-            <label className="text-slate-700 font-medium text-sm block mb-2">Mot de passe actuel</label>
-            <div className="relative">
-              <Input
-                type={mdpVisible.actuel ? "text" : "password"}
-                value={mdpActuel}
-                onChange={(e) => setMdpActuel(e.target.value)}
-                placeholder="••••••••"
-                className="bg-slate-50 border border-slate-300 pr-10"
-              />
-              <button
-                type="button"
-                onClick={() => setMdpVisible({ ...mdpVisible, actuel: !mdpVisible.actuel })}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-              >
-                {mdpVisible.actuel ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
-            </div>
+        {!adminMdpHash && (
+          <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 mb-6">
+            <p className="text-amber-800 text-sm font-medium">⚠️ Aucun mot de passe configuré</p>
+            <p className="text-amber-700 text-xs mt-1">Créez un mot de passe initial pour sécuriser l'accès admin.</p>
           </div>
+        )}
+
+        <form onSubmit={changerMotDePasse} className="space-y-5">
+          {/* Mot de passe actuel - visible uniquement si un mot de passe existe */}
+          {adminMdpHash && (
+            <div>
+              <label className="text-slate-700 font-medium text-sm block mb-2">Mot de passe actuel</label>
+              <div className="relative">
+                <Input
+                  type={mdpVisible.actuel ? "text" : "password"}
+                  value={mdpActuel}
+                  onChange={(e) => setMdpActuel(e.target.value)}
+                  placeholder="••••••••"
+                  className="bg-slate-50 border border-slate-300 pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setMdpVisible({ ...mdpVisible, actuel: !mdpVisible.actuel })}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                >
+                  {mdpVisible.actuel ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Nouveau mot de passe */}
           <div>
