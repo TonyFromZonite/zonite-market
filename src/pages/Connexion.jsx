@@ -245,8 +245,8 @@ export default function Connexion() {
                 <button onClick={() => { setModeMdpOublie(true); setErreur(""); }} className="text-slate-400 text-xs hover:text-[#F5C518] transition-colors underline underline-offset-2">
                   Mot de passe oublié ?
                 </button>
-                <a href={createPageUrl("Candidature")} className="text-[#F5C518] text-xs font-semibold hover:underline">
-                  Devenir vendeur →
+                <a href={createPageUrl("InscriptionVendeur")} className="text-[#F5C518] text-xs font-semibold hover:underline">
+                  Créer mon compte →
                 </a>
               </div>
             </div>
