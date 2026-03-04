@@ -152,7 +152,9 @@ export default function ConfigurationAdminPassword() {
 
           {/* Nouveau mot de passe */}
           <div>
-            <label className="text-slate-700 font-medium text-sm block mb-2">Nouveau mot de passe</label>
+            <label className="text-slate-700 font-medium text-sm block mb-2">
+              {adminMdpHash ? "Nouveau mot de passe" : "Créer un mot de passe"}
+            </label>
             <div className="relative">
               <Input
                 type={mdpVisible.nouveau ? "text" : "password"}
@@ -169,7 +171,22 @@ export default function ConfigurationAdminPassword() {
                 {mdpVisible.nouveau ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
-            <p className="text-slate-400 text-xs mt-1">Minimum 6 caractères</p>
+            <div className="flex items-center justify-between mt-2">
+              <p className="text-slate-400 text-xs">Minimum 6 caractères</p>
+              {!adminMdpHash && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const generated = genererMotDePasse();
+                    setMdpNouveau(generated);
+                    setMdpConfirm(generated);
+                  }}
+                  className="text-[#1a1f5e] text-xs font-semibold hover:underline"
+                >
+                  Générer →
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Confirmer mot de passe */}
