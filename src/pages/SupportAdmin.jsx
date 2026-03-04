@@ -37,9 +37,12 @@ export default function SupportAdmin() {
   const [nouveauStatut, setNouveauStatut] = useState("");
   const [enCours, setEnCours] = useState(false);
   // FAQ state
-  const [faqEdit, setFaqEdit] = useState(null); // null | "new" | {id, question, reponse}
+  const [faqEdit, setFaqEdit] = useState(null);
   const [faqForm, setFaqForm] = useState({ question: "", reponse: "" });
   const [faqEnCours, setFaqEnCours] = useState(false);
+  // Notifications state
+  const [notifFiltreType, setNotifFiltreType] = useState("tous");
+  const [notifFiltreVendeur, setNotifFiltreVendeur] = useState("");
   const queryClient = useQueryClient();
 
   const { data: faqItems = [], isLoading: faqLoading } = useQuery({
