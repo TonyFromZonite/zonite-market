@@ -185,7 +185,7 @@ function DashboardAdmin() {
     return d === aujourdhui;
   }).length;
 
-  const topProduit = [...(produits || [])].sort((a, b) => (b.total_vendu || 0) - (a.total_vendu || 0))[0];
+  const topProduit = [...(produits || [])].sort((a, b) => (b.total_vendu || 0) - (a.total_vendu || 0))[0] || {};
   const commandesVendeursAujourdhui = (commandesVendeurs || []).filter(c => c.created_date?.split("T")[0] === aujourdhui).length;
   const commissionsVendeursAPayer = (paiementsEnAttente || []).reduce((s, p) => s + (p.montant || 0), 0);
 
