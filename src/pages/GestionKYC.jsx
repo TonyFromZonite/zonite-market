@@ -27,11 +27,39 @@ export default function GestionKYC() {
 
   const validerKYC = async (statut) => {
     setEnCours(true);
+
     await base44.entities.CompteVendeur.update(compteSelectionne.id, {
       statut_kyc: statut,
       notes_admin: notes,
       statut: statut === "valide" ? "actif" : "suspendu",
     });
+
+    // Si validé, créer automatiquement le vendeur dans l'entité Vendeur (si pas déjà existant)
+    if (statut === "valide") {
+      const vendeurs = await base44.entities.Vendeur.list();
+      const dejaExistant = vendeurs.find(v => v.email === compteSelectionne.user_email);
+      if (!dejaExistant) {
+        await base44.entities.Vendeur.create({
+          nom_complet: compteSelectionne.nom_complet,
+          email: compteSelectionne.user_email,
+          telephone: compteSelectionne.telephone,
+          statut: "actif",
+          date_embauche: new Date().toISOString().split("T")[0],
+          solde_commission: 0,
+          total_commissions_gagnees: 0,
+          total_commissions_payees: 0,
+          nombre_ventes: 0,
+          chiffre_affaires_genere: 0,
+        });
+        await base44.entities.JournalAudit.create({
+          action: "Nouveau vendeur créé automatiquement",
+          module: "vendeur",
+          details: `Vendeur ${compteSelectionne.nom_complet} (${compteSelectionne.user_email}) créé suite à la validation KYC`,
+          entite_id: compteSelectionne.id,
+        });
+      }
+    }
+
     await base44.entities.NotificationVendeur.create({
       vendeur_email: compteSelectionne.user_email,
       titre: statut === "valide" ? "Compte validé !" : "Dossier rejeté",
@@ -40,7 +68,9 @@ export default function GestionKYC() {
         : `Votre dossier a été rejeté. ${notes || "Contactez notre équipe pour plus d'informations."}`,
       type: statut === "valide" ? "succes" : "alerte",
     });
+
     queryClient.invalidateQueries({ queryKey: ["comptes_vendeurs"] });
+    queryClient.invalidateQueries({ queryKey: ["vendeurs"] });
     setCompteSelectionne(null);
     setEnCours(false);
   };
