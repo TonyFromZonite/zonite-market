@@ -82,16 +82,24 @@ export default function Layout({ children, currentPageName }) {
   const deconnexion = () => {
     sessionStorage.removeItem("sous_admin");
     sessionStorage.removeItem("admin_session");
+    sessionStorage.removeItem("vendeur_session");
     base44.auth.logout();
   };
 
   const deconnexionSousAdmin = () => {
     sessionStorage.removeItem("sous_admin");
+    sessionStorage.removeItem("vendeur_session");
     window.location.href = createPageUrl("Connexion");
   };
 
   const deconnexionAdmin = () => {
     sessionStorage.removeItem("admin_session");
+    sessionStorage.removeItem("vendeur_session");
+    window.location.href = createPageUrl("Connexion");
+  };
+
+  const deconnexionVendeur = () => {
+    sessionStorage.removeItem("vendeur_session");
     window.location.href = createPageUrl("Connexion");
   };
 
