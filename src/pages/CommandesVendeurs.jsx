@@ -183,6 +183,38 @@ export default function CommandesVendeurs() {
     setCommandeSelectionnee(null);
   };
 
+  const enregistrerRetour = async () => {
+    setEnCours(true);
+    await base44.entities.RetourProduit.create({
+      commande_id: commandeSelectionnee.id,
+      vendeur_id: commandeSelectionnee.vendeur_id,
+      vendeur_nom: commandeSelectionnee.vendeur_nom,
+      vendeur_email: commandeSelectionnee.vendeur_email,
+      produit_id: commandeSelectionnee.produit_id,
+      produit_nom: commandeSelectionnee.produit_nom,
+      quantite_retournee: parseInt(retourForm.quantite) || 1,
+      raison: retourForm.raison,
+      raison_detail: retourForm.raison_detail,
+      statut: "en_attente",
+    });
+    await base44.entities.NotificationVendeur.create({
+      vendeur_email: commandeSelectionnee.vendeur_email,
+      titre: "Retour enregistré",
+      message: `Un retour de ${retourForm.quantite}x ${commandeSelectionnee.produit_nom} a été enregistré et est en cours de traitement.`,
+      type: "alerte",
+    });
+    await base44.entities.JournalAudit.create({
+      action: "Retour produit enregistré",
+      module: "commande",
+      details: `Retour de ${retourForm.quantite}x ${commandeSelectionnee.produit_nom} — Raison: ${retourForm.raison}`,
+      entite_id: commandeSelectionnee.id,
+    });
+    setModalRetour(false);
+    setEnCours(false);
+    setCommandeSelectionnee(null);
+    navigate(createPageUrl("RetoursAdmin"));
+  };
+
   const annulerCommande = async () => {
     setEnCours(true);
     // Restituer le stock si la commande était encore en cours (pas livrée)
