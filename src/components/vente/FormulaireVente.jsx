@@ -72,7 +72,7 @@ export default function FormulaireVente({ produits, vendeurs, livraisons, onSubm
     if (!qte || qte <= 0) return setErreur("La quantité doit être positive");
     if (!prixUnit || prixUnit <= 0) return setErreur("Le prix unitaire doit être positif");
     if (produitSelectionne && prixUnit < prixGros) {
-      return setErreur(`Le prix de vente (${prixUnit} DA) doit être ≥ au prix de gros (${prixGros} DA)`);
+      return setErreur(`Le prix de vente (${prixUnit} FCFA) doit être ≥ au prix de gros (${prixGros} FCFA)`);
     }
     if (produitSelectionne && qte > (produitSelectionne.stock_global || 0)) {
       return setErreur(`Stock insuffisant (${produitSelectionne.stock_global || 0} disponibles)`);
