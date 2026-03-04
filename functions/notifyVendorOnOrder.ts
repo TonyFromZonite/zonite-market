@@ -57,11 +57,17 @@ Deno.serve(async (req) => {
         annulee: "Votre commande a été annulée.",
       };
 
-      await base44.integrations.Core.SendEmail({
-        to: data.vendeur_email,
-        subject: `📦 Mise à jour commande - ${data.produit_nom}`,
-        body: `Bonjour,\n\n${messages[data.statut] || "Votre commande a été mise à jour."}\n\nDétails:\n- Produit: ${data.produit_nom}\n- Quantité: ${data.quantite}\n- Client: ${data.client_nom}\n\nCordialement,\nL'équipe ZONITE`,
-      });
+      // Envoyer email (non-bloquante - catch errors)
+      try {
+        await base44.integrations.Core.SendEmail({
+          to: data.vendeur_email,
+          subject: `📦 Mise à jour commande - ${data.produit_nom}`,
+          body: `Bonjour,\n\n${messages[data.statut] || "Votre commande a été mise à jour."}\n\nDétails:\n- Produit: ${data.produit_nom}\n- Quantité: ${data.quantite}\n- Client: ${data.client_nom}\n\nCordialement,\nL'équipe ZONITE`,
+        });
+      } catch (emailErr) {
+        console.error('Email send failed (non-blocking):', emailErr.message);
+        // Notification in-app est créée, email échoué ok
+      }
     }
 
     return Response.json({ success: true });

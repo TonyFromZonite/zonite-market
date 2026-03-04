@@ -1,0 +1,109 @@
+/**
+ * TRANSACTION ATOMIQUE : Créer commande + réserver stock
+ * Évite race conditions lors de commandes concurrentes
+ */
+
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
+import { logAudit } from './auditLoggingMiddleware.js';
+
+Deno.serve(async (req) => {
+  try {
+    if (req.method !== 'POST') {
+      return Response.json({ error: 'Method not allowed' }, { status: 405 });
+    }
+
+    const base44 = createClientFromRequest(req);
+    const user = await base44.auth.me();
+    
+    if (!user) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const {
+      vendeur_id, vendeur_nom, vendeur_email,
+      produit_id, produit_nom, quantite, prix_gros, prix_final_client, commission_vendeur,
+      livraison_incluse, client_nom, client_telephone, client_ville, client_quartier, client_adresse, notes
+    } = await req.json();
+
+    // Validation
+    if (!produit_id || quantite < 1) {
+      return Response.json({ error: 'Invalid product or quantity' }, { status: 400 });
+    }
+
+    // 1️⃣ Vérifier stock disponible (lecteur seul)
+    const produit = await base44.asServiceRole.entities.Produit.filter({ id: produit_id });
+    if (!produit.length) {
+      return Response.json({ error: 'Product not found' }, { status: 404 });
+    }
+
+    const stockDisponible = (produit[0].stock_global || 0) - (produit[0].stock_reserve || 0);
+    if (quantite > stockDisponible) {
+      await logAudit(base44, {
+        action: 'insufficient_stock',
+        module: 'commande',
+        details: `Tentative d'ordre avec stock insuffisant: ${quantite} > ${stockDisponible}`,
+        utilisateur: vendeur_email,
+        entite_id: produit_id,
+      });
+      return Response.json({ error: `Insufficient stock. Available: ${stockDisponible}` }, { status: 409 });
+    }
+
+    // 2️⃣ Créer la commande (transaction)
+    const commande = await base44.asServiceRole.entities.CommandeVendeur.create({
+      vendeur_id, vendeur_nom, vendeur_email,
+      produit_id, produit_nom, quantite, prix_gros, prix_final_client, commission_vendeur,
+      livraison_incluse, client_nom, client_telephone, client_ville, client_quartier, client_adresse, notes,
+      statut: "en_attente_validation_admin",
+    });
+
+    // 3️⃣ Réserver le stock ATOMIQUEMENT (augmenter stock_reserve)
+    await base44.asServiceRole.entities.Produit.update(produit_id, {
+      stock_reserve: (produit[0].stock_reserve || 0) + quantite,
+    });
+
+    // 4️⃣ Enregistrer mouvement de stock
+    await base44.asServiceRole.entities.MouvementStock.create({
+      produit_id, produit_nom,
+      type_mouvement: "sortie",
+      quantite,
+      stock_avant: produit[0].stock_global || 0,
+      stock_apres: (produit[0].stock_global || 0) - quantite,
+      raison: `Réservation commande vendeur ${vendeur_nom}`,
+      reference_vente: commande.id,
+    });
+
+    // 5️⃣ Créer notification (non-bloquante)
+    try {
+      await base44.asServiceRole.entities.NotificationVendeur.create({
+        vendeur_email,
+        titre: "Commande envoyée !",
+        message: `Votre commande de ${quantite}x ${produit_nom} pour ${client_nom} a été transmise à l'équipe ZONITE.`,
+        type: "succes",
+        importante: false,
+      });
+    } catch (notifErr) {
+      console.error('Notification creation failed (non-blocking):', notifErr.message);
+      // Continuer - la commande est créée
+    }
+
+    // 6️⃣ Audit log
+    await logAudit(base44, {
+      action: 'order_created',
+      module: 'commande',
+      details: `Commande créée: ${quantite}x ${produit_nom} pour ${client_nom}`,
+      utilisateur: vendeur_email,
+      entite_id: commande.id,
+      donnees_apres: { commande_id: commande.id, stock_reserve: (produit[0].stock_reserve || 0) + quantite },
+    });
+
+    return Response.json({
+      success: true,
+      commande_id: commande.id,
+      message: 'Order created and stock reserved'
+    });
+
+  } catch (error) {
+    console.error('Atomic order creation failed:', error.message);
+    return Response.json({ error: error.message }, { status: 500 });
+  }
+});

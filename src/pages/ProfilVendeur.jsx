@@ -71,7 +71,11 @@ export default function ProfilVendeur() {
       if (response.data.success) {
         setSuccesMdp(true);
         setAncienMdp(""); setNouveauMdp(""); setConfirmerMdp("");
-        setTimeout(() => { setSuccesMdp(false); setOuvrirChangeMdp(false); }, 2500);
+        // Invalider session et rediriger après 2s
+        setTimeout(() => {
+          sessionStorage.removeItem("vendeur_session");
+          window.location.href = createPageUrl("Connexion");
+        }, 2500);
       } else {
         setErreurMdp(response.data.error || "Erreur lors du changement de mot de passe.");
       }
@@ -147,20 +151,25 @@ export default function ProfilVendeur() {
         </div>
 
         {/* Statut KYC */}
-        <div className="bg-white rounded-2xl p-4 shadow-sm">
+        <div className={`rounded-2xl p-4 shadow-sm ${compteVendeur?.statut_kyc === "rejete" ? "bg-red-50 border border-red-200" : "bg-white"}`}>
           <h2 className="font-semibold text-slate-900 mb-2 text-sm">Statut du compte</h2>
           <div className="space-y-2 text-sm">
             {[
-              { label: "KYC", val: compteVendeur?.statut_kyc === "valide" ? "✓ Validé" : "En attente", ok: compteVendeur?.statut_kyc === "valide" },
+              { label: "KYC", val: compteVendeur?.statut_kyc === "valide" ? "✓ Validé" : compteVendeur?.statut_kyc === "rejete" ? "✗ Rejeté" : "En attente", ok: compteVendeur?.statut_kyc === "valide" },
               { label: "Formation", val: compteVendeur?.video_vue ? "✓ Complétée" : "Non complétée", ok: compteVendeur?.video_vue },
               { label: "Catalogue", val: compteVendeur?.catalogue_debloque ? "✓ Débloqué" : "Verrouillé", ok: compteVendeur?.catalogue_debloque },
             ].map(({ label, val, ok }) => (
               <div key={label} className="flex items-center justify-between">
                 <span className="text-slate-500">{label}</span>
-                <span className={`font-medium ${ok ? "text-emerald-600" : "text-yellow-600"}`}>{val}</span>
+                <span className={`font-medium ${ok ? "text-emerald-600" : label === "KYC" && compteVendeur?.statut_kyc === "rejete" ? "text-red-600" : "text-yellow-600"}`}>{val}</span>
               </div>
             ))}
           </div>
+          {compteVendeur?.statut_kyc === "rejete" && (
+            <div className="mt-3 p-2 bg-red-100 rounded text-xs text-red-700">
+              {compteVendeur?.notes_admin || "Votre dossier KYC a été rejeté. Contactez le support."}
+            </div>
+          )}
         </div>
 
         {/* Changer mot de passe */}

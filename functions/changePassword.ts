@@ -75,11 +75,12 @@ Deno.serve(async (req) => {
         utilisateur: user.email,
       });
 
-      return Response.json({ success: true, message: 'Password changed successfully' });
+      return Response.json({ success: true, message: 'Password changed successfully', redirect: true });
     }
 
     return Response.json({ error: 'Unauthorized' }, { status: 403 });
   } catch (error) {
+    console.error('Password change error:', error.message);
     return Response.json({ error: error.message }, { status: 500 });
   }
 });
