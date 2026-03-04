@@ -14,11 +14,19 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Email, password, and userType are required' }, { status: 400 });
     }
 
+    // Unified login for all user types
+    const users = await base44.asServiceRole.entities.User.filter({ email });
+    if (users.length === 0) {
+      return Response.json({ error: 'Account not found' }, { status: 401 });
+    }
+
+    const user = users[0];
+
     // Vendeur login
-    if (userType === 'vendeur') {
+    if (userType === 'vendeur' && user.role === 'vendeur') {
       const comptes = await base44.asServiceRole.entities.CompteVendeur.filter({ user_email: email });
       if (comptes.length === 0) {
-        return Response.json({ error: 'Account not found' }, { status: 401 });
+        return Response.json({ error: 'Vendor account not found' }, { status: 401 });
       }
 
       const compte = comptes[0];
@@ -42,41 +50,39 @@ Deno.serve(async (req) => {
 
       return Response.json({
         success: true,
-        session: { email: compte.user_email, id: compte.id, type: 'vendeur' }
+        session: { email, id: user.id, role: 'vendeur', type: 'vendeur' }
       });
     }
 
     // Admin and SousAdmin login
-    if (userType === 'admin') {
-      // Try admin first
-      const configs = await base44.asServiceRole.entities.ConfigApp.filter({ cle: 'admin_password_hash' });
-      if (configs.length > 0 && (email === 'admin' || email === 'administrateur')) {
-        const adminHash = configs[0].valeur;
-        const passwordMatch = await bcrypt.compare(password, adminHash);
-        if (passwordMatch) {
-          return Response.json({
-            success: true,
-            session: { role: 'admin', type: 'admin', loggedAt: new Date().toISOString() }
-          });
-        }
+    if (userType === 'admin' && (user.role === 'admin' || user.role === 'sous_admin')) {
+      // Get password hash from CompteVendeur or SousAdmin (legacy) or User (new)
+      let passwordHash = null;
+
+      if (user.role === 'admin') {
+        const configs = await base44.asServiceRole.entities.ConfigApp.filter({ cle: 'admin_password_hash' });
+        if (configs.length > 0) passwordHash = configs[0].valeur;
+      } else if (user.role === 'sous_admin') {
+        const sousAdmins = await base44.asServiceRole.entities.SousAdmin.filter({ email, statut: 'actif' });
+        if (sousAdmins.length > 0) passwordHash = sousAdmins[0].mot_de_passe_hash;
       }
 
-      // Try SousAdmin
-      const sousAdmins = await base44.asServiceRole.entities.SousAdmin.filter({ statut: 'actif' });
-      const sousAdmin = sousAdmins.find(sa => (sa.username === email || sa.email === email));
-      
-      if (sousAdmin) {
-        const passwordMatch = await bcrypt.compare(password, sousAdmin.mot_de_passe_hash);
-        if (passwordMatch) {
-          return Response.json({
-            success: true,
-            session: sousAdmin
-          });
-        }
+      if (!passwordHash) {
+        return Response.json({ error: 'Invalid credentials' }, { status: 401 });
       }
 
-      return Response.json({ error: 'Invalid credentials' }, { status: 401 });
+      const passwordMatch = await bcrypt.compare(password, passwordHash);
+      if (!passwordMatch) {
+        return Response.json({ error: 'Invalid password' }, { status: 401 });
+      }
+
+      return Response.json({
+        success: true,
+        session: { email, id: user.id, role: user.role, permissions: user.permissions || [], type: 'admin' }
+      });
     }
+
+    return Response.json({ error: 'Invalid credentials or role mismatch' }, { status: 401 });
 
     return Response.json({ error: 'Invalid userType' }, { status: 400 });
   } catch (error) {
