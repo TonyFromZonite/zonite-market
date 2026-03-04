@@ -84,7 +84,6 @@ Deno.serve(async (req) => {
 
     return Response.json({ error: 'Invalid credentials or role mismatch' }, { status: 401 });
 
-    return Response.json({ error: 'Invalid userType' }, { status: 400 });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }
