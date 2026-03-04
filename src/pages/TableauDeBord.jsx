@@ -202,23 +202,23 @@ function DashboardAdmin() {
   return (
     <div className="space-y-6">
       {/* Alertes */}
-      {(candidaturesEnAttente.length > 0 || kycEnAttente.length > 0 || paiementsEnAttente.length > 0) && (
+      {(candidaturesArray.length > 0 || kycArray.length > 0 || paiementsArray.length > 0) && (
         <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
           <p className="font-semibold text-yellow-800 text-sm mb-2">⚠️ Actions requises</p>
           <div className="flex flex-wrap gap-2">
-            {candidaturesEnAttente.length > 0 && (
+            {candidaturesArray.length > 0 && (
               <Link to={createPageUrl("Vendeurs")} className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full font-medium hover:bg-yellow-200">
-                {candidaturesEnAttente.length} candidature{candidaturesEnAttente.length > 1 ? "s" : ""} en attente
+                {candidaturesArray.length} candidature{candidaturesArray.length > 1 ? "s" : ""} en attente
               </Link>
             )}
-            {kycEnAttente.length > 0 && (
+            {kycArray.length > 0 && (
               <Link to={createPageUrl("Vendeurs")} className="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded-full font-medium hover:bg-orange-200">
-                {kycEnAttente.length} KYC à valider
+                {kycArray.length} KYC à valider
               </Link>
             )}
-            {paiementsEnAttente.length > 0 && (
+            {paiementsArray.length > 0 && (
               <Link to={createPageUrl("Vendeurs")} className="text-xs bg-red-100 text-red-800 px-2 py-1 rounded-full font-medium hover:bg-red-200">
-                {paiementsEnAttente.length} paiement{paiementsEnAttente.length > 1 ? "s" : ""} en attente ({formaterMontant(commissionsVendeursAPayer)})
+                {paiementsArray.length} paiement{paiementsArray.length > 1 ? "s" : ""} en attente ({formaterMontant(commissionsVendeursAPayer)})
               </Link>
             )}
           </div>
@@ -241,20 +241,20 @@ function DashboardAdmin() {
         <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">Application Vendeurs</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <CarteStatistique titre="Commandes Vendeurs Aujourd'hui" valeur={commandesVendeursAujourdhui} icone={ShoppingCart} couleur="indigo" />
-          <CarteStatistique titre="Total Commandes Vendeurs" valeur={commandesVendeurs.length} icone={Package} couleur="jaune" />
+          <CarteStatistique titre="Total Commandes Vendeurs" valeur={commandesArray.length} icone={Package} couleur="jaune" />
           <CarteStatistique titre="Stock Critique" valeur={stockCritique} icone={AlertTriangle} couleur={stockCritique > 0 ? "rouge" : "vert"} />
           <CarteStatistique titre="Top Produit" valeur={topProduit?.nom || "—"} icone={Package} couleur="bleu" />
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <GraphiqueVentes ventes={ventes} />
-        <StockCritique produits={produits} />
+        <GraphiqueVentes ventes={ventesArray} />
+        <StockCritique produits={produitsArray} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <TopProduits produits={produits} />
-        <TopVendeurs vendeurs={vendeurs} />
+        <TopProduits produits={produitsArray} />
+        <TopVendeurs vendeurs={vendeursArray} />
       </div>
     </div>
   );
