@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useCachedQuery } from "@/components/CacheManager";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -58,29 +59,25 @@ export default function EspaceVendeur() {
     charger();
   }, []);
 
-  const { data: commandes = [] } = useQuery({
-    queryKey: ["commandes_vendeur", compteVendeur?.id],
-    queryFn: () => base44.entities.CommandeVendeur.filter({ vendeur_id: compteVendeur.id }, "-created_date", 50),
-    enabled: !!compteVendeur?.id,
-    refetchInterval: 30000, // rafraîchissement toutes les 30s
-  });
+  const { data: commandes = [] } = useCachedQuery(
+    'COMMANDES',
+    () => base44.entities.CommandeVendeur.filter({ vendeur_id: compteVendeur.id }, "-created_date", 50),
+    { ttl: 5 * 60 * 1000, enabled: !!compteVendeur?.id }
+  );
 
-  // Recharger le compte vendeur pour avoir le solde à jour
-  const { data: compteActualise } = useQuery({
-    queryKey: ["compte_vendeur_solde", compteVendeur?.id],
-    queryFn: () => base44.entities.CompteVendeur.filter({ id: compteVendeur.id }),
-    enabled: !!compteVendeur?.id,
-    refetchInterval: 30000,
-    select: (data) => data[0] || compteVendeur,
-  });
+  const { data: compteActualise } = useCachedQuery(
+    'COMPTE_VENDEUR',
+    () => base44.entities.CompteVendeur.filter({ id: compteVendeur.id }),
+    { ttl: 3 * 60 * 1000, enabled: !!compteVendeur?.id }
+  );
 
-  const soldeAffiche = compteActualise || compteVendeur;
+  const soldeAffiche = compteActualise?.[0] || compteVendeur;
 
-  const { data: notifications = [] } = useQuery({
-    queryKey: ["notifs_vendeur", utilisateur?.email],
-    queryFn: () => base44.entities.NotificationVendeur.filter({ vendeur_email: utilisateur.email }, "-created_date", 10),
-    enabled: !!utilisateur?.email,
-  });
+  const { data: notifications = [] } = useCachedQuery(
+    'NOTIFICATIONS',
+    () => base44.entities.NotificationVendeur.filter({ vendeur_email: utilisateur.email }, "-created_date", 10),
+    { ttl: 2 * 60 * 1000, enabled: !!utilisateur?.email }
+  );
 
   const formater = (n) => `${Math.round(n || 0).toLocaleString("fr-FR")} FCFA`;
 
