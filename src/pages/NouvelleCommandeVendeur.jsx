@@ -197,10 +197,7 @@ export default function NouvelleCommandeVendeur() {
             </div>
           )}
 
-          <label className="flex items-center gap-3 cursor-pointer">
-            <input type="checkbox" checked={form.livraison_incluse} onChange={e => modifier("livraison_incluse", e.target.checked)} className="w-4 h-4" />
-            <span className="text-sm text-slate-700">Livraison incluse dans le prix</span>
-          </label>
+
         </div>
 
         {/* Client */}
