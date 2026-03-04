@@ -6,10 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Plus, Search, Pencil, Trash2, Package, Loader2, MapPin, ImagePlus, X, Layers } from "lucide-react";
+import { Plus, Search, Pencil, Trash2, Package, Loader2, MapPin, ImagePlus, X, Layers, Tag, RotateCcw, PackageCheck, XCircle } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const initProduit = {
