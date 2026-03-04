@@ -86,9 +86,9 @@ export default function VideoFormation() {
                     src={videoUrl}
                     title="Formation ZONITE"
                     frameBorder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    style={{ aspectRatio: '16 / 9' }}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                    allowFullScreen={true}
+                    style={{ aspectRatio: '16 / 9', border: 'none' }}
                   />
                 </div>
               ) : (
