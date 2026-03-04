@@ -369,10 +369,8 @@ export default function CommandesVendeurs() {
           )}
         </DialogContent>
       </Dialog>
-    </div>
-
-    {/* Modal Retour */}
-    <Dialog open={modalRetour} onOpenChange={setModalRetour}>
+      {/* Modal Retour */}
+      <Dialog open={modalRetour} onOpenChange={setModalRetour}>
       <DialogContent className="max-w-sm">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
