@@ -346,7 +346,7 @@ export default function SupportAdmin() {
             </div>
           </div>
         )}
-      </div>}
+      </div></div>}
     </div>
   );
 }
