@@ -24,7 +24,6 @@ const menuItems = [
   { nom: "Produits",             page: "Produits",             icone: Package },
   { nom: "Vendeurs",             page: "Vendeurs",             icone: Users },
   { nom: "Livraisons",           page: "Livraisons",           icone: Truck },
-  { nom: "Retours Produits",     page: "RetoursAdmin",         icone: RotateCcw },
   { nom: "Rapports Ventes",      page: "RapportsVentes",       icone: TrendingUp },
   { nom: "Support Vendeurs",     page: "SupportAdmin",         icone: MessageSquare },
   { nom: "Journal d'Audit",      page: "JournalAudit",         icone: Shield },
