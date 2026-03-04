@@ -71,6 +71,8 @@ export default function Connexion() {
       if (response.data.success) {
         sessionStorage.setItem("vendeur_session", JSON.stringify(response.data.session));
         window.location.href = createPageUrl("EspaceVendeur");
+      } else if (response.data.pendingApproval) {
+        window.location.href = createPageUrl("EnAttenteValidation");
       } else {
         setErreur("Erreur lors de la connexion. Réessayez.");
       }
