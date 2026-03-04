@@ -72,26 +72,26 @@ export default function VentesVendeurTab() {
   return (
     <div className="space-y-5">
       {/* Filtres */}
-      <div className="flex flex-wrap gap-3 items-center">
-        <div className="flex gap-1.5 flex-wrap">
+      <div className="flex flex-col md:flex-row flex-wrap gap-2 md:gap-3 items-start md:items-center">
+        <div className="flex gap-1 md:gap-1.5 flex-wrap">
           {PERIODES.map(p => (
             <button key={p.valeur}
               onClick={() => setPeriodeJours(p.valeur)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${periodeJours === p.valeur ? "bg-[#1a1f5e] text-white" : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"}`}>
+              className={`px-2 md:px-3 py-1.5 rounded-lg text-[10px] md:text-xs font-medium transition-colors ${periodeJours === p.valeur ? "bg-[#1a1f5e] text-white" : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"}`}>
               {p.label}
             </button>
           ))}
         </div>
         <Select value={filtreVendeur} onValueChange={setFiltreVendeur}>
-          <SelectTrigger className="w-48 h-9 text-sm"><SelectValue placeholder="Tous les vendeurs" /></SelectTrigger>
+          <SelectTrigger className="w-full md:w-48 h-9 text-xs md:text-sm"><SelectValue placeholder="Tous les vendeurs" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="tous">Tous les vendeurs</SelectItem>
             {vendeurs.map(v => <SelectItem key={v.id} value={v.id}>{v.nom}</SelectItem>)}
           </SelectContent>
         </Select>
-        <div className="relative flex-1 min-w-[180px]">
+        <div className="relative flex-1 w-full md:w-auto min-w-0 md:min-w-[180px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
-          <Input value={recherche} onChange={e => setRecherche(e.target.value)} placeholder="Rechercher..." className="pl-8 h-9 text-sm" />
+          <Input value={recherche} onChange={e => setRecherche(e.target.value)} placeholder="Rechercher..." className="pl-8 h-9 text-xs md:text-sm w-full" />
         </div>
       </div>
 
