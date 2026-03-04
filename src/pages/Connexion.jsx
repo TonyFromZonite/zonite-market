@@ -209,7 +209,7 @@ export default function Connexion() {
           {/* MODE VENDEUR */}
           {mode === MODE_VENDEUR && !modeMdpOublie && (
             <div>
-              <h2 className="text-white font-bold text-lg mb-0.5">Connexion Vendeur</h2>
+              <h2 className="text-white font-bold text-lg md:text-xl mb-0.5">Connexion Vendeur</h2>
               <p className="text-slate-300 text-xs mb-4">Entrez vos identifiants reçus par email.</p>
               <form onSubmit={connexionVendeur} className="space-y-4">
                 <div>
