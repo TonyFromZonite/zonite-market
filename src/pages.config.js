@@ -68,10 +68,11 @@ import PaiementsVendeurs from './pages/PaiementsVendeurs';
 import Produits from './pages/Produits';
 import ProfilVendeur from './pages/ProfilVendeur';
 import RapportsVentes from './pages/RapportsVentes';
+import RetoursAdmin from './pages/RetoursAdmin';
 import TableauDeBord from './pages/TableauDeBord';
 import Vendeurs from './pages/Vendeurs';
 import VideoFormation from './pages/VideoFormation';
-import RetoursAdmin from './pages/RetoursAdmin';
+import AideVendeur from './pages/AideVendeur';
 import __Layout from './Layout.jsx';
 
 
@@ -97,10 +98,11 @@ export const PAGES = {
     "Produits": Produits,
     "ProfilVendeur": ProfilVendeur,
     "RapportsVentes": RapportsVentes,
+    "RetoursAdmin": RetoursAdmin,
     "TableauDeBord": TableauDeBord,
     "Vendeurs": Vendeurs,
     "VideoFormation": VideoFormation,
-    "RetoursAdmin": RetoursAdmin,
+    "AideVendeur": AideVendeur,
 }
 
 export const pagesConfig = {
