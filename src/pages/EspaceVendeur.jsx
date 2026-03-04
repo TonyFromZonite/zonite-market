@@ -32,10 +32,30 @@ export default function EspaceVendeur() {
 
   useEffect(() => {
     const charger = async () => {
-      const u = await base44.auth.me();
-      setUtilisateur(u);
-      const comptes = await base44.entities.CompteVendeur.filter({ user_email: u.email });
-      if (comptes.length > 0) setCompteVendeur(comptes[0]);
+      // Récupérer la session vendeur (email stocké à la connexion)
+      let emailVendeur = null;
+      try {
+        const session = sessionStorage.getItem("vendeur_session");
+        if (session) {
+          const parsed = JSON.parse(session);
+          emailVendeur = parsed.email;
+        }
+      } catch (_) {}
+
+      // Fallback : utilisateur connecté via Base44
+      if (!emailVendeur) {
+        try {
+          const u = await base44.auth.me();
+          if (u?.email) emailVendeur = u.email;
+          setUtilisateur(u);
+        } catch (_) {}
+      }
+
+      if (emailVendeur) {
+        setUtilisateur({ email: emailVendeur });
+        const comptes = await base44.entities.CompteVendeur.filter({ user_email: emailVendeur });
+        if (comptes.length > 0) setCompteVendeur(comptes[0]);
+      }
       setChargement(false);
     };
     charger();
