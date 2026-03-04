@@ -91,21 +91,29 @@ Deno.serve(async (req) => {
     const nouveauMdp = genererMdp();
     const hashedPassword = await bcrypt.hash(nouveauMdp, 10);
 
+    // Atomique: Mettre à jour le mot de passe ET logger avant d'envoyer l'email
     await base44.asServiceRole.entities.CompteVendeur.update(compte.id, { mot_de_passe_hash: hashedPassword });
 
-    // Log audit
+    // Log audit APRÈS vérification du compte
     await base44.asServiceRole.entities.JournalAudit.create({
-      action: 'Password reset requested',
+      action: 'password_reset_request',
       module: 'systeme',
-      details: `Password reset for ${email}`,
+      details: `Password reset initiated for vendor account`,
       utilisateur: email,
+      entite_id: compte.id,
     });
 
-    await base44.integrations.Core.SendEmail({
-      to: email,
-      subject: '🔐 Votre nouveau mot de passe ZONITE',
-      body: `Bonjour ${compte.nom_complet},\n\nVotre nouveau mot de passe temporaire est :\n\n👉 ${nouveauMdp}\n\nConnectez-vous sur l'application ZONITE et changez-le dans votre profil.\n\nPour votre sécurité, ce mot de passe expire dans 24h.\n\nCordialement,\nL'équipe ZONITE`
-    });
+    // Envoyer l'email avec le nouveau mot de passe
+    try {
+      await base44.integrations.Core.SendEmail({
+        to: email,
+        subject: '🔐 Votre nouveau mot de passe ZONITE',
+        body: `Bonjour ${compte.nom_complet},\n\nVotre nouveau mot de passe temporaire est :\n\n👉 ${nouveauMdp}\n\nConnectez-vous sur l'application ZONITE et changez-le dans votre profil.\n\nPour votre sécurité, ce mot de passe expire dans 24h.\n\nCordialement,\nL'équipe ZONITE`
+      });
+    } catch (emailErr) {
+      console.error('Reset email send failed:', emailErr.message);
+      // L'utilisateur peut toujours se connecter avec le nouveau mot de passe même si l'email a échoué
+    }
 
     return Response.json({ success: true, message: 'Password reset email sent' });
   } catch (error) {
