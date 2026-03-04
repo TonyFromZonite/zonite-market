@@ -231,7 +231,7 @@ export default function ConfigurationAdminPassword() {
               disabled={entraitement}
               className="bg-[#1a1f5e] hover:bg-[#141952] text-white font-bold"
             >
-              {entraitement ? "Mise à jour..." : "Changer le mot de passe"}
+              {entraitement ? "Mise à jour..." : (adminMdpHash ? "Changer le mot de passe" : "Créer le mot de passe")}
             </Button>
           </div>
 
