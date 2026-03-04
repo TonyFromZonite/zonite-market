@@ -55,10 +55,47 @@ export default function NotificationBell() {
       } catch (_) {}
     };
 
+    const unsubscribers = [];
+
     if (vendeurSession || sousAdmin || adminSession) {
       chargerNotifications();
-      const interval = setInterval(chargerNotifications, 30000); // Refresh toutes les 30s
-      return () => clearInterval(interval);
+
+      // Subscription temps réel pour les notifications vendeur
+      if (vendeurSession?.email) {
+        const unsub = base44.entities.NotificationVendeur.subscribe((event) => {
+          if (event.type === "create" && event.data?.vendeur_email === vendeurSession.email) {
+            setNotifications(prev => [{ ...event.data, type: "vendeur" }, ...prev]);
+          }
+        });
+        unsubscribers.push(unsub);
+      }
+
+      // Subscription temps réel pour les commandes (admin)
+      if (adminSession || sousAdmin) {
+        const unsub = base44.entities.CommandeVendeur.subscribe((event) => {
+          if (event.type === "create" && event.data?.statut === "en_attente_validation_admin") {
+            const newNotif = {
+              id: event.id,
+              titre: `Nouvelle commande de ${event.data.vendeur_nom}`,
+              message: `${event.data.quantite} × ${event.data.produit_nom}`,
+              type: "commande",
+              created_date: event.data.created_date,
+              lue: false,
+            };
+            setNotifications(prev => [newNotif, ...prev]);
+          } else if (event.type === "update" && event.data?.statut !== "en_attente_validation_admin") {
+            // Retirer la notification si le statut change
+            setNotifications(prev => prev.filter(n => n.id !== event.id));
+          }
+        });
+        unsubscribers.push(unsub);
+      }
+
+      const interval = setInterval(chargerNotifications, 60000); // Refresh toutes les 60s
+      return () => {
+        clearInterval(interval);
+        unsubscribers.forEach(unsub => unsub());
+      };
     }
   }, [vendeurSession, sousAdmin, adminSession]);
 
