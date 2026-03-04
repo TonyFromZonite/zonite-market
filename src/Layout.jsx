@@ -14,7 +14,7 @@ const PAGES_VENDEUR = [
   "EspaceVendeur", "InscriptionVendeur", "VideoFormation", "CatalogueVendeur",
   "NouvelleCommandeVendeur", "MesCommandesVendeur", "ProfilVendeur",
   "DemandePaiement", "NotificationsVendeur", "Candidature", "AideVendeur",
-  "Connexion"
+  "Connexion", "EspaceSousAdmin"
 ];
 
 const TOUS_LES_MENUS = [
