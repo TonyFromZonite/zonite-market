@@ -255,10 +255,16 @@ function DashboardAdmin() {
 
 export default function TableauDeBord() {
   const [sousAdmin] = useState(() => getSousAdminSession());
+  const [adminSession] = useState(() => getAdminSession());
 
   if (sousAdmin) {
     return <DashboardSousAdmin sousAdmin={sousAdmin} />;
   }
 
+  if (adminSession) {
+    return <DashboardAdmin />;
+  }
+
+  // Vérifier si connecté via Base44 auth
   return <DashboardAdmin />;
 }
