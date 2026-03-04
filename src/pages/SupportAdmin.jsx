@@ -176,6 +176,10 @@ export default function SupportAdmin() {
           className={`px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors ${onglet === "faq" ? "border-[#1a1f5e] text-[#1a1f5e]" : "border-transparent text-slate-500 hover:text-slate-700"}`}>
           <HelpCircle className="w-4 h-4 inline mr-1.5" />FAQ ({faqItems.length})
         </button>
+        <button onClick={() => setOnglet("notifications")}
+          className={`px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors ${onglet === "notifications" ? "border-[#1a1f5e] text-[#1a1f5e]" : "border-transparent text-slate-500 hover:text-slate-700"}`}>
+          <Bell className="w-4 h-4 inline mr-1.5" />Notifications
+        </button>
       </div>
 
       {/* Section FAQ */}
