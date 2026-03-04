@@ -491,15 +491,15 @@ export default function RapportsVentes() {
                 <tbody>
                   {topVendeurs.map((l, i) => (
                     <tr key={i} className="border-t border-slate-50 hover:bg-slate-50">
-                      <td className="px-4 py-2.5 font-medium text-slate-800">
-                        <span className="flex items-center gap-2">
-                          <span className={`w-7 h-7 rounded-full text-xs font-bold flex items-center justify-center flex-shrink-0 ${badgeRank(i)}`}>{l.nom.charAt(0).toUpperCase()}</span>
-                          <span className="truncate max-w-[120px]">{l.nom}</span>
+                      <td className="px-2 md:px-4 py-2.5 font-medium text-slate-800">
+                        <span className="flex items-center gap-1.5">
+                          <span className={`w-6 h-6 md:w-7 md:h-7 rounded-full text-[9px] md:text-xs font-bold flex items-center justify-center flex-shrink-0 ${badgeRank(i)}`}>{l.nom.charAt(0).toUpperCase()}</span>
+                          <span className="truncate max-w-[80px] md:max-w-[120px] text-xs md:text-sm">{l.nom}</span>
                         </span>
                       </td>
-                      <td className="px-4 py-2.5 text-right text-slate-600">{l.nb}</td>
-                      <td className="px-4 py-2.5 text-right font-medium text-slate-800">{fmt(l.ca)}</td>
-                      <td className="px-4 py-2.5 text-right font-semibold text-orange-600">{fmt(l.commissions)}</td>
+                      <td className="px-2 md:px-4 py-2.5 text-right text-slate-600 text-xs md:text-sm">{l.nb}</td>
+                      <td className="px-2 md:px-4 py-2.5 text-right font-medium text-slate-800 text-xs md:text-sm">{fmt(l.ca)}</td>
+                      <td className="px-2 md:px-4 py-2.5 text-right font-semibold text-orange-600 text-xs md:text-sm">{fmt(l.commissions)}</td>
                     </tr>
                   ))}
                 </tbody>
