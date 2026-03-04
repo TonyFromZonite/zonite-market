@@ -382,10 +382,10 @@ export default function RapportsVentes() {
       {/* Header + Filtres */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-slate-900">Rapports des Ventes</h2>
-          <p className="text-sm text-slate-500">Analyse détaillée des performances commerciales</p>
+          <h2 className="text-lg md:text-xl font-bold text-slate-900">Rapports des Ventes</h2>
+          <p className="text-xs md:text-sm text-slate-500">Analyse détaillée des performances commerciales</p>
         </div>
-        <div className="flex gap-2 flex-wrap items-center">
+        <div className="flex gap-1.5 md:gap-2 flex-wrap items-center">
           {PERIODES.map(p => (
             <Button key={p.valeur} size="sm" variant={periodeJours === p.valeur ? "default" : "outline"}
               onClick={() => setPeriodeJours(p.valeur)}
