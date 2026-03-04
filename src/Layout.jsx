@@ -71,11 +71,17 @@ export default function Layout({ children, currentPageName }) {
 
   const deconnexion = () => {
     sessionStorage.removeItem("sous_admin");
+    sessionStorage.removeItem("admin_session");
     base44.auth.logout();
   };
 
   const deconnexionSousAdmin = () => {
     sessionStorage.removeItem("sous_admin");
+    window.location.href = createPageUrl("Connexion");
+  };
+
+  const deconnexionAdmin = () => {
+    sessionStorage.removeItem("admin_session");
     window.location.href = createPageUrl("Connexion");
   };
 
