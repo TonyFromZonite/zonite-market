@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from "react";
+// Note: no external PDF libraries used
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Skeleton } from "@/components/ui/skeleton";
