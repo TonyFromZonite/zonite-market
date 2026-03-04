@@ -7,7 +7,6 @@ Deno.serve(async (req) => {
     const { email, full_name } = payload;
 
     // Vérifier que l'appel vient d'une automation enregistrée (seule source fiable)
-    // Les automations Entity ont une structure spécifique: event.type, event.entity_name, event.entity_id
     const isValidAutomation = payload.event && 
       typeof payload.event === 'object' && 
       payload.event.type && 
@@ -22,9 +21,13 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Email and full_name are required' }, { status: 400 });
     }
 
-    // Valider email format
-    if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+    // Sanitization stricte
+    if (typeof email !== 'string' || !email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
       return Response.json({ error: 'Invalid email format' }, { status: 400 });
+    }
+
+    if (typeof full_name !== 'string' || full_name.length < 2 || full_name.length > 100) {
+      return Response.json({ error: 'Invalid name (2-100 characters)' }, { status: 400 });
     }
 
     // Check if User already exists

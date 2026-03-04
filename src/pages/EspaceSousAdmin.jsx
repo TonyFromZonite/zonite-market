@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import { useCachedQuery } from "@/components/CacheManager";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -30,11 +30,11 @@ function getSousAdminSession() {
 export default function EspaceSousAdmin() {
   const [sousAdmin] = useState(() => getSousAdminSession());
 
-  const { data: commandesAttente = [], isLoading } = useQuery({
-    queryKey: ["sa_commandes_attente"],
-    queryFn: () => base44.entities.CommandeVendeur.filter({ statut: "en_attente_validation_admin" }),
-    enabled: !!(sousAdmin?.permissions || []).includes("CommandesVendeurs"),
-  });
+  const { data: commandesAttente = [], loading: isLoading } = useCachedQuery(
+    'COMMANDES',
+    () => base44.entities.CommandeVendeur.filter({ statut: "en_attente_validation_admin" }),
+    { ttl: 5 * 60 * 1000, enabled: (sousAdmin?.permissions || []).includes("CommandesVendeurs") }
+  );
 
   const modules = TOUS_MODULES.filter(m => (sousAdmin?.permissions || []).includes(m.page));
 

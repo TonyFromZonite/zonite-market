@@ -12,7 +12,7 @@ Deno.serve(async (req) => {
     }
 
     // Rate limiting: max 5 tentatives par 15 min par email
-    const rateCheck = checkRateLimit(`login:${email}`, 5, 900000);
+    const rateCheck = await checkRateLimit(base44, `login:${email}`, 5, 900000);
     if (!rateCheck.allowed) {
       await logAudit(base44, {
         action: 'login_rate_limit_exceeded',

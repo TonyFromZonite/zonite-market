@@ -29,31 +29,39 @@ export async function logAudit(base44, {
 }
 
 /**
- * Rate limiter simple en mémoire
- * Attention: perd les données à redémarrage du fonction
- * Pour prod: utiliser Redis ou équivalent
+ * Rate limiter basé sur JournalAudit
+ * Persiste à travers les redémarrages
+ * À utiliser avec base44.asServiceRole pour vérifier les tentatives récentes
  */
-const rateLimitMap = new Map();
-
-export function checkRateLimit(identifier, maxRequests = 3, windowMs = 3600000) {
+export async function checkRateLimit(base44, identifier, maxRequests = 5, windowMs = 900000) {
   const now = Date.now();
-  const key = identifier;
+  const windowStart = now - windowMs;
 
-  if (!rateLimitMap.has(key)) {
-    rateLimitMap.set(key, []);
+  try {
+    // Récupérer les tentatives récentes du journal d'audit
+    const recentAttempts = await base44.asServiceRole.entities.JournalAudit.filter({
+      action: `rate_limit_check:${identifier}`,
+      created_date: { $gte: new Date(windowStart).toISOString() }
+    });
+
+    if (recentAttempts.length >= maxRequests) {
+      return { allowed: false, remaining: 0 };
+    }
+
+    // Enregistrer cette tentative
+    await base44.asServiceRole.entities.JournalAudit.create({
+      action: `rate_limit_check:${identifier}`,
+      module: 'systeme',
+      details: `Rate limit check for ${identifier}`,
+      utilisateur: identifier,
+    }).catch(() => {}); // Ne pas bloquer si l'audit échoue
+
+    return { allowed: true, remaining: maxRequests - recentAttempts.length - 1 };
+  } catch (err) {
+    console.error('Rate limit check error:', err.message);
+    // En cas d'erreur, laisser passer mais logger
+    return { allowed: true, remaining: maxRequests };
   }
-
-  const requests = rateLimitMap.get(key);
-  const recentRequests = requests.filter(time => now - time < windowMs);
-
-  if (recentRequests.length >= maxRequests) {
-    return { allowed: false, remaining: 0 };
-  }
-
-  recentRequests.push(now);
-  rateLimitMap.set(key, recentRequests);
-
-  return { allowed: true, remaining: maxRequests - recentRequests.length };
 }
 
 /**

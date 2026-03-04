@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { useCachedQuery, cacheStore } from "@/components/CacheManager";
 import {
@@ -14,6 +13,8 @@ import GraphiqueVentes from "@/components/dashboard/GraphiqueVentes";
 import TopProduits from "@/components/dashboard/TopProduits";
 import TopVendeurs from "@/components/dashboard/TopVendeurs";
 import StockCritique from "@/components/dashboard/StockCritique";
+
+const formaterMontant = (n) => `${Math.round(n || 0).toLocaleString("fr-FR")} FCFA`;
 
 function getSousAdminSession() {
   try {
@@ -43,7 +44,6 @@ function DashboardSousAdmin({ sousAdmin }) {
     { ttl: 30 * 60 * 1000, enabled: (sousAdmin.permissions || []).includes("Produits") }
   );
 
-  const formatMontant = (n) => `${Math.round(n || 0).toLocaleString("fr-FR")} FCFA`;
   const aujourd = new Date().toISOString().split("T")[0];
 
   const cmdAujourdhui = commandesVendeurs.filter(c => c.created_date?.split("T")[0] === aujourd).length;
@@ -188,8 +188,6 @@ function DashboardAdmin() {
   const topProduit = [...(produits || [])].sort((a, b) => (b.total_vendu || 0) - (a.total_vendu || 0))[0];
   const commandesVendeursAujourdhui = (commandesVendeurs || []).filter(c => c.created_date?.split("T")[0] === aujourdhui).length;
   const commissionsVendeursAPayer = (paiementsEnAttente || []).reduce((s, p) => s + (p.montant || 0), 0);
-
-  const formaterMontant = (n) => `${Math.round(n).toLocaleString("fr-FR")} FCFA`;
 
   if (enChargement) {
     return (
