@@ -95,16 +95,16 @@ export default function EspaceVendeur() {
     );
   }
 
-  // KYC non validé
+  // Pas de compte vendeur trouvé
   if (!compteVendeur) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl p-6 max-w-sm w-full text-center shadow-lg">
           <AlertCircle className="w-12 h-12 text-yellow-500 mx-auto mb-3" />
-          <h2 className="text-lg font-bold text-slate-900 mb-2">Compte non configuré</h2>
-          <p className="text-sm text-slate-500 mb-4">Vous devez compléter votre profil vendeur pour accéder à l'espace vendeur.</p>
+          <h2 className="text-lg font-bold text-slate-900 mb-2">Compte introuvable</h2>
+          <p className="text-sm text-slate-500 mb-4">Aucun compte vendeur n'est associé à cet email. Inscrivez-vous d'abord.</p>
           <Link to={createPageUrl("InscriptionVendeur")}>
-            <Button className="w-full bg-[#1a1f5e] hover:bg-[#141952]">Compléter mon profil</Button>
+            <Button className="w-full bg-[#1a1f5e] hover:bg-[#141952]">Créer mon compte</Button>
           </Link>
         </div>
       </div>
