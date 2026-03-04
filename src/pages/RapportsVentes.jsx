@@ -370,7 +370,7 @@ export default function RapportsVentes() {
           <h2 className="text-xl font-bold text-slate-900">Rapports des Ventes</h2>
           <p className="text-sm text-slate-500">Analyse détaillée des performances commerciales</p>
         </div>
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex gap-2 flex-wrap items-center">
           {PERIODES.map(p => (
             <Button key={p.valeur} size="sm" variant={periodeJours === p.valeur ? "default" : "outline"}
               onClick={() => setPeriodeJours(p.valeur)}
@@ -378,6 +378,10 @@ export default function RapportsVentes() {
               {p.label}
             </Button>
           ))}
+          <Button size="sm" onClick={exporterPDF} disabled={exportEnCours} className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2 ml-2">
+            {exportEnCours ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+            Exporter PDF
+          </Button>
         </div>
       </div>
 
