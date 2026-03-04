@@ -187,7 +187,12 @@ export default function Layout({ children, currentPageName }) {
           <h1 className="text-base font-semibold text-slate-900 truncate flex-1">
             {TOUS_LES_MENUS.find((i) => i.page === currentPageName)?.nom || "ZONITE"}
           </h1>
-          {!sousAdmin && <RechercheGlobale />}
+          {!sousAdmin && !adminSession && <RechercheGlobale />}
+          {adminSession && (
+            <span className="text-xs bg-[#F5C518]/20 text-[#1a1f5e] font-semibold px-2 py-1 rounded-full hidden sm:block">
+              Admin Principal
+            </span>
+          )}
           {sousAdmin && (
             <span className="text-xs bg-[#F5C518]/20 text-[#1a1f5e] font-semibold px-2 py-1 rounded-full hidden sm:block">
               {sousAdmin.nom_role}
