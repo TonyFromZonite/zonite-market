@@ -153,7 +153,81 @@ export default function SupportAdmin() {
         </button>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-3">
+      {/* Section FAQ */}
+      {onglet === "faq" && (
+        <div className="space-y-4">
+          <div className="flex justify-end">
+            <Button onClick={nouveauFaq} className="bg-[#1a1f5e] hover:bg-[#141952]">
+              <Plus className="w-4 h-4 mr-2" /> Ajouter une question
+            </Button>
+          </div>
+
+          {faqEdit && (
+            <div className="bg-white rounded-xl border border-[#1a1f5e]/20 p-5 space-y-3 shadow-sm">
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold text-slate-900">{faqEdit === "new" ? "Nouvelle question" : "Modifier la question"}</h3>
+                <button onClick={() => setFaqEdit(null)}><X className="w-4 h-4 text-slate-400" /></button>
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-slate-700">Question *</label>
+                <Input value={faqForm.question} onChange={e => setFaqForm(f => ({ ...f, question: e.target.value }))} placeholder="Ex: Comment passer une commande ?" />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-slate-700">Réponse *</label>
+                <Textarea value={faqForm.reponse} onChange={e => setFaqForm(f => ({ ...f, reponse: e.target.value }))} rows={4} placeholder="Rédigez la réponse..." />
+              </div>
+              <div className="flex items-center gap-3">
+                <label className="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
+                  <input type="checkbox" checked={faqForm.actif} onChange={e => setFaqForm(f => ({ ...f, actif: e.target.checked }))} className="rounded" />
+                  Visible par les vendeurs
+                </label>
+              </div>
+              <div className="flex gap-2 justify-end">
+                <Button variant="outline" onClick={() => setFaqEdit(null)}>Annuler</Button>
+                <Button onClick={sauvegarderFaq} disabled={faqEnCours || !faqForm.question.trim() || !faqForm.reponse.trim()} className="bg-[#1a1f5e] hover:bg-[#141952]">
+                  {faqEnCours ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Check className="w-4 h-4 mr-2" />}
+                  Enregistrer
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {faqLoading ? (
+            <div className="text-center py-8 text-slate-400"><Loader2 className="w-6 h-6 animate-spin mx-auto" /></div>
+          ) : faqItems.length === 0 ? (
+            <div className="text-center py-12 text-slate-400">
+              <HelpCircle className="w-10 h-10 mx-auto mb-2 opacity-40" />
+              <p className="text-sm">Aucune question FAQ. Ajoutez-en une !</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {faqItems.map((item, i) => (
+                <div key={item.id} className={`bg-white rounded-xl border p-4 flex items-start gap-3 ${!item.actif ? "opacity-50" : "border-slate-200"}`}>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-slate-900 mb-1">{item.question}</p>
+                    <p className="text-sm text-slate-500 line-clamp-2">{item.reponse}</p>
+                    {!item.actif && <span className="text-[10px] text-slate-400 italic">Masquée aux vendeurs</span>}
+                  </div>
+                  <div className="flex items-center gap-1 flex-shrink-0">
+                    <button onClick={() => toggleFaqActif(item)} title={item.actif ? "Masquer" : "Afficher"}
+                      className={`p-1.5 rounded-lg transition-colors ${item.actif ? "text-emerald-600 hover:bg-emerald-50" : "text-slate-400 hover:bg-slate-100"}`}>
+                      <Check className="w-4 h-4" />
+                    </button>
+                    <button onClick={() => ouvrirFaqEdit(item)} className="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors">
+                      <Pencil className="w-4 h-4" />
+                    </button>
+                    <button onClick={() => supprimerFaq(item.id)} className="p-1.5 rounded-lg text-red-500 hover:bg-red-50 transition-colors">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {onglet === "tickets" && <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <input
