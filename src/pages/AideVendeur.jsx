@@ -13,40 +13,7 @@ import { createPageUrl } from "@/utils";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
-const FAQ = [
-  {
-    question: "Comment passer une commande ?",
-    reponse: "Allez dans 'Nouvelle commande', sélectionnez le produit, entrez la quantité, le prix de vente et les informations du client. Une fois soumise, l'équipe ZONITE validera la commande."
-  },
-  {
-    question: "Comment calculer ma commission ?",
-    reponse: "Votre commission = (Prix de vente final – Prix de gros) × Quantité. Par exemple, si le prix de gros est 5 000 FCFA et que vous vendez à 7 000 FCFA, vous gagnez 2 000 FCFA par unité."
-  },
-  {
-    question: "Quand est-ce que je reçois mon paiement ?",
-    reponse: "Les commissions sont créditées dès qu'une commande est marquée 'Livrée'. Vous pouvez ensuite faire une demande de retrait depuis votre espace 'Demande de Paiement'."
-  },
-  {
-    question: "Que faire si une livraison échoue ?",
-    reponse: "Si la livraison échoue, la commande est marquée 'Échec livraison'. Le stock est restitué automatiquement. Vous pouvez relancer la commande si le client est encore intéressé."
-  },
-  {
-    question: "Comment voir mes commissions en attente ?",
-    reponse: "Depuis votre tableau de bord, la section 'Solde commissions' affiche vos gains non encore versés. Vous pouvez soumettre une demande de paiement à tout moment."
-  },
-  {
-    question: "Comment mettre à jour mon profil ?",
-    reponse: "Allez dans 'Mon Profil' depuis le menu du bas. Vous pouvez modifier vos coordonnées, votre numéro Mobile Money et votre photo de pièce d'identité."
-  },
-  {
-    question: "Que signifie 'En attente de validation admin' ?",
-    reponse: "Votre commande a été reçue et attend d'être vérifiée par l'équipe ZONITE. Une fois validée, un livreur lui sera attribué. Ce processus prend généralement quelques heures."
-  },
-  {
-    question: "Puis-je annuler une commande ?",
-    reponse: "Seul l'équipe ZONITE peut annuler une commande. Si vous avez besoin d'annuler, ouvrez un ticket de support en précisant le numéro de commande."
-  }
-];
+
 
 const STATUTS = {
   ouvert: { label: "Ouvert", color: "bg-blue-100 text-blue-700" },
