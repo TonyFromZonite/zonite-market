@@ -118,10 +118,10 @@ export default function Connexion() {
         userType: 'admin'
       });
       if (response.data.success) {
-        if (response.data.session.type === 'admin') {
+        if (response.data.session.role === 'admin') {
           sessionStorage.setItem("admin_session", JSON.stringify(response.data.session));
           window.location.href = createPageUrl("TableauDeBord");
-        } else {
+        } else if (response.data.session.role === 'sous_admin') {
           sessionStorage.setItem("sous_admin", JSON.stringify(response.data.session));
           window.location.href = createPageUrl("EspaceSousAdmin");
         }
