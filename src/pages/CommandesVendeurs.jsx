@@ -347,6 +347,11 @@ export default function CommandesVendeurs() {
                     <PackageCheck className="w-4 h-4" /> Confirmer livraison
                   </Button>
                 )}
+                {commandeSelectionnee.statut === "livree" && (
+                  <Button onClick={() => { setRetourForm({ raison: "client_refuse", raison_detail: "", quantite: commandeSelectionnee.quantite }); setModalRetour(true); }} variant="outline" className="w-full border-orange-300 text-orange-600 hover:bg-orange-50 gap-2">
+                    <RotateCcw className="w-4 h-4" /> Enregistrer un retour
+                  </Button>
+                )}
                 {!["livree", "echec_livraison", "annulee"].includes(commandeSelectionnee.statut) && (
                   <div className="flex gap-2">
                     {["en_livraison", "attribuee_livreur", "validee_admin"].includes(commandeSelectionnee.statut) && (
