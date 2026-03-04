@@ -896,7 +896,8 @@ export default function Produits() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      </div>}
+      </div>
+      )}
     </div>
   );
 }
