@@ -79,6 +79,7 @@ export default function GestionSousAdmins() {
 
   const sauvegarder = async () => {
     if (!form.nom_complet || !form.nom_role || !form.username || !form.email) return;
+    if (!editing && !form.mot_de_passe) return; // Mot de passe requis pour création
     setChargement(true);
     const data = {
       nom_complet: form.nom_complet,
@@ -90,7 +91,15 @@ export default function GestionSousAdmins() {
       notes: form.notes,
     };
     if (form.mot_de_passe) {
-      data.mot_de_passe_hash = btoa(form.mot_de_passe); // encodage simple base64
+      try {
+        const response = await base44.functions.invoke('hashPassword', {
+          password: form.mot_de_passe
+        });
+        data.mot_de_passe_hash = response.data.hashedPassword;
+      } catch (_) {
+        setChargement(false);
+        return;
+      }
     }
     if (editing) {
       await base44.entities.SousAdmin.update(editing.id, data);
