@@ -62,6 +62,7 @@ import EnAttenteValidation from './pages/EnAttenteValidation';
 import EspaceSousAdmin from './pages/EspaceSousAdmin';
 import EspaceVendeur from './pages/EspaceVendeur';
 import GestionCandidatures from './pages/GestionCandidatures';
+import GestionCommandes from './pages/GestionCommandes';
 import GestionKYC from './pages/GestionKYC';
 import GestionSousAdmins from './pages/GestionSousAdmins';
 import InscriptionVendeur from './pages/InscriptionVendeur';
@@ -78,10 +79,9 @@ import RapportsVentes from './pages/RapportsVentes';
 import RetoursAdmin from './pages/RetoursAdmin';
 import SupportAdmin from './pages/SupportAdmin';
 import TableauDeBord from './pages/TableauDeBord';
+import TableauDeBordVendeur from './pages/TableauDeBordVendeur';
 import Vendeurs from './pages/Vendeurs';
 import VideoFormation from './pages/VideoFormation';
-import TableauDeBordVendeur from './pages/TableauDeBordVendeur';
-import GestionCommandes from './pages/GestionCommandes';
 import __Layout from './Layout.jsx';
 
 
@@ -101,6 +101,7 @@ export const PAGES = {
     "EspaceSousAdmin": EspaceSousAdmin,
     "EspaceVendeur": EspaceVendeur,
     "GestionCandidatures": GestionCandidatures,
+    "GestionCommandes": GestionCommandes,
     "GestionKYC": GestionKYC,
     "GestionSousAdmins": GestionSousAdmins,
     "InscriptionVendeur": InscriptionVendeur,
@@ -117,10 +118,9 @@ export const PAGES = {
     "RetoursAdmin": RetoursAdmin,
     "SupportAdmin": SupportAdmin,
     "TableauDeBord": TableauDeBord,
+    "TableauDeBordVendeur": TableauDeBordVendeur,
     "Vendeurs": Vendeurs,
     "VideoFormation": VideoFormation,
-    "TableauDeBordVendeur": TableauDeBordVendeur,
-    "GestionCommandes": GestionCommandes,
 }
 
 export const pagesConfig = {

@@ -50,6 +50,13 @@ function getAdminSession() {
   } catch (_) { return null; }
 }
 
+function getVendeurSession() {
+  try {
+    const data = sessionStorage.getItem("vendeur_session");
+    return data ? JSON.parse(data) : null;
+  } catch (_) { return null; }
+}
+
 export default function Layout({ children, currentPageName }) {
   const [menuOuvert, setMenuOuvert] = useState(false);
   const [nbCommandesAttente, setNbCommandesAttente] = useState(0);
