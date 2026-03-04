@@ -28,9 +28,25 @@ export default function MesCommandesVendeur() {
 
   useEffect(() => {
     const charger = async () => {
-      const u = await base44.auth.me();
-      const comptes = await base44.entities.CompteVendeur.filter({ user_email: u.email });
-      if (comptes.length > 0) setCompteVendeur(comptes[0]);
+      let emailVendeur = null;
+      
+      try {
+        const session = sessionStorage.getItem("vendeur_session");
+        if (session) {
+          const parsed = JSON.parse(session);
+          emailVendeur = parsed.email;
+        }
+      } catch (_) {}
+
+      if (!emailVendeur) {
+        const u = await base44.auth.me().catch(() => null);
+        if (u?.email) emailVendeur = u.email;
+      }
+
+      if (emailVendeur) {
+        const comptes = await base44.entities.CompteVendeur.filter({ user_email: emailVendeur });
+        if (comptes.length > 0) setCompteVendeur(comptes[0]);
+      }
     };
     charger();
   }, []);
