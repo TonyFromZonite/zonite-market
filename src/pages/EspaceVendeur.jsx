@@ -149,8 +149,8 @@ export default function EspaceVendeur() {
           <div className="flex items-center gap-3">
             <img src={LOGO} alt="Zonite" className="h-9 w-9 rounded-xl object-contain bg-white p-0.5 flex-shrink-0" />
             <div>
-              <p className="text-slate-300 text-xs">Bonjour 👋</p>
-              <h1 className="text-base font-bold leading-tight">{compteVendeur.nom_complet}</h1>
+              <span className="text-xs font-bold tracking-tight leading-none">ZONITE <span className="text-[#F5C518]">Vendeurs</span></span>
+              <p className="text-slate-300 text-xs mt-0.5">Bonjour 👋 {compteVendeur.nom_complet}</p>
             </div>
           </div>
           <div className="flex items-center gap-3">

@@ -47,6 +47,7 @@
  *
  * The mainPage value must match a key in the PAGES object exactly.
  */
+import AideVendeur from './pages/AideVendeur';
 import Candidature from './pages/Candidature';
 import CatalogueVendeur from './pages/CatalogueVendeur';
 import Categories from './pages/Categories';
@@ -69,15 +70,15 @@ import Produits from './pages/Produits';
 import ProfilVendeur from './pages/ProfilVendeur';
 import RapportsVentes from './pages/RapportsVentes';
 import RetoursAdmin from './pages/RetoursAdmin';
+import SupportAdmin from './pages/SupportAdmin';
 import TableauDeBord from './pages/TableauDeBord';
 import Vendeurs from './pages/Vendeurs';
 import VideoFormation from './pages/VideoFormation';
-import AideVendeur from './pages/AideVendeur';
-import SupportAdmin from './pages/SupportAdmin';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
+    "AideVendeur": AideVendeur,
     "Candidature": Candidature,
     "CatalogueVendeur": CatalogueVendeur,
     "Categories": Categories,
@@ -100,11 +101,10 @@ export const PAGES = {
     "ProfilVendeur": ProfilVendeur,
     "RapportsVentes": RapportsVentes,
     "RetoursAdmin": RetoursAdmin,
+    "SupportAdmin": SupportAdmin,
     "TableauDeBord": TableauDeBord,
     "Vendeurs": Vendeurs,
     "VideoFormation": VideoFormation,
-    "AideVendeur": AideVendeur,
-    "SupportAdmin": SupportAdmin,
 }
 
 export const pagesConfig = {
