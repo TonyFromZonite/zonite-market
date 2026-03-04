@@ -138,7 +138,10 @@ export default function AideVendeur() {
         {onglet === "faq" && (
           <div className="space-y-2">
             <p className="text-xs text-slate-500 font-medium uppercase tracking-wide px-1">Questions fréquentes</p>
-            {FAQ.map((item, i) => (
+            {faqItems.length === 0 && (
+              <div className="text-center py-8 text-slate-400 text-sm">Aucune question disponible pour l'instant.</div>
+            )}
+            {faqItems.map((item, i) => (
               <div key={i} className="bg-white rounded-2xl shadow-sm overflow-hidden">
                 <button
                   onClick={() => setFaqOuverte(faqOuverte === i ? null : i)}
