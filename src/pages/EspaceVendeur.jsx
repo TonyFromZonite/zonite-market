@@ -265,6 +265,7 @@ export default function EspaceVendeur() {
           { label: "Commandes", page: "MesCommandesVendeur", icone: "📋", actif: false },
           { label: "Catalogue", page: "CatalogueVendeur", icone: "📦", actif: false },
           { label: "Profil", page: "ProfilVendeur", icone: "👤", actif: false },
+          { label: "Aide", page: "AideVendeur", icone: "❓", actif: false },
         ].map(({ label, page, icone, actif }) => (
           <Link key={page} to={createPageUrl(page)} className="flex-1 flex flex-col items-center py-2.5 gap-1">
             <span className="text-xl">{icone}</span>
