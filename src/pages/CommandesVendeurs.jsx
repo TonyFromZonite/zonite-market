@@ -405,6 +405,7 @@ export default function CommandesVendeurs() {
           </Button>
         </div>
       </DialogContent>
-    </Dialog>
+      </Dialog>
+    </div>
   );
 }
