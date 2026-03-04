@@ -14,37 +14,37 @@ export default function VideoFormation() {
   const [erreur, setErreur] = useState("");
   const navigate = useNavigate();
 
-  // Extraire videoId robustement de tous formats YouTube et convertir en URL embed
-  const convertToEmbedUrl = (rawUrl) => {
+  // Extraire videoId robustement de tous formats YouTube
+  const extractVideoId = (rawUrl) => {
     if (!rawUrl || typeof rawUrl !== "string") return null;
     
-    let videoId = null;
-    
     try {
-      // Si déjà en format embed
+      // Format embed: https://www.youtube.com/embed/Yr0uWVJYRiI
       if (rawUrl.includes("/embed/")) {
-        videoId = rawUrl.split("/embed/")[1]?.split("?")[0]?.split("&")[0];
-      } 
-      // Format youtu.be/xxxxx (short URL avec ou sans params)
-      else if (rawUrl.includes("youtu.be/")) {
-        const url = new URL(rawUrl);
-        videoId = url.pathname.replace(/\//g, "");
-      } 
-      // Format youtube.com/watch?v=xxxxx
-      else if (rawUrl.includes("youtube.com/watch")) {
-        const url = new URL(rawUrl);
-        videoId = url.searchParams.get("v");
+        return rawUrl.split("/embed/")[1]?.split("?")[0]?.split("&")[0];
       }
       
-      // Valider que c'est un vrai videoId YouTube (11 caractères alphanumériques/tirets/underscores)
-      if (videoId && /^[a-zA-Z0-9_-]{11}$/.test(videoId)) {
-        return `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1&fs=1&autoplay=0`;
+      // Format youtu.be (short): https://youtu.be/Yr0uWVJYRiI?si=xxx
+      if (rawUrl.includes("youtu.be/")) {
+        const match = rawUrl.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);
+        if (match) return match[1];
+      }
+      
+      // Format youtube.com/watch: https://youtube.com/watch?v=Yr0uWVJYRiI
+      if (rawUrl.includes("youtube.com/watch")) {
+        const match = rawUrl.match(/[?&]v=([a-zA-Z0-9_-]{11})/);
+        if (match) return match[1];
       }
     } catch (e) {
-      console.error("Erreur parsing URL YouTube:", e, rawUrl);
+      console.error("Parsing YouTube error:", e);
     }
     
     return null;
+  };
+
+  const convertToEmbedUrl = (videoId) => {
+    if (!videoId) return null;
+    return `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1&fs=1`;
   };
 
   useEffect(() => {
