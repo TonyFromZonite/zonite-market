@@ -1,3 +1,5 @@
+import React from "react";
+
 /**
  * CACHE MANAGER - Réduit consommation Base44 de 70%+
  * Stockage hybride: memory + localStorage + sessionStorage
