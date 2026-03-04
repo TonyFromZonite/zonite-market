@@ -46,29 +46,7 @@ export default function VideoFormation() {
     charger();
   }, []);
 
-  const confirmer = async () => {
-    if (!accepte) return;
-    setEnCours(true);
-    await base44.entities.CompteVendeur.update(compteVendeur.id, {
-      video_vue: true,
-      conditions_acceptees: true,
-      catalogue_debloque: true,
-    });
-    await base44.entities.NotificationVendeur.create({
-      vendeur_email: compteVendeur.user_email,
-      titre: "Catalogue débloqué !",
-      message: "Félicitations ! Vous avez accès au catalogue produits ZONITE. Créez votre première commande !",
-      type: "succes",
-    });
-    setEnCours(false);
-    setEtape(3);
-  };
 
-  const sections = [
-    { emoji: "🏢", titre: "Présentation ZONITE", desc: "Découvrez notre entreprise et notre vision du dropshipping au Cameroun." },
-    { emoji: "💰", titre: "Système de commissions", desc: "Comprenez comment sont calculées vos commissions sur chaque vente." },
-    { emoji: "📦", titre: "Fonctionnement Dropshipping", desc: "Comment passer des commandes, la livraison et le suivi client." },
-  ];
 
   return (
     <div className="min-h-screen bg-slate-50 p-4">
@@ -82,7 +60,7 @@ export default function VideoFormation() {
           <p className="text-sm text-slate-500">Obligatoire avant d'accéder au catalogue</p>
         </div>
 
-        {etape === 3 ? (
+        {videoTerminee && accepte ? (
           <div className="bg-white rounded-2xl p-8 text-center shadow-lg">
             <CheckCircle2 className="w-16 h-16 text-emerald-500 mx-auto mb-4" />
             <h2 className="text-xl font-bold text-slate-900 mb-2">Catalogue débloqué !</h2>
@@ -93,40 +71,42 @@ export default function VideoFormation() {
           </div>
         ) : (
           <>
-            {/* Vidéo simulée */}
-            <div className="bg-[#1a1f5e] rounded-2xl overflow-hidden mb-4 relative">
-              <div className="aspect-video flex items-center justify-center">
-                <div className="text-center text-white">
-                  <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3 cursor-pointer hover:bg-white/30 transition-colors"
-                    onClick={() => setVideoTerminee(true)}>
-                    <Play className="w-8 h-8 text-white fill-white" />
-                  </div>
-                  <p className="font-bold text-lg">Présentation ZONITE Dropshipping</p>
-                  <p className="text-slate-300 text-sm">Durée : ~15 minutes</p>
-                  {!videoTerminee && (
-                    <button onClick={() => setVideoTerminee(true)} className="mt-3 text-xs text-[#F5C518] underline">
-                      Marquer comme vue
-                    </button>
-                  )}
+            {/* Lecteur vidéo YouTube */}
+            <div className="bg-[#1a1f5e] rounded-2xl overflow-hidden mb-4">
+              {erreur ? (
+                <div className="aspect-video flex items-center justify-center flex-col gap-3 p-4">
+                  <AlertCircle className="w-10 h-10 text-yellow-400" />
+                  <p className="text-white text-center text-sm">{erreur}</p>
                 </div>
-              </div>
-              {videoTerminee && (
-                <div className="absolute top-3 right-3 bg-emerald-500 text-white text-xs px-2 py-1 rounded-full">✓ Vue</div>
+              ) : videoUrl ? (
+                <div className="aspect-video w-full">
+                  <iframe
+                    width="100%"
+                    height="100%"
+                    src={videoUrl}
+                    title="Formation ZONITE"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    style={{ aspectRatio: '16 / 9' }}
+                  />
+                </div>
+              ) : (
+                <div className="aspect-video flex items-center justify-center bg-slate-800">
+                  <Loader2 className="w-8 h-8 text-white animate-spin" />
+                </div>
               )}
             </div>
 
-            {/* Contenu de la formation */}
-            <div className="space-y-3 mb-5">
-              {sections.map((s, i) => (
-                <div key={i} className="bg-white rounded-2xl p-4 shadow-sm flex items-start gap-3">
-                  <span className="text-2xl">{s.emoji}</span>
-                  <div>
-                    <p className="font-semibold text-slate-900 text-sm">{s.titre}</p>
-                    <p className="text-xs text-slate-500 mt-1">{s.desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
+            {/* Bouton confirmer vidéo vue */}
+            {videoUrl && !videoTerminee && (
+              <Button
+                onClick={() => setVideoTerminee(true)}
+                className="w-full mb-4 bg-emerald-600 hover:bg-emerald-700"
+              >
+                ✓ J'ai regardé la vidéo complètement
+              </Button>
+            )}
 
             {/* Acceptation politiques + confirmation */}
             {videoTerminee && !accepte && (
