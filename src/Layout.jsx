@@ -22,7 +22,6 @@ const menuItems = [
   { nom: "Commandes Admin",      page: "Commandes",            icone: ClipboardList },
   { nom: "Commandes Vendeurs",   page: "CommandesVendeurs",    icone: ShoppingCart },
   { nom: "Produits",             page: "Produits",             icone: Package },
-  { nom: "Catégories",           page: "Categories",           icone: Tag },
   { nom: "Vendeurs",             page: "Vendeurs",             icone: Users },
   { nom: "Livraisons",           page: "Livraisons",           icone: Truck },
   { nom: "Retours Produits",     page: "RetoursAdmin",         icone: RotateCcw },
