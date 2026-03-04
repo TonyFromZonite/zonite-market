@@ -24,11 +24,7 @@ const TikTokIcon = ({ size = 20 }) => (
 const MODE_VENDEUR = "vendeur";
 const MODE_ADMIN = "admin";
 
-// Générer un mot de passe aléatoire
-function genererMdp(longueur = 8) {
-  const chars = "ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
-  return Array.from({ length: longueur }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
-}
+
 
 export default function Connexion() {
   const [mode, setMode] = useState(MODE_VENDEUR);
