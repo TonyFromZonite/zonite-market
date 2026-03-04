@@ -32,7 +32,6 @@ export default function EspaceVendeur() {
 
   useEffect(() => {
     const charger = async () => {
-      // Récupérer la session vendeur (email stocké à la connexion)
       let emailVendeur = null;
       try {
         const session = sessionStorage.getItem("vendeur_session");
@@ -42,12 +41,10 @@ export default function EspaceVendeur() {
         }
       } catch (_) {}
 
-      // Fallback : utilisateur connecté via Base44
       if (!emailVendeur) {
         try {
           const u = await base44.auth.me();
           if (u?.email) emailVendeur = u.email;
-          setUtilisateur(u);
         } catch (_) {}
       }
 
@@ -71,8 +68,8 @@ export default function EspaceVendeur() {
   // Recharger le compte vendeur pour avoir le solde à jour
   const { data: compteActualise } = useQuery({
     queryKey: ["compte_vendeur_solde", compteVendeur?.id],
-    queryFn: () => base44.entities.CompteVendeur.filter({ user_email: utilisateur?.email }),
-    enabled: !!compteVendeur?.id && !!utilisateur?.email,
+    queryFn: () => base44.entities.CompteVendeur.filter({ id: compteVendeur.id }),
+    enabled: !!compteVendeur?.id,
     refetchInterval: 30000,
     select: (data) => data[0] || compteVendeur,
   });
