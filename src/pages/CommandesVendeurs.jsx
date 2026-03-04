@@ -370,5 +370,43 @@ export default function CommandesVendeurs() {
         </DialogContent>
       </Dialog>
     </div>
+
+    {/* Modal Retour */}
+    <Dialog open={modalRetour} onOpenChange={setModalRetour}>
+      <DialogContent className="max-w-sm">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <RotateCcw className="w-4 h-4 text-orange-500" /> Enregistrer un retour
+          </DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4 text-sm">
+          <p className="text-slate-500">Commande : <span className="font-medium text-slate-800">{commandeSelectionnee?.produit_nom} × {commandeSelectionnee?.quantite}</span></p>
+          <div className="space-y-1">
+            <label className="text-slate-500 text-xs font-medium">Quantité retournée *</label>
+            <Input type="number" min="1" max={commandeSelectionnee?.quantite} value={retourForm.quantite}
+              onChange={e => setRetourForm(f => ({ ...f, quantite: e.target.value }))} />
+          </div>
+          <div className="space-y-1">
+            <label className="text-slate-500 text-xs font-medium">Raison *</label>
+            <Select value={retourForm.raison} onValueChange={v => setRetourForm(f => ({ ...f, raison: v }))}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="defaut_produit">Défaut produit</SelectItem>
+                <SelectItem value="mauvaise_livraison">Mauvaise livraison</SelectItem>
+                <SelectItem value="client_refuse">Client a refusé</SelectItem>
+                <SelectItem value="autre">Autre</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1">
+            <label className="text-slate-500 text-xs font-medium">Détail (optionnel)</label>
+            <Textarea value={retourForm.raison_detail} onChange={e => setRetourForm(f => ({ ...f, raison_detail: e.target.value }))} rows={2} placeholder="Précisions..." />
+          </div>
+          <Button onClick={enregistrerRetour} disabled={enCours} className="w-full bg-orange-500 hover:bg-orange-600 gap-2">
+            {enCours ? <RotateCcw className="w-4 h-4 animate-spin" /> : <RotateCcw className="w-4 h-4" />} Confirmer le retour
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
