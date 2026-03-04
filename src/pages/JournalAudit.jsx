@@ -169,7 +169,8 @@ export default function JournalAudit() {
           </div>
         )}
       </div>
-      </>}
+      </div>
+      )}
     </div>
   );
 }
