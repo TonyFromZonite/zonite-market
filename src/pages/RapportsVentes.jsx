@@ -531,12 +531,12 @@ export default function RapportsVentes() {
               </ResponsiveContainer>
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead><tr className="bg-slate-50 text-slate-500 text-xs uppercase">
-                  <th className="text-left px-4 py-2 font-medium">Ville</th>
-                  <th className="text-right px-4 py-2 font-medium">Cmdes</th>
-                  <th className="text-right px-4 py-2 font-medium">CA</th>
-                  <th className="text-right px-4 py-2 font-medium">%</th>
+              <table className="w-full text-xs md:text-sm">
+                <thead><tr className="bg-slate-50 text-slate-500 text-[10px] md:text-xs uppercase">
+                  <th className="text-left px-2 md:px-4 py-2 font-medium">Ville</th>
+                  <th className="text-right px-2 md:px-4 py-2 font-medium">Cmdes</th>
+                  <th className="text-right px-2 md:px-4 py-2 font-medium">CA</th>
+                  <th className="text-right px-2 md:px-4 py-2 font-medium">%</th>
                 </tr></thead>
                 <tbody>
                   {topVilles.map((l, i) => {
