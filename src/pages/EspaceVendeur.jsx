@@ -111,6 +111,19 @@ export default function EspaceVendeur() {
     );
   }
 
+  // Compte en attente de validation KYC
+  if (compteVendeur.statut === "en_attente_kyc") {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl p-6 max-w-sm w-full text-center shadow-lg">
+          <Clock className="w-12 h-12 text-yellow-400 mx-auto mb-3" />
+          <h2 className="text-lg font-bold text-slate-900 mb-2">Validation en cours</h2>
+          <p className="text-sm text-slate-500">Votre compte est en cours de validation par notre équipe. Vous recevrez un email sous 24-48h avec la décision.</p>
+        </div>
+      </div>
+    );
+  }
+
   if (compteVendeur.statut_kyc === "en_attente") {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
