@@ -311,6 +311,7 @@ function RetoursTab() {
 
 export default function Produits() {
   const [ongletActif, setOngletActif] = useState("produits");
+  const [ongletActif, setOngletActif] = useState("produits");
   const [recherche, setRecherche] = useState("");
   const [filtreCategorie, setFiltreCategorie] = useState("all");
   const [dialogOuvert, setDialogOuvert] = useState(false);
