@@ -99,6 +99,19 @@ export default function InscriptionVendeur() {
 
     const mdp = form.mot_de_passe || genererMdp();
 
+    // Hash password securely via backend
+    let hashedPassword;
+    try {
+      const response = await base44.functions.invoke('hashPassword', {
+        password: mdp
+      });
+      hashedPassword = response.data.hashedPassword;
+    } catch (_) {
+      setErreur("Erreur lors du hachage du mot de passe.");
+      setEnCours(false);
+      return;
+    }
+
     await base44.entities.CompteVendeur.create({
       user_email: form.email,
       nom_complet: form.nom_complet,
@@ -109,7 +122,7 @@ export default function InscriptionVendeur() {
       operateur_mobile_money: form.operateur_mobile_money,
       photo_identite_url: form.photo_identite_url,
       selfie_url: form.selfie_url,
-      mot_de_passe_hash: btoa(mdp),
+      mot_de_passe_hash: hashedPassword,
       statut_kyc: "en_attente",
       statut: "en_attente_kyc",
       video_vue: false,

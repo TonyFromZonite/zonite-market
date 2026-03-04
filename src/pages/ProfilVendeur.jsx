@@ -40,15 +40,26 @@ export default function ProfilVendeur() {
     e.preventDefault();
     setErreurMdp("");
     if (!ancienMdp || !nouveauMdp || !confirmerMdp) { setErreurMdp("Tous les champs sont requis."); return; }
-    if (compteVendeur.mot_de_passe_hash !== btoa(ancienMdp)) { setErreurMdp("Ancien mot de passe incorrect."); return; }
     if (nouveauMdp.length < 6) { setErreurMdp("Le nouveau mot de passe doit faire au moins 6 caractères."); return; }
     if (nouveauMdp !== confirmerMdp) { setErreurMdp("Les mots de passe ne correspondent pas."); return; }
     setSaveMdpEnCours(true);
-    await base44.entities.CompteVendeur.update(compteVendeur.id, { mot_de_passe_hash: btoa(nouveauMdp) });
-    setSuccesMdp(true);
+    try {
+      const response = await base44.functions.invoke('changePassword', {
+        oldPassword: ancienMdp,
+        newPassword: nouveauMdp,
+        userType: 'vendeur'
+      });
+      if (response.data.success) {
+        setSuccesMdp(true);
+        setAncienMdp(""); setNouveauMdp(""); setConfirmerMdp("");
+        setTimeout(() => { setSuccesMdp(false); setOuvrirChangeMdp(false); }, 2500);
+      } else {
+        setErreurMdp(response.data.error || "Erreur lors du changement de mot de passe.");
+      }
+    } catch (_) {
+      setErreurMdp("Erreur lors du changement de mot de passe.");
+    }
     setSaveMdpEnCours(false);
-    setAncienMdp(""); setNouveauMdp(""); setConfirmerMdp("");
-    setTimeout(() => { setSuccesMdp(false); setOuvrirChangeMdp(false); }, 2500);
   };
 
   if (chargement) return (
