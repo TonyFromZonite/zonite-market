@@ -256,6 +256,70 @@ export default function SupportAdmin() {
         </div>
       )}
 
+      {/* Section Notifications Admin */}
+      {onglet === "notifications" && (
+        <div className="space-y-4">
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <input
+                className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                placeholder="Filtrer par email vendeur..."
+                value={notifFiltreVendeur}
+                onChange={e => setNotifFiltreVendeur(e.target.value)}
+              />
+            </div>
+            <Select value={notifFiltreType} onValueChange={setNotifFiltreType}>
+              <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="tous">Tous types</SelectItem>
+                <SelectItem value="info">Info</SelectItem>
+                <SelectItem value="succes">Succès</SelectItem>
+                <SelectItem value="alerte">Alerte</SelectItem>
+                <SelectItem value="paiement">Paiement</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          {notifsLoading ? (
+            <div className="text-center py-12 text-slate-400"><Loader2 className="w-6 h-6 animate-spin mx-auto" /></div>
+          ) : notifsFiltrees.length === 0 ? (
+            <div className="text-center py-12 text-slate-400">
+              <Bell className="w-10 h-10 mx-auto mb-2 opacity-40" />
+              <p className="text-sm">Aucune notification</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {notifsFiltrees.map(n => (
+                <div key={n.id} className={`bg-white rounded-xl border p-4 flex items-start gap-3 transition-opacity ${n.lue ? "opacity-60" : "border-slate-200"} ${n.importante ? "border-l-4 border-l-yellow-400" : ""}`}>
+                  <span className="text-xl flex-shrink-0">
+                    {n.type === "succes" ? "✅" : n.type === "alerte" ? "⚠️" : n.type === "paiement" ? "💰" : "ℹ️"}
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-slate-900">{n.titre}</p>
+                    <p className="text-xs text-slate-500 mt-0.5">{n.message}</p>
+                    <div className="flex items-center gap-3 mt-1">
+                      <span className="text-[10px] text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">{n.vendeur_email}</span>
+                      <span className="text-[10px] text-slate-400">{new Date(n.created_date).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</span>
+                      {!n.lue && <span className="w-2 h-2 bg-blue-500 rounded-full"></span>}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1 flex-shrink-0">
+                    <button onClick={() => toggleImportante(n)} title={n.importante ? "Retirer l'importance" : "Marquer importante"}
+                      className={`p-1.5 rounded-lg transition-colors ${n.importante ? "text-yellow-500 hover:bg-yellow-50" : "text-slate-300 hover:bg-slate-100"}`}>
+                      <Star className="w-4 h-4" fill={n.importante ? "currentColor" : "none"} />
+                    </button>
+                    <button onClick={() => marquerLueAdmin(n)} title={n.lue ? "Marquer non lue" : "Marquer lue"}
+                      className={`p-1.5 rounded-lg transition-colors ${n.lue ? "text-slate-400 hover:bg-slate-100" : "text-blue-600 hover:bg-blue-50"}`}>
+                      <CheckCheck className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       {onglet === "tickets" && <div className="space-y-4"><div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
