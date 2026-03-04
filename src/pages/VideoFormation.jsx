@@ -15,29 +15,54 @@ export default function VideoFormation() {
 
   useEffect(() => {
     const charger = async () => {
-      const u = await base44.auth.me();
-      const comptes = await base44.entities.CompteVendeur.filter({ user_email: u.email });
+      let emailVendeur = null;
+      
+      // Vérifier session vendeur (priorité)
+      try {
+        const session = sessionStorage.getItem("vendeur_session");
+        if (session) {
+          const parsed = JSON.parse(session);
+          emailVendeur = parsed.email;
+        }
+      } catch (_) {}
+
+      if (!emailVendeur) {
+        const u = await base44.auth.me().catch(() => null);
+        if (u?.email) emailVendeur = u.email;
+      }
+
+      if (!emailVendeur) {
+        window.location.href = createPageUrl("Connexion");
+        return;
+      }
+
+      const comptes = await base44.entities.CompteVendeur.filter({ user_email: emailVendeur });
       if (comptes.length > 0) setCompteVendeur(comptes[0]);
     };
     charger();
   }, []);
 
   const confirmer = async () => {
-    if (!accepte) return;
+    if (!accepte || !compteVendeur) return;
     setEnCours(true);
-    await base44.entities.CompteVendeur.update(compteVendeur.id, {
-      video_vue: true,
-      conditions_acceptees: true,
-      catalogue_debloque: true,
-    });
-    await base44.entities.NotificationVendeur.create({
-      vendeur_email: compteVendeur.user_email,
-      titre: "Catalogue débloqué !",
-      message: "Félicitations ! Vous avez accès au catalogue produits ZONITE. Créez votre première commande !",
-      type: "succes",
-    });
-    setEnCours(false);
-    setEtape(3);
+    try {
+      await base44.entities.CompteVendeur.update(compteVendeur.id, {
+        video_vue: true,
+        conditions_acceptees: true,
+        catalogue_debloque: true,
+      });
+      await base44.entities.NotificationVendeur.create({
+        vendeur_email: compteVendeur.user_email,
+        titre: "Catalogue débloqué !",
+        message: "Félicitations ! Vous avez accès au catalogue produits ZONITE. Créez votre première commande !",
+        type: "succes",
+      });
+      setEtape(3);
+    } catch (err) {
+      console.error('Error unlocking catalog:', err.message);
+    } finally {
+      setEnCours(false);
+    }
   };
 
   const sections = [
