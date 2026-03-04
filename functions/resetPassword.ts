@@ -1,9 +1,30 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 import bcrypt from 'npm:bcryptjs@2.4.3';
 
-function genererMdp(longueur = 12) {
-  const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
-  return Array.from({ length: longueur }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+function genererMdp(longueur = 16) {
+  // Longueur par défaut: 16 (au lieu de 8/12)
+  // Inclure spécial chars pour meilleure entropie
+  const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$%^&*';
+  let password = '';
+  
+  // Au moins 1 maj, 1 min, 1 chiffre, 1 spécial
+  const hasUpper = 'ABCDEFGHJKMNPQRSTUVWXYZ';
+  const hasLower = 'abcdefghjkmnpqrstuvwxyz';
+  const hasDigit = '23456789';
+  const hasSpecial = '!@#$%^&*';
+  
+  password += hasUpper[Math.floor(Math.random() * hasUpper.length)];
+  password += hasLower[Math.floor(Math.random() * hasLower.length)];
+  password += hasDigit[Math.floor(Math.random() * hasDigit.length)];
+  password += hasSpecial[Math.floor(Math.random() * hasSpecial.length)];
+  
+  // Remplir le reste de manière aléatoire
+  for (let i = password.length; i < longueur; i++) {
+    password += chars[Math.floor(Math.random() * chars.length)];
+  }
+  
+  // Mélanger le mot de passe
+  return password.split('').sort(() => Math.random() - 0.5).join('');
 }
 
 // Rate limiting simple (en mémoire)
