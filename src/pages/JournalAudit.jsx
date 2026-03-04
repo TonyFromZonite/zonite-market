@@ -73,6 +73,22 @@ export default function JournalAudit() {
 
   return (
     <div className="space-y-4">
+      {/* Onglets */}
+      <div className="flex gap-1 border-b border-slate-200">
+        {ONGLETS.map(({ key, label, icone: Icone }) => (
+          <button
+            key={key}
+            onClick={() => setOngletActif(key)}
+            className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium border-b-2 -mb-px whitespace-nowrap transition-colors ${ongletActif === key ? "border-[#1a1f5e] text-[#1a1f5e]" : "border-transparent text-slate-500 hover:text-slate-700"}`}
+          >
+            <Icone className="w-4 h-4" />
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {ongletActif === "rapports" && <RapportsVentes />}
+      {ongletActif === "journal" && <>
       {/* Filtres */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
