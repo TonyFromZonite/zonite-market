@@ -15,11 +15,13 @@ import {
 const LOGO = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69a304769dda004762ee3a57/be2e82d8c_410287629_332500566218921_7304714630055582730_n.jpg";
 
 const STATUTS = {
-  en_attente: { label: "En attente", couleur: "bg-yellow-100 text-yellow-800" },
-  en_preparation: { label: "En préparation", couleur: "bg-blue-100 text-blue-800" },
-  en_livraison: { label: "En livraison", couleur: "bg-purple-100 text-purple-800" },
-  livree: { label: "Livrée ✓", couleur: "bg-emerald-100 text-emerald-800" },
-  echec: { label: "Échec", couleur: "bg-red-100 text-red-800" },
+  en_attente_validation_admin: { label: "En attente", couleur: "bg-yellow-100 text-yellow-800" },
+  validee_admin:               { label: "Validée", couleur: "bg-blue-100 text-blue-800" },
+  attribuee_livreur:           { label: "Livreur attribué", couleur: "bg-indigo-100 text-indigo-800" },
+  en_livraison:                { label: "En livraison 🚚", couleur: "bg-purple-100 text-purple-800" },
+  livree:                      { label: "Livrée ✓", couleur: "bg-emerald-100 text-emerald-800" },
+  echec_livraison:             { label: "Échec", couleur: "bg-orange-100 text-orange-800" },
+  annulee:                     { label: "Annulée", couleur: "bg-red-100 text-red-800" },
 };
 
 export default function EspaceVendeur() {
@@ -122,9 +124,9 @@ export default function EspaceVendeur() {
   }
 
   const notifsNonLues = notifications.filter(n => !n.lue).length;
-  const commandesEnAttente = commandes.filter(c => c.statut === "en_attente").length;
+  const commandesEnAttente = commandes.filter(c => ["en_attente_validation_admin", "validee_admin", "attribuee_livreur"].includes(c.statut)).length;
   const commandesReussies = commandes.filter(c => c.statut === "livree").length;
-  const commandesEchouees = commandes.filter(c => c.statut === "echec").length;
+  const commandesEchouees = commandes.filter(c => ["echec_livraison", "annulee"].includes(c.statut)).length;
   const commandesEnLivraison = commandes.filter(c => c.statut === "en_livraison").length;
 
   return (
