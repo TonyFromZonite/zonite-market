@@ -72,6 +72,31 @@ export default function VideoFormation() {
     }
   };
 
+  // Convertir les URLs en embed valides
+  const getEmbedUrl = (url) => {
+    if (!url) return null;
+    
+    // YouTube
+    if (url.includes("youtube.com") || url.includes("youtu.be")) {
+      let videoId = "";
+      if (url.includes("youtube.com/watch?v=")) {
+        videoId = url.split("watch?v=")[1]?.split("&")[0];
+      } else if (url.includes("youtu.be/")) {
+        videoId = url.split("youtu.be/")[1]?.split("?")[0];
+      }
+      return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
+    }
+    
+    // TikTok
+    if (url.includes("tiktok.com")) {
+      return url.includes("vm.tiktok.com") || url.includes("vt.tiktok.com") 
+        ? `https://www.tiktok.com/embed/v2/${url.split("/video/")[1]?.split("?")[0] || ""}`
+        : url;
+    }
+    
+    return url;
+  };
+
   const sections = [
     { emoji: "🏢", titre: "Présentation ZONITE", desc: "Découvrez notre entreprise et notre vision du dropshipping au Cameroun." },
     { emoji: "💰", titre: "Système de commissions", desc: "Comprenez comment sont calculées vos commissions sur chaque vente." },
@@ -103,35 +128,26 @@ export default function VideoFormation() {
           <>
             {/* Vidéo - Embed depuis lien admin */}
             <div className="bg-[#1a1f5e] rounded-2xl overflow-hidden mb-4 relative">
-              {videoUrl ? (
+              {videoUrl && getEmbedUrl(videoUrl) ? (
                 <div className="aspect-video">
-                  {videoUrl.includes("tiktok.com") ? (
-                    <iframe
-                      src={videoUrl.replace(/\/$/, "") + "?embed=v1"}
-                      width="100%"
-                      height="100%"
-                      frameBorder="0"
-                      allow="autoplay"
-                      allowFullScreen
-                      className="w-full h-full"
-                    />
-                  ) : (
-                    <iframe
-                      src={videoUrl}
-                      width="100%"
-                      height="100%"
-                      frameBorder="0"
-                      allow="autoplay; encrypted-media"
-                      allowFullScreen
-                      className="w-full h-full"
-                    />
-                  )}
+                  <iframe
+                    src={getEmbedUrl(videoUrl)}
+                    width="100%"
+                    height="100%"
+                    frameBorder="0"
+                    allow="autoplay; encrypted-media"
+                    allowFullScreen
+                    className="w-full h-full"
+                  />
                 </div>
               ) : (
                 <div className="aspect-video flex items-center justify-center bg-slate-700">
                   <div className="text-center text-white">
+                    <div className="text-3xl mb-2">🎬</div>
                     <p className="font-bold text-lg">Vidéo de formation</p>
-                    <p className="text-slate-300 text-sm">Lien non configuré par l'admin</p>
+                    <p className="text-slate-300 text-sm">
+                      {videoUrl ? "Lien invalide" : "Lien non configuré par l'admin"}
+                    </p>
                   </div>
                 </div>
               )}
