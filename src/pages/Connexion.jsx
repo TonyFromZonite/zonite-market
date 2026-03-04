@@ -251,10 +251,10 @@ export default function Connexion() {
                 </Button>
               </form>
               <div className="mt-3 md:mt-4 flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-                <button onClick={() => { setModeMdpOublie(true); setErreur(""); }} className="text-slate-400 text-xs hover:text-[#F5C518] transition-colors underline underline-offset-2">
+                <button onClick={() => { setModeMdpOublie(true); setErreur(""); }} className="text-slate-400 text-xs hover:text-[#F5C518] transition-colors underline underline-offset-2 text-center md:text-left">
                   Mot de passe oublié ?
                 </button>
-                <a href={createPageUrl("InscriptionVendeur")} className="text-[#F5C518] text-xs font-semibold hover:underline">
+                <a href={createPageUrl("InscriptionVendeur")} className="text-[#F5C518] text-xs font-semibold hover:underline text-center md:text-right">
                   Créer mon compte →
                 </a>
               </div>
