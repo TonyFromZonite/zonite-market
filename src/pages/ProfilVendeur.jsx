@@ -26,9 +26,26 @@ export default function ProfilVendeur() {
 
   useEffect(() => {
     const charger = async () => {
-      const u = await base44.auth.me();
-      const comptes = await base44.entities.CompteVendeur.filter({ user_email: u.email });
-      if (comptes.length > 0) setCompteVendeur(comptes[0]);
+      let emailVendeur = null;
+      
+      // Session vendeur prioritaire
+      try {
+        const session = sessionStorage.getItem("vendeur_session");
+        if (session) {
+          const parsed = JSON.parse(session);
+          emailVendeur = parsed.email;
+        }
+      } catch (_) {}
+
+      if (!emailVendeur) {
+        const u = await base44.auth.me().catch(() => null);
+        if (u?.email) emailVendeur = u.email;
+      }
+
+      if (emailVendeur) {
+        const comptes = await base44.entities.CompteVendeur.filter({ user_email: emailVendeur });
+        if (comptes.length > 0) setCompteVendeur(comptes[0]);
+      }
       setChargement(false);
     };
     charger();
@@ -40,7 +57,9 @@ export default function ProfilVendeur() {
     e.preventDefault();
     setErreurMdp("");
     if (!ancienMdp || !nouveauMdp || !confirmerMdp) { setErreurMdp("Tous les champs sont requis."); return; }
-    if (nouveauMdp.length < 6) { setErreurMdp("Le nouveau mot de passe doit faire au moins 6 caractères."); return; }
+    if (nouveauMdp.length < 8) { setErreurMdp("Minimum 8 caractères requis."); return; }
+    if (!/[A-Z]/.test(nouveauMdp)) { setErreurMdp("Doit contenir au moins 1 majuscule."); return; }
+    if (!/[0-9]/.test(nouveauMdp)) { setErreurMdp("Doit contenir au moins 1 chiffre."); return; }
     if (nouveauMdp !== confirmerMdp) { setErreurMdp("Les mots de passe ne correspondent pas."); return; }
     setSaveMdpEnCours(true);
     try {
