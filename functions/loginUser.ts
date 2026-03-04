@@ -1,5 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 import bcrypt from 'npm:bcryptjs@2.4.3';
+import { checkRateLimit, validateEmail, logAudit } from './auditLoggingMiddleware.js';
 
 Deno.serve(async (req) => {
   try {
