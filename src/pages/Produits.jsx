@@ -462,12 +462,37 @@ export default function Produits() {
   const commissionVendeur = (p) => (p.prix_vente || 0) - (p.prix_gros || 0);
   const beneficeZonite = (p) => (p.prix_gros || 0) - (p.prix_achat || 0);
 
+  const { data: retoursEnAttente = [] } = useQuery({
+    queryKey: ["retours_badge"],
+    queryFn: () => base44.entities.RetourProduit.filter({ statut: "en_attente" }),
+  });
+
   if (isLoading) {
     return <div className="space-y-3">{Array(6).fill(0).map((_, i) => <Skeleton key={i} className="h-12 rounded-lg" />)}</div>;
   }
 
   return (
     <div className="space-y-4">
+      {/* Onglets de navigation */}
+      <div className="flex gap-1 border-b border-slate-200 overflow-x-auto">
+        {ONGLETS_PRODUITS.map(({ key, label }) => {
+          const badge = key === "retours" ? retoursEnAttente.length : 0;
+          return (
+            <button
+              key={key}
+              onClick={() => setOngletActif(key)}
+              className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium border-b-2 -mb-px whitespace-nowrap transition-colors ${ongletActif === key ? "border-[#1a1f5e] text-[#1a1f5e]" : "border-transparent text-slate-500 hover:text-slate-700"}`}
+            >
+              {label}
+              {badge > 0 && <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{badge}</span>}
+            </button>
+          );
+        })}
+      </div>
+
+      {ongletActif === "categories" && <CategoriesTab />}
+      {ongletActif === "retours" && <RetoursTab />}
+      {ongletActif === "produits" && <div className="space-y-4">
       {/* Barre de recherche + filtres + bouton */}
       <div className="flex flex-col sm:flex-row gap-3 justify-between">
         <div className="flex flex-1 gap-2 max-w-2xl">
