@@ -168,7 +168,15 @@ function DashboardAdmin() {
 
   const enChargement = chargementVentes || chargementProduits || chargementVendeurs;
 
-  const chiffreAffaires = (ventes || [])
+  const ventesArray = Array.isArray(ventes) ? ventes : [];
+  const produitsArray = Array.isArray(produits) ? produits : [];
+  const vendeursArray = Array.isArray(vendeurs) ? vendeurs : [];
+  const commandesArray = Array.isArray(commandesVendeurs) ? commandesVendeurs : [];
+  const candidaturesArray = Array.isArray(candidaturesEnAttente) ? candidaturesEnAttente : [];
+  const kycArray = Array.isArray(kycEnAttente) ? kycEnAttente : [];
+  const paiementsArray = Array.isArray(paiementsEnAttente) ? paiementsEnAttente : [];
+
+  const chiffreAffaires = ventesArray
     .filter(v => v.statut_commande !== "annulee" && v.statut_commande !== "retournee")
     .reduce((s, v) => s + (v.montant_total || 0), 0);
 
