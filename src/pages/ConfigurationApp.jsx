@@ -12,6 +12,10 @@ const CONFIGS = [
   { cle: "nom_app", label: "Nom de l'application (ex: ZONITE Vendeurs)", placeholder: "ZONITE Vendeurs", icone: Globe, couleur: "text-[#1a1f5e]" },
 ];
 
+import { Link } from "react-router-dom";
+import { createPageUrl } from "@/utils";
+import { Lock } from "lucide-react";
+
 export default function ConfigurationApp() {
   const [valeurs, setValeurs] = useState({});
   const [ids, setIds] = useState({});
