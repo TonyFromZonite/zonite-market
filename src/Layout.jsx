@@ -151,6 +151,7 @@ export default function Layout({ children, currentPageName }) {
           <h1 className="text-base font-semibold text-slate-900 truncate flex-1">
             {menuItems.find((i) => i.page === currentPageName)?.nom || "ZONITE"}
           </h1>
+          <RechercheGlobale />
         </header>
 
         {/* Page */}
