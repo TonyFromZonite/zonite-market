@@ -208,6 +208,11 @@ export default function Layout({ children, currentPageName }) {
           {!sousAdmin && !adminSession && <RechercheGlobale />}
           <div className="flex items-center gap-2">
             <NotificationBell />
+            {vendeurSession && (
+              <span className="text-xs bg-[#F5C518]/20 text-[#1a1f5e] font-semibold px-2 py-1 rounded-full hidden sm:block">
+                Vendeur
+              </span>
+            )}
             {adminSession && (
               <span className="text-xs bg-[#F5C518]/20 text-[#1a1f5e] font-semibold px-2 py-1 rounded-full hidden sm:block">
                 Admin Principal
