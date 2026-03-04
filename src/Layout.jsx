@@ -52,6 +52,7 @@ export default function Layout({ children, currentPageName }) {
   const [menuOuvert, setMenuOuvert] = useState(false);
   const [nbCommandesAttente, setNbCommandesAttente] = useState(0);
   const [sousAdmin] = useState(() => getSousAdminSession());
+  const [adminSession] = useState(() => getAdminSession());
 
   // Filtrer les menus selon le rôle
   const menuItems = sousAdmin
