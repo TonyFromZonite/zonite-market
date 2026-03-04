@@ -21,6 +21,13 @@ function getSousAdminSession() {
   } catch (_) { return null; }
 }
 
+function getAdminSession() {
+  try {
+    const data = sessionStorage.getItem("admin_session");
+    return data ? JSON.parse(data) : null;
+  } catch (_) { return null; }
+}
+
 // Dashboard simplifié pour sous-admins
 function DashboardSousAdmin({ sousAdmin }) {
   const { data: commandesVendeurs = [], isLoading: chargCmd } = useQuery({
