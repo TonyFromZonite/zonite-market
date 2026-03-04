@@ -5,10 +5,21 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
     const { event, data, old_data } = await req.json();
 
-    // Vérifier que l'appel vient du système (automation)
-    // Les automations ont un event type défini
-    if (!event || !event.type) {
-      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    // STRICT: Vérifier que l'appel vient d'une automation CommandeVendeur + update event
+    // Structure garantie des automations: event.type, event.entity_name, event.entity_id, data
+    const isValidAutomation = 
+      event && 
+      typeof event === 'object' && 
+      event.type === 'update' &&
+      event.entity_name === 'CommandeVendeur' &&
+      event.entity_id &&
+      data &&
+      typeof data === 'object' &&
+      data.vendeur_email && // Vérifier que le vendeur email existe dans data
+      data.produit_nom;
+    
+    if (!isValidAutomation) {
+      return Response.json({ error: 'Unauthorized: Invalid automation context' }, { status: 401 });
     }
 
     // Notifier vendeur seulement si le statut change
