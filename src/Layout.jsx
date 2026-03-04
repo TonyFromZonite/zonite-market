@@ -35,9 +35,6 @@ const LOGO = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/
 
 export default function Layout({ children, currentPageName }) {
   const [menuOuvert, setMenuOuvert] = useState(false);
-  const [nbCandidatures, setNbCandidatures] = useState(0);
-  const [nbKyc, setNbKyc] = useState(0);
-  const [nbPaiements, setNbPaiements] = useState(0);
   const [nbCommandesAttente, setNbCommandesAttente] = useState(0);
 
   useEffect(() => {
