@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Save, Facebook, Globe, MessageCircle } from "lucide-react";
 
 const CONFIGS = [
+  { cle: "lien_youtube_formation", label: "Lien YouTube vidéo de formation", placeholder: "https://www.youtube.com/embed/dQw4w9WgXcQ", icone: Globe, couleur: "text-red-600" },
   { cle: "lien_facebook", label: "Lien Facebook", placeholder: "https://facebook.com/votrepagezone", icone: Facebook, couleur: "text-blue-600" },
   { cle: "lien_tiktok", label: "Lien TikTok", placeholder: "https://tiktok.com/@votrecompte", icone: Globe, couleur: "text-slate-700" },
   { cle: "message_accueil", label: "Message de bienvenue (page connexion)", placeholder: "Chaque vente est une victoire. Allons-y ! 🚀", icone: MessageCircle, couleur: "text-emerald-600" },
@@ -14,7 +15,7 @@ const CONFIGS = [
 
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { Lock } from "lucide-react";
+import { Lock, Youtube } from "lucide-react";
 
 export default function ConfigurationApp() {
   const [valeurs, setValeurs] = useState({});
@@ -59,19 +60,22 @@ export default function ConfigurationApp() {
       </div>
 
       <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-5">
-        {CONFIGS.map(({ cle, label, placeholder, icone: Icone, couleur }) => (
-          <div key={cle}>
-            <Label className="flex items-center gap-2 mb-1.5">
-              <Icone className={`w-4 h-4 ${couleur}`} />
-              {label}
-            </Label>
-            <Input
-              value={valeurs[cle] || ""}
-              onChange={(e) => setValeurs({ ...valeurs, [cle]: e.target.value })}
-              placeholder={placeholder}
-            />
-          </div>
-        ))}
+         {CONFIGS.map(({ cle, label, placeholder, icone: Icone, couleur }) => (
+           <div key={cle}>
+             <Label className="flex items-center gap-2 mb-1.5">
+               <Icone className={`w-4 h-4 ${couleur}`} />
+               {label}
+             </Label>
+             <Input
+               value={valeurs[cle] || ""}
+               onChange={(e) => setValeurs({ ...valeurs, [cle]: e.target.value })}
+               placeholder={placeholder}
+             />
+             {cle === "lien_youtube_formation" && (
+               <p className="text-xs text-slate-500 mt-1">💡 Collez l'URL complète YouTube ou l'URL embed (ex: https://www.youtube.com/embed/VIDEO_ID)</p>
+             )}
+           </div>
+         ))}
 
         <div className="pt-2 flex items-center gap-3">
           <Button
