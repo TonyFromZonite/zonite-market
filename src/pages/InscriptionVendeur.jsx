@@ -112,6 +112,7 @@ export default function InscriptionVendeur() {
       return;
     }
 
+    // Créer le CompteVendeur
     await base44.entities.CompteVendeur.create({
       user_email: form.email,
       nom_complet: form.nom_complet,
@@ -134,6 +135,16 @@ export default function InscriptionVendeur() {
       ventes_reussies: 0,
       ventes_echouees: 0,
     });
+
+    // Créer le User Base44 avec rôle 'vendeur'
+    try {
+      await base44.functions.invoke('createUserOnInscription', {
+        email: form.email,
+        full_name: form.nom_complet
+      });
+    } catch (e) {
+      console.log('Erreur création User Base44:', e.message);
+    }
 
     // Email de confirmation d'inscription
     await base44.integrations.Core.SendEmail({

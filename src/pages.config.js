@@ -58,6 +58,7 @@ import ConfigurationAdminPassword from './pages/ConfigurationAdminPassword';
 import ConfigurationApp from './pages/ConfigurationApp';
 import Connexion from './pages/Connexion';
 import DemandePaiement from './pages/DemandePaiement';
+import EnAttenteValidation from './pages/EnAttenteValidation';
 import EspaceSousAdmin from './pages/EspaceSousAdmin';
 import EspaceVendeur from './pages/EspaceVendeur';
 import GestionCandidatures from './pages/GestionCandidatures';
@@ -79,7 +80,6 @@ import SupportAdmin from './pages/SupportAdmin';
 import TableauDeBord from './pages/TableauDeBord';
 import Vendeurs from './pages/Vendeurs';
 import VideoFormation from './pages/VideoFormation';
-import EnAttenteValidation from './pages/EnAttenteValidation';
 import __Layout from './Layout.jsx';
 
 
@@ -95,6 +95,7 @@ export const PAGES = {
     "ConfigurationApp": ConfigurationApp,
     "Connexion": Connexion,
     "DemandePaiement": DemandePaiement,
+    "EnAttenteValidation": EnAttenteValidation,
     "EspaceSousAdmin": EspaceSousAdmin,
     "EspaceVendeur": EspaceVendeur,
     "GestionCandidatures": GestionCandidatures,
@@ -116,7 +117,6 @@ export const PAGES = {
     "TableauDeBord": TableauDeBord,
     "Vendeurs": Vendeurs,
     "VideoFormation": VideoFormation,
-    "EnAttenteValidation": EnAttenteValidation,
 }
 
 export const pagesConfig = {
