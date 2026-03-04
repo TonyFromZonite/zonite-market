@@ -202,32 +202,38 @@ export default function VideoFormation() {
                 </label>
 
                 <Button
-                  onClick={async () => {
-                    if (!accepte) return;
-                    setEnCours(true);
-                    try {
-                      await base44.entities.CompteVendeur.update(compteVendeur.id, {
-                        video_vue: true,
-                        conditions_acceptees: true,
-                        catalogue_debloque: true,
-                      });
-                      await base44.entities.NotificationVendeur.create({
-                        vendeur_email: compteVendeur.user_email,
-                        titre: "Catalogue débloqué !",
-                        message: "Félicitations ! Vous avez accès au catalogue produits ZONITE. Créez votre première commande !",
-                        type: "succes",
-                      });
-                      setEnCours(false);
-                    } catch (err) {
-                      setErreur("Erreur lors de la finalisation");
-                      setEnCours(false);
-                    }
-                  }}
-                  disabled={!accepte || enCours}
-                  className="w-full bg-[#F5C518] hover:bg-[#e0b010] text-[#1a1f5e] font-bold h-12"
-                >
-                  {enCours ? <Loader2 className="w-5 h-5 animate-spin" /> : "Débloquer le catalogue →"}
-                </Button>
+                   onClick={async () => {
+                     if (!accepte || !compteVendeur?.id) return;
+                     setEnCours(true);
+                     setErreur("");
+                     try {
+                       await Promise.all([
+                         base44.entities.CompteVendeur.update(compteVendeur.id, {
+                           video_vue: true,
+                           conditions_acceptees: true,
+                           catalogue_debloque: true,
+                         }),
+                         base44.entities.NotificationVendeur.create({
+                           vendeur_email: compteVendeur.user_email,
+                           titre: "Catalogue débloqué !",
+                           message: "Félicitations ! Vous avez accès au catalogue ZONITE.",
+                           type: "succes",
+                         })
+                       ]);
+                       // Légère pause avant redirection
+                       await new Promise(r => setTimeout(r, 500));
+                     } catch (err) {
+                       console.error("Finalisation:", err);
+                       setErreur("Erreur lors de la finalisation. Rechargez la page.");
+                     } finally {
+                       setEnCours(false);
+                     }
+                   }}
+                   disabled={!accepte || enCours || !compteVendeur?.id}
+                   className="w-full bg-[#F5C518] hover:bg-[#e0b010] text-[#1a1f5e] font-bold h-12"
+                 >
+                   {enCours ? <Loader2 className="w-5 h-5 animate-spin" /> : "Débloquer le catalogue →"}
+                 </Button>
               </div>
             )}
           </>
