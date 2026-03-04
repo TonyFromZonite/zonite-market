@@ -134,7 +134,7 @@ export default function Connexion() {
       );
       if (sousAdmin) {
         sessionStorage.setItem("sous_admin", JSON.stringify(sousAdmin));
-        window.location.href = createPageUrl("TableauDeBord");
+        window.location.href = createPageUrl("EspaceSousAdmin");
         return;
       }
       setErreur("Identifiants incorrects ou compte suspendu.");
