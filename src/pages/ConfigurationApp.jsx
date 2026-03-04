@@ -113,6 +113,24 @@ export default function ConfigurationApp() {
           <p className="mt-3 text-sm text-slate-600 italic">"{valeurs["message_accueil"]}"</p>
         )}
       </div>
+
+      {/* Sécurité Admin */}
+      <div className="bg-white rounded-xl border border-slate-200 p-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Lock className="w-5 h-5 text-[#1a1f5e]" />
+            <div>
+              <p className="font-bold text-slate-900">Sécurité Administrateur</p>
+              <p className="text-sm text-slate-500">Configurez votre mot de passe pour l'accès mobile</p>
+            </div>
+          </div>
+          <Link to={createPageUrl("ConfigurationAdminPassword")}>
+            <Button className="bg-[#1a1f5e] hover:bg-[#141952]">
+              Gérer mot de passe →
+            </Button>
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }
