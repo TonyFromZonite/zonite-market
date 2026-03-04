@@ -54,10 +54,14 @@ import Categories from './pages/Categories';
 import Commandes from './pages/Commandes';
 import CommandesVendeurs from './pages/CommandesVendeurs';
 import Commissions from './pages/Commissions';
+import ConfigurationApp from './pages/ConfigurationApp';
+import Connexion from './pages/Connexion';
 import DemandePaiement from './pages/DemandePaiement';
+import EspaceSousAdmin from './pages/EspaceSousAdmin';
 import EspaceVendeur from './pages/EspaceVendeur';
 import GestionCandidatures from './pages/GestionCandidatures';
 import GestionKYC from './pages/GestionKYC';
+import GestionSousAdmins from './pages/GestionSousAdmins';
 import InscriptionVendeur from './pages/InscriptionVendeur';
 import JournalAudit from './pages/JournalAudit';
 import Livraisons from './pages/Livraisons';
@@ -74,10 +78,6 @@ import SupportAdmin from './pages/SupportAdmin';
 import TableauDeBord from './pages/TableauDeBord';
 import Vendeurs from './pages/Vendeurs';
 import VideoFormation from './pages/VideoFormation';
-import GestionSousAdmins from './pages/GestionSousAdmins';
-import Connexion from './pages/Connexion';
-import ConfigurationApp from './pages/ConfigurationApp';
-import EspaceSousAdmin from './pages/EspaceSousAdmin';
 import ConfigurationAdminPassword from './pages/ConfigurationAdminPassword';
 import __Layout from './Layout.jsx';
 
@@ -90,10 +90,14 @@ export const PAGES = {
     "Commandes": Commandes,
     "CommandesVendeurs": CommandesVendeurs,
     "Commissions": Commissions,
+    "ConfigurationApp": ConfigurationApp,
+    "Connexion": Connexion,
     "DemandePaiement": DemandePaiement,
+    "EspaceSousAdmin": EspaceSousAdmin,
     "EspaceVendeur": EspaceVendeur,
     "GestionCandidatures": GestionCandidatures,
     "GestionKYC": GestionKYC,
+    "GestionSousAdmins": GestionSousAdmins,
     "InscriptionVendeur": InscriptionVendeur,
     "JournalAudit": JournalAudit,
     "Livraisons": Livraisons,
@@ -110,10 +114,6 @@ export const PAGES = {
     "TableauDeBord": TableauDeBord,
     "Vendeurs": Vendeurs,
     "VideoFormation": VideoFormation,
-    "GestionSousAdmins": GestionSousAdmins,
-    "Connexion": Connexion,
-    "ConfigurationApp": ConfigurationApp,
-    "EspaceSousAdmin": EspaceSousAdmin,
     "ConfigurationAdminPassword": ConfigurationAdminPassword,
 }
 

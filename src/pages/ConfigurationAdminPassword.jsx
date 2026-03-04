@@ -31,12 +31,25 @@ export default function ConfigurationAdminPassword() {
     charger();
   }, []);
 
+  const genererMotDePasse = () => {
+    const chars = "ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
+    return Array.from({ length: 12 }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
+  };
+
   const changerMotDePasse = async (e) => {
     e.preventDefault();
     setErreur("");
     setSucces("");
 
-    if (!mdpActuel || !mdpNouveau || !mdpConfirm) {
+    // Si pas de mot de passe existant, on n'a besoin que du nouveau
+    const necessiteAncien = !!adminMdpHash;
+
+    if (necessiteAncien && !mdpActuel) {
+      setErreur("Veuillez entrer le mot de passe actuel.");
+      return;
+    }
+
+    if (!mdpNouveau || !mdpConfirm) {
       setErreur("Tous les champs sont obligatoires.");
       return;
     }
@@ -54,8 +67,8 @@ export default function ConfigurationAdminPassword() {
     setEntraitement(true);
 
     try {
-      // Vérifier le mot de passe actuel
-      if (btoa(mdpActuel) !== adminMdpHash) {
+      // Vérifier le mot de passe actuel si un existe
+      if (necessiteAncien && btoa(mdpActuel) !== adminMdpHash) {
         setErreur("Le mot de passe actuel est incorrect.");
         setEntraitement(false);
         return;
@@ -66,13 +79,11 @@ export default function ConfigurationAdminPassword() {
       const newHash = btoa(mdpNouveau);
 
       if (configs.length > 0) {
-        // Mettre à jour la configuration existante
         await base44.entities.ConfigApp.update(configs[0].id, {
           valeur: newHash,
           description: "Mot de passe chiffré de l'administrateur principal"
         });
       } else {
-        // Créer une nouvelle configuration
         await base44.entities.ConfigApp.create({
           cle: "admin_password_hash",
           valeur: newHash,
@@ -80,7 +91,7 @@ export default function ConfigurationAdminPassword() {
         });
       }
 
-      setSucces("Mot de passe mis à jour avec succès !");
+      setSucces("Mot de passe configuré avec succès !");
       setMdpActuel("");
       setMdpNouveau("");
       setMdpConfirm("");
