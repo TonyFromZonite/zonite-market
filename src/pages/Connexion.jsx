@@ -121,13 +121,22 @@ export default function Connexion() {
     setChargementOublie(false);
   };
 
-  // Connexion sous-admin
+  // Connexion sous-admin et admin
   const connexionSousAdmin = async (e) => {
     e.preventDefault();
     if (!email || !motDePasse) { setErreur("Veuillez remplir tous les champs."); return; }
     setChargement(true);
     setErreur("");
     try {
+      // Essayer admin d'abord
+      const adminMdpHash = configs["admin_password_hash"];
+      if (adminMdpHash && (email === "admin" || email === "administrateur") && btoa(motDePasse) === adminMdpHash) {
+        sessionStorage.setItem("admin_session", JSON.stringify({ role: "admin", loggedAt: new Date().toISOString() }));
+        window.location.href = createPageUrl("TableauDeBord");
+        return;
+      }
+      
+      // Sinon chercher un sous-admin
       const resultats = await base44.entities.SousAdmin.filter({ statut: "actif" });
       const sousAdmin = resultats.find(
         (sa) => (sa.username === email || sa.email === email) && sa.mot_de_passe_hash === btoa(motDePasse)
