@@ -568,7 +568,7 @@ export default function RapportsVentes() {
           </div>
         )}
       </div>
-      </>}
+      </div>}
     </div>
   );
 }
