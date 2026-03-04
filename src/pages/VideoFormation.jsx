@@ -59,22 +59,30 @@ export default function VideoFormation() {
         const comptes = await base44.entities.CompteVendeur.filter({ user_email: u.email });
         if (comptes.length > 0) setCompteVendeur(comptes[0]);
 
-        // Récupérer le lien YouTube depuis la config
-        const configs = await base44.entities.ConfigApp.filter({ cle: "lien_youtube_formation" });
-        if (configs.length > 0 && configs[0].valeur) {
+        // Récupérer le lien YouTube depuis la config (avec retry si vide)
+        let configs = await base44.entities.ConfigApp.filter({ cle: "lien_youtube_formation" });
+        
+        // Retry une fois si résultat vide (race condition)
+        if (!configs?.length) {
+          await new Promise(r => setTimeout(r, 300));
+          configs = await base44.entities.ConfigApp.filter({ cle: "lien_youtube_formation" });
+        }
+
+        if (configs?.length > 0 && configs[0]?.valeur) {
           const videoId = extractVideoId(configs[0].valeur);
           if (videoId) {
             const embedUrl = convertToEmbedUrl(videoId);
             setVideoUrl(embedUrl);
           } else {
-            setErreur("Format vidéo invalide. URL YouTube attendue.");
+            console.error("Invalid video ID extracted from:", configs[0].valeur);
+            setErreur("Format vidéo invalide.");
           }
         } else {
-          setErreur("Aucune vidéo de formation configurée.");
+          setErreur("Vidéo non configurée.");
         }
       } catch (err) {
         console.error("Erreur chargement vidéo:", err);
-        setErreur("Erreur lors du chargement de la vidéo");
+        setErreur("Erreur de chargement.");
       }
     };
     charger();
