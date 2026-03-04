@@ -60,95 +60,79 @@ export default function Connexion() {
     chargerConfigs();
   }, []);
 
-  // Connexion vendeur (email + mot de passe stocké sur CompteVendeur)
+  // Connexion vendeur (email + mot de passe via fonction backend sécurisée)
   const connexionVendeur = async (e) => {
     e.preventDefault();
     if (!email || !motDePasse) { setErreur("Veuillez remplir tous les champs."); return; }
     setChargement(true);
     setErreur("");
     try {
-      const comptes = await base44.entities.CompteVendeur.filter({ user_email: email });
-      if (comptes.length === 0) {
-        setErreur("Aucun compte trouvé avec cet email.");
-        setChargement(false);
-        return;
+      const response = await base44.functions.invoke('loginUser', {
+        email,
+        password: motDePasse,
+        userType: 'vendeur'
+      });
+      if (response.data.success) {
+        sessionStorage.setItem("vendeur_session", JSON.stringify(response.data.session));
+        window.location.href = createPageUrl("EspaceVendeur");
+      } else {
+        setErreur("Erreur lors de la connexion. Réessayez.");
       }
-      const compte = comptes[0];
-      if (compte.statut === "suspendu") {
-        setErreur("Votre compte est suspendu. Contactez l'administrateur.");
-        setChargement(false);
-        return;
-      }
-      if (compte.mot_de_passe_hash !== btoa(motDePasse)) {
-        setErreur("Mot de passe incorrect.");
-        setChargement(false);
-        return;
-      }
-      // Stocker la session vendeur
-      sessionStorage.setItem("vendeur_session", JSON.stringify({ email: compte.user_email, id: compte.id }));
-      window.location.href = createPageUrl("EspaceVendeur");
-    } catch (_) {
-      setErreur("Erreur lors de la connexion. Réessayez.");
+    } catch (err) {
+      const errorMsg = err.response?.data?.error || "Erreur lors de la connexion. Réessayez.";
+      setErreur(errorMsg);
     }
     setChargement(false);
   };
 
-  // Mot de passe oublié vendeur : génère un nouveau mdp et l'envoie par email
+  // Mot de passe oublié vendeur : appelle fonction backend sécurisée
   const mdpOublie = async (e) => {
     e.preventDefault();
     if (!emailOublie) { setErreur("Entrez votre email."); return; }
     setChargementOublie(true);
     setErreur("");
     try {
-      const comptes = await base44.entities.CompteVendeur.filter({ user_email: emailOublie });
-      if (comptes.length === 0) {
-        setErreur("Aucun compte trouvé avec cet email.");
-        setChargementOublie(false);
-        return;
-      }
-      const compte = comptes[0];
-      const nouveauMdp = genererMdp();
-      await base44.entities.CompteVendeur.update(compte.id, { mot_de_passe_hash: btoa(nouveauMdp) });
-      await base44.integrations.Core.SendEmail({
-        to: emailOublie,
-        subject: "🔐 Votre nouveau mot de passe ZONITE",
-        body: `Bonjour ${compte.nom_complet},\n\nVotre nouveau mot de passe temporaire est :\n\n👉 ${nouveauMdp}\n\nConnectez-vous sur l'application ZONITE et changez-le dans votre profil.\n\nCordialement,\nL'équipe ZONITE`,
+      const response = await base44.functions.invoke('resetPassword', {
+        email: emailOublie
       });
-      setMdpOublieSucces(true);
-    } catch (_) {
-      setErreur("Erreur lors de l'envoi. Réessayez.");
+      if (response.data.success) {
+        setMdpOublieSucces(true);
+      } else {
+        setErreur("Erreur lors de l'envoi. Réessayez.");
+      }
+    } catch (err) {
+      const errorMsg = err.response?.data?.error || "Erreur lors de l'envoi. Réessayez.";
+      setErreur(errorMsg);
     }
     setChargementOublie(false);
   };
 
-  // Connexion sous-admin et admin
+  // Connexion sous-admin et admin via fonction backend sécurisée
   const connexionSousAdmin = async (e) => {
     e.preventDefault();
     if (!email || !motDePasse) { setErreur("Veuillez remplir tous les champs."); return; }
     setChargement(true);
     setErreur("");
     try {
-      // Essayer admin d'abord
-      const adminMdpHash = configs["admin_password_hash"];
-      if (adminMdpHash && (email === "admin" || email === "administrateur") && btoa(motDePasse) === adminMdpHash) {
-        sessionStorage.setItem("admin_session", JSON.stringify({ role: "admin", loggedAt: new Date().toISOString() }));
-        window.location.href = createPageUrl("TableauDeBord");
-        return;
+      const response = await base44.functions.invoke('loginUser', {
+        email,
+        password: motDePasse,
+        userType: 'admin'
+      });
+      if (response.data.success) {
+        if (response.data.session.type === 'admin') {
+          sessionStorage.setItem("admin_session", JSON.stringify(response.data.session));
+          window.location.href = createPageUrl("TableauDeBord");
+        } else {
+          sessionStorage.setItem("sous_admin", JSON.stringify(response.data.session));
+          window.location.href = createPageUrl("EspaceSousAdmin");
+        }
+      } else {
+        setErreur("Identifiants incorrects ou compte suspendu.");
       }
-      
-      // Sinon chercher un sous-admin
-      const resultats = await base44.entities.SousAdmin.filter({ statut: "actif" });
-      const sousAdmin = resultats.find(
-        (sa) => (sa.username === email || sa.email === email) && sa.mot_de_passe_hash === btoa(motDePasse)
-      );
-      if (sousAdmin) {
-        sessionStorage.setItem("sous_admin", JSON.stringify(sousAdmin));
-        window.location.href = createPageUrl("EspaceSousAdmin");
-        return;
-      }
-      setErreur("Identifiants incorrects ou compte suspendu.");
-    } catch (_) {
-      setErreur("Erreur lors de la connexion. Réessayez.");
+    } catch (err) {
+      const errorMsg = err.response?.data?.error || "Erreur lors de la connexion. Réessayez.";
+      setErreur(errorMsg);
     }
     setChargement(false);
   };

@@ -54,6 +54,7 @@ import Categories from './pages/Categories';
 import Commandes from './pages/Commandes';
 import CommandesVendeurs from './pages/CommandesVendeurs';
 import Commissions from './pages/Commissions';
+import ConfigurationAdminPassword from './pages/ConfigurationAdminPassword';
 import ConfigurationApp from './pages/ConfigurationApp';
 import Connexion from './pages/Connexion';
 import DemandePaiement from './pages/DemandePaiement';
@@ -78,7 +79,6 @@ import SupportAdmin from './pages/SupportAdmin';
 import TableauDeBord from './pages/TableauDeBord';
 import Vendeurs from './pages/Vendeurs';
 import VideoFormation from './pages/VideoFormation';
-import ConfigurationAdminPassword from './pages/ConfigurationAdminPassword';
 import __Layout from './Layout.jsx';
 
 
@@ -90,6 +90,7 @@ export const PAGES = {
     "Commandes": Commandes,
     "CommandesVendeurs": CommandesVendeurs,
     "Commissions": Commissions,
+    "ConfigurationAdminPassword": ConfigurationAdminPassword,
     "ConfigurationApp": ConfigurationApp,
     "Connexion": Connexion,
     "DemandePaiement": DemandePaiement,
@@ -114,7 +115,6 @@ export const PAGES = {
     "TableauDeBord": TableauDeBord,
     "Vendeurs": Vendeurs,
     "VideoFormation": VideoFormation,
-    "ConfigurationAdminPassword": ConfigurationAdminPassword,
 }
 
 export const pagesConfig = {
