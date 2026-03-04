@@ -246,11 +246,11 @@ export default function Connexion() {
                   </div>
                 )}
 
-                <Button type="submit" disabled={chargement} className="w-full h-11 bg-[#F5C518] hover:bg-[#e0b010] text-[#1a1f5e] font-black text-sm rounded-xl shadow-lg shadow-[#F5C518]/20 transition-all active:scale-95">
+                <Button type="submit" disabled={chargement} className="w-full h-11 md:h-12 bg-[#F5C518] hover:bg-[#e0b010] text-[#1a1f5e] font-black text-sm md:text-base rounded-xl shadow-lg shadow-[#F5C518]/20 transition-all active:scale-95">
                   {chargement ? "Vérification..." : "Se connecter →"}
                 </Button>
               </form>
-              <div className="mt-3 flex items-center justify-between">
+              <div className="mt-3 md:mt-4 flex flex-col md:flex-row md:items-center md:justify-between gap-2">
                 <button onClick={() => { setModeMdpOublie(true); setErreur(""); }} className="text-slate-400 text-xs hover:text-[#F5C518] transition-colors underline underline-offset-2">
                   Mot de passe oublié ?
                 </button>
