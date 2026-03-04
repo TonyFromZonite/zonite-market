@@ -96,27 +96,27 @@ export default function VentesVendeurTab() {
       </div>
 
       {/* KPIs */}
-      <div className="grid grid-cols-3 gap-4">
-        <div className="bg-white rounded-xl p-4 shadow-sm border border-slate-100">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
+        <div className="bg-white rounded-xl p-3 md:p-4 shadow-sm border border-slate-100">
           <div className="flex items-center gap-2 mb-1">
             <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center"><ShoppingCart className="w-4 h-4 text-blue-600" /></div>
-            <p className="text-xs text-slate-500 font-medium">Commandes</p>
+            <p className="text-[11px] md:text-xs text-slate-500 font-medium truncate">Commandes</p>
           </div>
-          <p className="text-2xl font-bold text-slate-900">{nbCommandes}</p>
+          <p className="text-xl md:text-2xl font-bold text-slate-900">{nbCommandes}</p>
         </div>
-        <div className="bg-white rounded-xl p-4 shadow-sm border border-slate-100">
+        <div className="bg-white rounded-xl p-3 md:p-4 shadow-sm border border-slate-100">
           <div className="flex items-center gap-2 mb-1">
             <div className="w-8 h-8 bg-purple-50 rounded-lg flex items-center justify-center"><DollarSign className="w-4 h-4 text-purple-600" /></div>
-            <p className="text-xs text-slate-500 font-medium">CA Vendeurs</p>
+            <p className="text-[11px] md:text-xs text-slate-500 font-medium truncate">CA Vendeurs</p>
           </div>
-          <p className="text-xl font-bold text-slate-900">{fmt(caTotal)}</p>
+          <p className="text-base md:text-xl font-bold text-slate-900 truncate">{fmt(caTotal)}</p>
         </div>
-        <div className="bg-white rounded-xl p-4 shadow-sm border border-slate-100">
+        <div className="bg-white rounded-xl p-3 md:p-4 shadow-sm border border-slate-100">
           <div className="flex items-center gap-2 mb-1">
             <div className="w-8 h-8 bg-yellow-50 rounded-lg flex items-center justify-center"><TrendingUp className="w-4 h-4 text-yellow-600" /></div>
-            <p className="text-xs text-slate-500 font-medium">Commissions totales</p>
+            <p className="text-[11px] md:text-xs text-slate-500 font-medium truncate">Commissions totales</p>
           </div>
-          <p className="text-xl font-bold text-yellow-600">{fmt(commissionsTotal)}</p>
+          <p className="text-base md:text-xl font-bold text-yellow-600 truncate">{fmt(commissionsTotal)}</p>
         </div>
       </div>
 
