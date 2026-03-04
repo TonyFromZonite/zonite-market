@@ -126,17 +126,17 @@ export default function VentesVendeurTab() {
           <div className="p-10 text-center text-slate-400 text-sm">Aucune commande livrée pour cette période</div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full text-xs md:text-sm">
               <thead>
-                <tr className="bg-slate-50 text-slate-500 text-xs uppercase border-b border-slate-100">
-                  <th className="text-left px-4 py-3 font-medium">Date</th>
-                  <th className="text-left px-4 py-3 font-medium">Vendeur</th>
-                  <th className="text-left px-4 py-3 font-medium">Produit</th>
-                  <th className="text-right px-4 py-3 font-medium">Qté</th>
-                  <th className="text-right px-4 py-3 font-medium">Prix client</th>
-                  <th className="text-right px-4 py-3 font-medium">CA</th>
-                  <th className="text-right px-4 py-3 font-medium">Commission</th>
-                  <th className="text-left px-4 py-3 font-medium">Ville</th>
+                <tr className="bg-slate-50 text-slate-500 text-[10px] md:text-xs uppercase border-b border-slate-100">
+                  <th className="text-left px-2 md:px-4 py-3 font-medium">Date</th>
+                  <th className="text-left px-2 md:px-4 py-3 font-medium">Vendeur</th>
+                  <th className="text-left px-2 md:px-4 py-3 font-medium">Produit</th>
+                  <th className="text-right px-2 md:px-4 py-3 font-medium">Qté</th>
+                  <th className="text-right px-2 md:px-4 py-3 font-medium hidden sm:table-cell">Prix client</th>
+                  <th className="text-right px-2 md:px-4 py-3 font-medium">CA</th>
+                  <th className="text-right px-2 md:px-4 py-3 font-medium">Commission</th>
+                  <th className="text-left px-2 md:px-4 py-3 font-medium hidden md:table-cell">Ville</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
