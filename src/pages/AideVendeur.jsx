@@ -35,6 +35,11 @@ export default function AideVendeur() {
   const [compteVendeur, setCompteVendeur] = useState(null);
   const [onglet, setOnglet] = useState("faq");
   const [faqOuverte, setFaqOuverte] = useState(null);
+
+  const { data: faqItems = [] } = useQuery({
+    queryKey: ["faq_items"],
+    queryFn: () => base44.entities.FaqItem.filter({ actif: true }, "ordre"),
+  });
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ sujet: "", categorie: "", message: "" });
   const [enCours, setEnCours] = useState(false);
