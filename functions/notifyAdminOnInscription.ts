@@ -3,23 +3,21 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    
-    // Vérifier que l'appel vient du système (automation) ou d'un admin authentifié
-    let isAuthorized = false;
-    
-    // Vérifier si automation (contexte spécial)
     const payload = await req.json();
-    if (payload.event && payload.event.type) {
-      // C'est un appel d'automation, autorisé
-      isAuthorized = true;
-    } else {
-      // Vérifier authentification utilisateur
-      const user = await base44.auth.me().catch(() => null);
-      isAuthorized = user?.role === 'admin';
-    }
 
-    if (!isAuthorized) {
-      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    // STRICT: Vérifier que l'appel vient d'une automation CandidatureVendeur + create event
+    // Structure garantie des automations: event.type, event.entity_name, event.entity_id, data
+    const isValidAutomation = 
+      payload.event && 
+      typeof payload.event === 'object' && 
+      payload.event.type === 'create' &&
+      payload.event.entity_name === 'CandidatureVendeur' &&
+      payload.event.entity_id &&
+      payload.data &&
+      typeof payload.data === 'object';
+    
+    if (!isValidAutomation) {
+      return Response.json({ error: 'Unauthorized: Invalid automation context' }, { status: 401 });
     }
 
     const { vendeur_id, vendeur_nom, vendeur_email } = payload;
