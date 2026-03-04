@@ -65,13 +65,15 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Invalid email format' }, { status: 400 });
     }
 
-    // Vérifier rate limiting
+    // Vérifier rate limiting AVANT toute opération
     if (!checkRateLimit(email)) {
       return Response.json({ error: 'Too many reset attempts. Try again later.' }, { status: 429 });
     }
 
     // Vérifier que le compte existe (sans divulguer si l'email existe)
     const comptes = await base44.asServiceRole.entities.CompteVendeur.filter({ user_email: email });
+    
+    // SÉCURITÉ: Ne PAS logger ou révéler si un compte existe via audit
     if (comptes.length === 0) {
       // Ne pas divulguer si le compte existe ou non
       return Response.json({ success: true, message: 'If the email exists, a reset link will be sent' });
