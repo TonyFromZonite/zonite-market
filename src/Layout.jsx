@@ -189,16 +189,19 @@ export default function Layout({ children, currentPageName }) {
             {TOUS_LES_MENUS.find((i) => i.page === currentPageName)?.nom || "ZONITE"}
           </h1>
           {!sousAdmin && !adminSession && <RechercheGlobale />}
-          {adminSession && (
-            <span className="text-xs bg-[#F5C518]/20 text-[#1a1f5e] font-semibold px-2 py-1 rounded-full hidden sm:block">
-              Admin Principal
-            </span>
-          )}
-          {sousAdmin && (
-            <span className="text-xs bg-[#F5C518]/20 text-[#1a1f5e] font-semibold px-2 py-1 rounded-full hidden sm:block">
-              {sousAdmin.nom_role}
-            </span>
-          )}
+          <div className="flex items-center gap-2">
+            <NotificationBell />
+            {adminSession && (
+              <span className="text-xs bg-[#F5C518]/20 text-[#1a1f5e] font-semibold px-2 py-1 rounded-full hidden sm:block">
+                Admin Principal
+              </span>
+            )}
+            {sousAdmin && (
+              <span className="text-xs bg-[#F5C518]/20 text-[#1a1f5e] font-semibold px-2 py-1 rounded-full hidden sm:block">
+                {sousAdmin.nom_role}
+              </span>
+            )}
+          </div>
         </header>
 
         {/* Page */}
