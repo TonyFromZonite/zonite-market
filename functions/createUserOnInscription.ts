@@ -3,20 +3,20 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    
-    // Vérifier la source: fonction appelée uniquement via l'automation ou l'app interne
-    const origin = req.headers.get('origin') || '';
-    const authorization = req.headers.get('authorization') || '';
-    
-    // Accepter uniquement les appels depuis l'app elle-même ou via authentification valide
-    const isFromApp = origin.includes('localhost') || origin.includes(Deno.env.get('APP_DOMAIN') || '');
-    const hasValidAuth = authorization.startsWith('Bearer ');
-    
-    if (!isFromApp && !hasValidAuth) {
-      return Response.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const payload = await req.json();
+    const { email, full_name } = payload;
 
-    const { email, full_name } = await req.json();
+    // Vérifier que l'appel vient d'une automation enregistrée (seule source fiable)
+    // Les automations Entity ont une structure spécifique: event.type, event.entity_name, event.entity_id
+    const isValidAutomation = payload.event && 
+      typeof payload.event === 'object' && 
+      payload.event.type && 
+      payload.event.entity_name && 
+      payload.event.entity_id;
+    
+    if (!isValidAutomation) {
+      return Response.json({ error: 'Unauthorized: Invalid automation context' }, { status: 401 });
+    }
 
     if (!email || !full_name) {
       return Response.json({ error: 'Email and full_name are required' }, { status: 400 });
