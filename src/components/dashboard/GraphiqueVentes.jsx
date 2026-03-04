@@ -30,7 +30,7 @@ export default function GraphiqueVentes({ ventes }) {
             <YAxis tick={{ fontSize: 11, fill: "#64748b" }} />
             <Tooltip
               contentStyle={{ borderRadius: "8px", border: "1px solid #e2e8f0", fontSize: "12px" }}
-              formatter={(val) => [`${val.toLocaleString("fr-FR")} DA`, "Montant"]}
+              formatter={(val) => [`${val.toLocaleString("fr-FR")} FCFA`, "Montant"]}
             />
             <Bar dataKey="montant" fill="#2563EB" radius={[4, 4, 0, 0]} />
           </BarChart>

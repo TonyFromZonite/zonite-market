@@ -27,7 +27,7 @@ export default function TopVendeurs({ vendeurs }) {
               <p className="text-xs text-slate-500">{vendeur.nombre_ventes || 0} ventes</p>
             </div>
             <p className="text-sm font-semibold text-slate-700">
-              {(vendeur.chiffre_affaires_genere || 0).toLocaleString("fr-FR")} DA
+              {(vendeur.chiffre_affaires_genere || 0).toLocaleString("fr-FR")} FCFA
             </p>
           </div>
         ))}
