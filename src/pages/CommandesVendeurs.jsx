@@ -39,6 +39,11 @@ export default function CommandesVendeurs() {
     queryFn: () => base44.entities.CommandeVendeur.list("-created_date", 200),
   });
 
+  const { data: livreurs = [] } = useQuery({
+    queryKey: ["livreurs_actifs"],
+    queryFn: () => base44.entities.Livraison.filter({ statut: "actif" }),
+  });
+
   const nbEnAttente = commandes.filter(c => c.statut === "en_attente_validation_admin").length;
 
   const validerCommande = async () => {
