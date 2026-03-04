@@ -5,6 +5,12 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
     const { event, data, old_data } = await req.json();
 
+    // Vérifier que l'appel vient du système (automation)
+    // Les automations ont un event type défini
+    if (!event || !event.type) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     // Notifier vendeur seulement si le statut change
     if (event.type === "update" && data && old_data && data.statut !== old_data.statut) {
       const statusLabels = {

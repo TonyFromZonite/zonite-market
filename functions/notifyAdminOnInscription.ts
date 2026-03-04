@@ -3,10 +3,34 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const { vendeur_id, vendeur_nom, vendeur_email } = await req.json();
+    
+    // Vérifier que l'appel vient du système (automation) ou d'un admin authentifié
+    let isAuthorized = false;
+    
+    // Vérifier si automation (contexte spécial)
+    const payload = await req.json();
+    if (payload.event && payload.event.type) {
+      // C'est un appel d'automation, autorisé
+      isAuthorized = true;
+    } else {
+      // Vérifier authentification utilisateur
+      const user = await base44.auth.me().catch(() => null);
+      isAuthorized = user?.role === 'admin';
+    }
+
+    if (!isAuthorized) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { vendeur_id, vendeur_nom, vendeur_email } = payload;
 
     if (!vendeur_id || !vendeur_nom || !vendeur_email) {
       return Response.json({ error: 'Données manquantes' }, { status: 400 });
+    }
+
+    // Valider email
+    if (!vendeur_email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+      return Response.json({ error: 'Invalid email' }, { status: 400 });
     }
 
     // Créer une notification pour tous les admins
