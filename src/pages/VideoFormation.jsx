@@ -105,18 +105,20 @@ export default function VideoFormation() {
                   <p className="text-white text-center text-sm">{erreur}</p>
                 </div>
               ) : videoUrl ? (
-                <div className="aspect-video w-full">
-                  <iframe
-                    width="100%"
-                    height="100%"
-                    src={videoUrl}
-                    title="Formation ZONITE"
-                    frameBorder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-                    allowFullScreen={true}
-                    style={{ aspectRatio: '16 / 9', border: 'none' }}
-                  />
-                </div>
+               <div className="aspect-video w-full">
+                 <iframe
+                   width="100%"
+                   height="100%"
+                   src={videoUrl}
+                   title="Formation ZONITE"
+                   frameBorder="0"
+                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                   allowFullScreen
+                   sandbox="allow-same-origin allow-scripts allow-popups allow-presentation"
+                   style={{ aspectRatio: '16 / 9', border: 'none', display: 'block' }}
+                   onError={() => setErreur("Erreur de chargement de la vidéo YouTube")}
+                 />
+               </div>
               ) : (
                 <div className="aspect-video flex items-center justify-center bg-slate-800">
                   <Loader2 className="w-8 h-8 text-white animate-spin" />
