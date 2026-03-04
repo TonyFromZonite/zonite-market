@@ -91,7 +91,7 @@ export default function NouvelleVente() {
     await base44.entities.JournalAudit.create({
       action: "Nouvelle vente enregistrée",
       module: "vente",
-      details: `Vente de ${donnees.quantite}x ${produit.nom} par ${vendeur.nom_complet} – Total: ${donnees.montantTotal} DA`,
+      details: `Vente de ${donnees.quantite}x ${produit.nom} par ${vendeur.nom_complet} – Total: ${donnees.montantTotal} FCFA`,
       entite_id: donnees.produit_id,
     });
 

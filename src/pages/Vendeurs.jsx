@@ -99,7 +99,7 @@ export default function Vendeurs() {
     `${v.nom_complet} ${v.email} ${v.telephone}`.toLowerCase().includes(recherche.toLowerCase())
   );
 
-  const formater = (n) => `${Math.round(n || 0).toLocaleString("fr-FR")} DA`;
+  const formater = (n) => `${Math.round(n || 0).toLocaleString("fr-FR")} FCFA`;
 
   if (isLoading) {
     return <div className="space-y-3">{Array(5).fill(0).map((_, i) => <Skeleton key={i} className="h-12 rounded-lg" />)}</div>;
