@@ -97,14 +97,6 @@ export default function InscriptionVendeur() {
     setEnCours(true);
     setErreur("");
 
-    // Vérifier si un compte existe déjà avec cet email
-    const existants = await base44.entities.CompteVendeur.filter({ user_email: form.email });
-    if (existants.length > 0) {
-      setErreur("Un compte existe déjà avec cet email. Connectez-vous.");
-      setEnCours(false);
-      return;
-    }
-
     // ✅ Tout est géré côté serveur : hachage, création, email
     await base44.functions.invoke('registerVendor', {
       email: form.email,
