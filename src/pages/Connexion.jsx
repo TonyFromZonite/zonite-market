@@ -326,14 +326,7 @@ export default function Connexion() {
                   {chargement ? "Vérification..." : "Accéder au panneau admin →"}
                 </Button>
               </form>
-              <div className="mt-3 pt-3 border-t border-white/10 text-center">
-                <button
-                  onClick={() => base44.auth.redirectToLogin(createPageUrl("TableauDeBord"))}
-                  className="text-slate-400 text-xs hover:text-[#F5C518] transition-colors underline underline-offset-2"
-                >
-                  Admin principal → Connexion via lien magique
-                </button>
-              </div>
+
             </div>
           )}
         </div>
