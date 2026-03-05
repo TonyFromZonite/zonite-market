@@ -100,18 +100,8 @@ export default function InscriptionVendeur() {
 
     const mdp = form.mot_de_passe || genererMdp();
 
-    // Hash password securely via backend
-    let hashedPassword;
-    try {
-      const response = await base44.functions.invoke('hashPassword', {
-        password: mdp
-      });
-      hashedPassword = response.data.hashedPassword;
-    } catch (_) {
-      setErreur("Erreur lors du hachage du mot de passe.");
-      setEnCours(false);
-      return;
-    }
+    // Hash password côté client
+    const hashedPassword = await bcrypt.hash(mdp, 10);
 
     // Créer le CompteVendeur
     await base44.entities.CompteVendeur.create({
