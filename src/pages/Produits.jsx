@@ -431,6 +431,8 @@ export default function Produits() {
       await base44.entities.Produit.create(data);
       await base44.entities.JournalAudit.create({ action: "Produit créé", module: "produit", details: `Nouveau produit: ${form.nom} (${form.reference})` });
     }
+    invalidateQuery('PRODUITS');
+    invalidateQuery('CATEGORIES');
     queryClient.invalidateQueries({ queryKey: ["produits"] });
     setDialogOuvert(false);
     setEnCours(false);
