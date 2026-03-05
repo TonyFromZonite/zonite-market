@@ -320,9 +320,32 @@ export default function InscriptionVendeur() {
               <p className="text-slate-300 text-xs mt-0.5">Ces documents permettent à notre équipe de valider votre compte.</p>
             </div>
 
-            {/* Photo identité */}
+            {/* Type de document */}
             <div>
-              <Label className="text-slate-200 text-xs mb-1.5 block">Pièce d'identité (CNI, passeport) *</Label>
+              <Label className="text-slate-200 text-xs mb-2 block">Type de document *</Label>
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => { setTypeDocument("cni"); modifier("photo_identite_verso_url", ""); }}
+                  className={`flex-1 py-2.5 rounded-xl text-xs font-bold border transition-all ${typeDocument === "cni" ? "bg-[#F5C518] text-[#1a1f5e] border-[#F5C518]" : "bg-white/5 text-slate-300 border-white/20 hover:bg-white/10"}`}
+                >
+                  🪪 CNI
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setTypeDocument("passeport"); modifier("photo_identite_verso_url", ""); }}
+                  className={`flex-1 py-2.5 rounded-xl text-xs font-bold border transition-all ${typeDocument === "passeport" ? "bg-[#F5C518] text-[#1a1f5e] border-[#F5C518]" : "bg-white/5 text-slate-300 border-white/20 hover:bg-white/10"}`}
+                >
+                  📘 Passeport
+                </button>
+              </div>
+            </div>
+
+            {/* Recto (ou page principale pour passeport) */}
+            <div>
+              <Label className="text-slate-200 text-xs mb-1.5 block">
+                {typeDocument === "cni" ? "CNI — Recto *" : "Passeport — Page principale *"}
+              </Label>
               <label htmlFor="id-photo" className={`flex flex-col items-center justify-center w-full h-24 rounded-2xl border-2 border-dashed cursor-pointer transition-all ${form.photo_identite_url ? "border-emerald-400 bg-emerald-500/10" : "border-white/20 bg-white/5 hover:bg-white/10"}`}>
                 {uploadEnCours.id ? (
                   <Loader2 className="w-6 h-6 text-white animate-spin" />
@@ -342,6 +365,31 @@ export default function InscriptionVendeur() {
                   onChange={e => e.target.files[0] && uploadFichier(e.target.files[0], "photo_identite_url")} />
               </label>
             </div>
+
+            {/* Verso CNI uniquement */}
+            {typeDocument === "cni" && (
+              <div>
+                <Label className="text-slate-200 text-xs mb-1.5 block">CNI — Verso *</Label>
+                <label htmlFor="id-verso" className={`flex flex-col items-center justify-center w-full h-24 rounded-2xl border-2 border-dashed cursor-pointer transition-all ${form.photo_identite_verso_url ? "border-emerald-400 bg-emerald-500/10" : "border-white/20 bg-white/5 hover:bg-white/10"}`}>
+                  {uploadEnCours.idVerso ? (
+                    <Loader2 className="w-6 h-6 text-white animate-spin" />
+                  ) : form.photo_identite_verso_url ? (
+                    <div className="text-center">
+                      <CheckCircle2 className="w-6 h-6 text-emerald-400 mx-auto mb-1" />
+                      <p className="text-emerald-300 text-xs font-medium">Verso uploadé ✓</p>
+                      <p className="text-slate-400 text-[10px]">Cliquez pour changer</p>
+                    </div>
+                  ) : (
+                    <div className="text-center">
+                      <Upload className="w-6 h-6 text-slate-400 mx-auto mb-1" />
+                      <p className="text-slate-300 text-xs">Appuyez pour uploader</p>
+                    </div>
+                  )}
+                  <input type="file" accept="image/*" id="id-verso" className="hidden"
+                    onChange={e => e.target.files[0] && uploadFichier(e.target.files[0], "photo_identite_verso_url")} />
+                </label>
+              </div>
+            )}
 
             {/* Selfie */}
             <div>
