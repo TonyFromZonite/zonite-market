@@ -61,11 +61,11 @@ export default function Livraisons() {
     if (!form.nom.trim()) return;
     setEnCours(true);
     if (livreurEdite) {
-      await base44.entities.Livraison.update(livreurEdite.id, form);
-      await base44.entities.JournalAudit.create({ action: "Livreur modifié", module: "livraison", details: `Livreur ${form.nom} modifié`, entite_id: livreurEdite.id });
+      await base44.functions.invoke('updateLivraison', { livraisonId: livreurEdite.id, data: form });
+      await base44.functions.invoke('createAudit', { action: "Livreur modifié", module: "livraison", details: `Livreur ${form.nom} modifié`, entite_id: livreurEdite.id });
     } else {
-      await base44.entities.Livraison.create(form);
-      await base44.entities.JournalAudit.create({ action: "Livreur créé", module: "livraison", details: `Nouveau livreur: ${form.nom}` });
+      await base44.functions.invoke('createLivraison', form);
+      await base44.functions.invoke('createAudit', { action: "Livreur créé", module: "livraison", details: `Nouveau livreur: ${form.nom}` });
     }
     queryClient.invalidateQueries({ queryKey: ["livraisons"] });
     setDialogOuvert(false);
@@ -74,8 +74,8 @@ export default function Livraisons() {
 
   const supprimer = async (l) => {
     if (!confirm(`Supprimer le livreur "${l.nom}" ?`)) return;
-    await base44.entities.Livraison.delete(l.id);
-    await base44.entities.JournalAudit.create({ action: "Livreur supprimé", module: "livraison", details: `Livreur ${l.nom} supprimé`, entite_id: l.id });
+    await base44.functions.invoke('deleteLivraison', { livraisonId: l.id });
+    await base44.functions.invoke('createAudit', { action: "Livreur supprimé", module: "livraison", details: `Livreur ${l.nom} supprimé`, entite_id: l.id });
     queryClient.invalidateQueries({ queryKey: ["livraisons"] });
   };
 
