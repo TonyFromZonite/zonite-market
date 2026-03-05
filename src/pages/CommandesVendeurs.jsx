@@ -244,6 +244,7 @@ export default function CommandesVendeurs() {
       message: `Votre commande de ${commandeSelectionnee.produit_nom} pour ${commandeSelectionnee.client_nom} a été annulée.`,
       type: "alerte",
     });
+    await base44.entities.JournalAudit.create({ action: "Commande annulée", module: "commande", details: `Commande ${commandeSelectionnee.id} annulée`, entite_id: commandeSelectionnee.id });
     invalidateQuery('PRODUITS');
     queryClient.invalidateQueries({ queryKey: ["commandes_vendeurs_admin"] });
     setEnCours(false);
