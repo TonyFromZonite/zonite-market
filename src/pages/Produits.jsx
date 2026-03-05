@@ -480,16 +480,23 @@ export default function Produits() {
   const ajouterStock = async () => {
     if (!produitEdite || stockAjout <= 0) return;
     setEnCours(true);
-    const ancien = produitEdite.stock_global || 0;
-    const nouveau = ancien + stockAjout;
-    await base44.entities.Produit.update(produitEdite.id, { stock_global: nouveau, statut: nouveau > 0 ? "actif" : produitEdite.statut });
-    await base44.entities.MouvementStock.create({ produit_id: produitEdite.id, produit_nom: produitEdite.nom, type_mouvement: "entree", quantite: stockAjout, stock_avant: ancien, stock_apres: nouveau, raison: "Approvisionnement" });
-    await base44.entities.JournalAudit.create({ action: "Stock ajouté", module: "produit", details: `+${stockAjout} unités pour ${produitEdite.nom} (${ancien} → ${nouveau})`, entite_id: produitEdite.id });
-    invalidateQuery('PRODUITS');
-    queryClient.invalidateQueries({ queryKey: ["produits"] });
-    setDialogStock(false);
-    setStockAjout(0);
-    setEnCours(false);
+    try {
+      const ancien = produitEdite.stock_global || 0;
+      const nouveau = ancien + stockAjout;
+      await base44.entities.Produit.update(produitEdite.id, { stock_global: nouveau, statut: nouveau > 0 ? "actif" : produitEdite.statut });
+      await base44.entities.MouvementStock.create({ produit_id: produitEdite.id, produit_nom: produitEdite.nom, type_mouvement: "entree", quantite: stockAjout, stock_avant: ancien, stock_apres: nouveau, raison: "Approvisionnement" });
+      await base44.entities.JournalAudit.create({ action: "Stock ajouté", module: "produit", details: `+${stockAjout} unités pour ${produitEdite.nom} (${ancien} → ${nouveau})`, entite_id: produitEdite.id });
+      showSuccess("Stock ajouté", `+${stockAjout} unité(s) pour ${produitEdite.nom}`);
+      invalidateQuery('PRODUITS');
+      queryClient.invalidateQueries({ queryKey: ["produits"] });
+      setDialogStock(false);
+      setStockAjout(0);
+    } catch (err) {
+      console.error("Erreur lors de l'ajout de stock:", err);
+      showError("Erreur d'approvisionnement", err.message || "Échec de l'approvisionnement");
+    } finally {
+      setEnCours(false);
+    }
   };
 
   // ── Filtrage ──────────────────────────────────────────────────────────────────
