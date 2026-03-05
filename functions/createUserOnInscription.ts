@@ -2,26 +2,20 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 
 Deno.serve(async (req) => {
   try {
+    if (req.method !== 'POST') {
+      return Response.json({ error: 'Method not allowed' }, { status: 405 });
+    }
+
     const base44 = createClientFromRequest(req);
     const payload = await req.json();
-    const { email, full_name } = payload;
 
-    // Vérifier que l'appel vient d'une automation enregistrée (seule source fiable)
-    const isValidAutomation = payload.event && 
-      typeof payload.event === 'object' && 
-      payload.event.type && 
-      payload.event.entity_name && 
-      payload.event.entity_id;
-    
-    if (!isValidAutomation) {
-      return Response.json({ error: 'Unauthorized: Invalid automation context' }, { status: 401 });
-    }
+    const email = payload.email || payload.data?.user_email;
+    const full_name = payload.full_name || payload.data?.nom_complet;
 
     if (!email || !full_name) {
       return Response.json({ error: 'Email and full_name are required' }, { status: 400 });
     }
 
-    // Sanitization stricte
     if (typeof email !== 'string' || !email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
       return Response.json({ error: 'Invalid email format' }, { status: 400 });
     }
@@ -45,13 +39,15 @@ Deno.serve(async (req) => {
 
     // Log audit
     await base44.asServiceRole.entities.JournalAudit.create({
-      action: 'User vendeur créé',
+      action: 'user_vendeur_cree',
       module: 'systeme',
-      details: `Nouvel utilisateur vendeur: ${email}`,
-    });
+      details: `Nouvel utilisateur vendeur créé: ${email}`,
+      utilisateur: email,
+    }).catch(() => {});
 
     return Response.json({ success: true, message: 'User created successfully' });
   } catch (error) {
+    console.error('createUserOnInscription error:', error.message);
     return Response.json({ error: error.message }, { status: 500 });
   }
 });
