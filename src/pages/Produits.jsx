@@ -463,11 +463,11 @@ export default function Produits() {
 
       if (produitEdite) {
         await base44.entities.Produit.update(produitEdite.id, data);
-        await base44.functions.invoke('createAudit', { action: "Produit modifié", module: "produit", details: `Produit ${form.nom} modifié`, entite_id: produitEdite.id });
+        await base44.entities.JournalAudit.create({ action: "Produit modifié", module: "produit", details: `Produit ${form.nom} modifié`, entite_id: produitEdite.id });
         showSuccess("Produit modifié", `${form.nom} a été mis à jour avec succès`);
       } else {
-        const res = await base44.functions.invoke('createProduit', data);
-        await base44.functions.invoke('createAudit', { action: "Produit créé", module: "produit", details: `Nouveau produit: ${form.nom} (${form.reference})` });
+        const newProd = await base44.entities.Produit.create(data);
+        await base44.entities.JournalAudit.create({ action: "Produit créé", module: "produit", details: `Nouveau produit: ${form.nom} (${form.reference})`, entite_id: newProd.id });
         showSuccess("Produit créé", `${form.nom} a été créé avec succès`);
       }
 
@@ -491,7 +491,8 @@ export default function Produits() {
   const supprimer = async (produit) => {
     setEnCours(true);
     try {
-      await base44.functions.invoke('deleteProduit', { produitId: produit.id });
+      await base44.entities.Produit.update(produit.id, { statut: "supprime" });
+      await base44.entities.JournalAudit.create({ action: "Produit supprimé", module: "produit", details: `Produit ${produit.nom} supprimé`, entite_id: produit.id });
       showSuccess("Produit supprimé", `${produit.nom} a été supprimé avec succès`);
       invalidateQuery('PRODUITS');
       queryClient.invalidateQueries({ queryKey: ["produits"] });
