@@ -81,112 +81,98 @@ Deno.serve(async (req) => {
 
     } else if (userType === 'admin') {
 
-       // PRIORITÉ 1: Vérifier si c'est un sous-admin
-       let sousAdmins = [];
-       try {
-         sousAdmins = await base44.asServiceRole.entities.SousAdmin.filter({ email: email });
-         if (sousAdmins.length === 0 && !validateEmail(email)) {
-           const allSousAdmins = await base44.asServiceRole.entities.SousAdmin.filter({});
-           sousAdmins = allSousAdmins.filter(s => s.username === email);
-         }
-       } catch (_) {}
+        // PRIORITÉ 1: Chercher tous les admins et sous-admins
+        let allAdmins = [];
+        let allSousAdmins = [];
 
-       if (sousAdmins.length > 0) {
-         const sousAdmin = sousAdmins[0];
+        try {
+          allAdmins = await base44.asServiceRole.entities.User.filter({ role: 'admin' });
+        } catch (_) {}
 
-         if (sousAdmin.statut === 'suspendu') {
-           return Response.json({ error: 'Compte suspendu.' }, { status: 403 });
-         }
+        try {
+          allSousAdmins = await base44.asServiceRole.entities.SousAdmin.filter({});
+        } catch (_) {}
 
-         const passwordMatch = await bcrypt.compare(password, sousAdmin.mot_de_passe_hash || '');
-         if (!passwordMatch) {
-           return Response.json({ error: 'Identifiants incorrects.' }, { status: 401 });
-         }
-
-         await base44.asServiceRole.entities.JournalAudit.create({
-           action: 'sous_admin_login',
-           module: 'systeme',
-           details: `Connexion sous-admin: ${sousAdmin.nom_complet}`,
-           utilisateur: sousAdmin.email,
-         }).catch(() => {});
-
-         return Response.json({
-           success: true,
-           session: {
-             type: 'sous_admin',
-             role: 'sous_admin',
-             email: sousAdmin.email,
-             nom_complet: sousAdmin.nom_complet,
-             nom_role: sousAdmin.nom_role,
-             permissions: sousAdmin.permissions || [],
-             sous_admin_id: sousAdmin.id,
-           }
-         });
-       }
-
-       // PRIORITÉ 2: Admin principal — recherche par email ou username
-       let adminUsers = [];
-
-       // Chercher tous les admins sans filtre pour éviter les erreurs de permission
-       try {
-         const allAdmins = await base44.asServiceRole.entities.User.filter({ role: 'admin' });
-         console.log('[DEBUG] Found admins:', allAdmins.length);
-         allAdmins.forEach(a => console.log('[DEBUG] Admin:', a.email, 'username:', a.data?.username));
-
-         // Si c'est un email, chercher par email; sinon par username
-         if (validateEmail(email)) {
-           adminUsers = allAdmins.filter(u => u.email === email);
-         } else {
-           adminUsers = allAdmins.filter(u => u.data?.username === email);
-         }
-         console.log('[DEBUG] Matched admins:', adminUsers.length);
-       } catch (e) {
-         console.log('[DEBUG] Error finding admins:', e.message);
-       }
-
-       if (adminUsers.length === 0) {
-         return Response.json({ error: 'Identifiants incorrects.' }, { status: 401 });
-       }
-
-      // Vérifier le hash bcrypt stocké en ConfigApp
-       let adminPasswordMatch = false;
-       try {
-         const configs = await base44.asServiceRole.entities.ConfigApp.filter({ cle: 'admin_password_hash' });
-         console.log('[DEBUG] ConfigApp found:', configs.length);
-         if (configs.length > 0) {
-           const hashValue = configs[0].data?.valeur || configs[0].valeur;
-           console.log('[DEBUG] Password:', password, 'Hash:', hashValue?.substring(0, 20) + '...');
-           if (hashValue) {
-             adminPasswordMatch = await bcrypt.compare(password, hashValue);
-             console.log('[DEBUG] Password match:', adminPasswordMatch);
-           }
-         }
-       } catch (e) {
-         console.log('[DEBUG] ConfigApp error:', e.message);
-       }
-
-       if (!adminPasswordMatch) {
-         return Response.json({ error: 'Identifiants incorrects.' }, { status: 401 });
-       }
-
-      const adminUser = adminUsers[0];
-
-      await base44.asServiceRole.entities.JournalAudit.create({
-        action: 'admin_login',
-        module: 'systeme',
-        details: `Connexion admin principal: ${adminUser.full_name}`,
-        utilisateur: adminUser.email,
-      }).catch(() => {});
-
-      return Response.json({
-        success: true,
-        session: {
-          type: 'admin',
-          role: 'admin',
-          email: adminUser.email,
-          full_name: adminUser.full_name,
+        // Chercher le sous-admin par email ou username
+        let matchedSousAdmin = null;
+        if (validateEmail(email)) {
+          matchedSousAdmin = allSousAdmins.find(s => s.email === email);
+        } else {
+          matchedSousAdmin = allSousAdmins.find(s => s.username === email);
         }
-      });
+
+        if (matchedSousAdmin) {
+          if (matchedSousAdmin.statut === 'suspendu') {
+            return Response.json({ error: 'Compte suspendu.' }, { status: 403 });
+          }
+          const passwordMatch = await bcrypt.compare(password, matchedSousAdmin.mot_de_passe_hash || '');
+          if (!passwordMatch) {
+            return Response.json({ error: 'Identifiants incorrects.' }, { status: 401 });
+          }
+          await base44.asServiceRole.entities.JournalAudit.create({
+            action: 'sous_admin_login',
+            module: 'systeme',
+            details: `Connexion sous-admin: ${matchedSousAdmin.nom_complet}`,
+            utilisateur: matchedSousAdmin.email,
+          }).catch(() => {});
+          return Response.json({
+            success: true,
+            session: {
+              type: 'sous_admin',
+              role: 'sous_admin',
+              email: matchedSousAdmin.email,
+              nom_complet: matchedSousAdmin.nom_complet,
+              nom_role: matchedSousAdmin.nom_role,
+              permissions: matchedSousAdmin.permissions || [],
+              sous_admin_id: matchedSousAdmin.id,
+            }
+          });
+        }
+
+        // Chercher l'admin principal par email ou username
+        let matchedAdmin = null;
+        if (validateEmail(email)) {
+          matchedAdmin = allAdmins.find(u => u.email === email);
+        } else {
+          matchedAdmin = allAdmins.find(u => u.data?.username === email);
+        }
+
+        if (!matchedAdmin) {
+          return Response.json({ error: 'Identifiants incorrects.' }, { status: 401 });
+        }
+
+        // Vérifier le mot de passe via ConfigApp
+        let adminPasswordMatch = false;
+        try {
+          const configs = await base44.asServiceRole.entities.ConfigApp.filter({ cle: 'admin_password_hash' });
+          if (configs.length > 0) {
+            const hashValue = configs[0].data?.valeur || configs[0].valeur;
+            if (hashValue) {
+              adminPasswordMatch = await bcrypt.compare(password, hashValue);
+            }
+          }
+        } catch (_) {}
+
+        if (!adminPasswordMatch) {
+          return Response.json({ error: 'Identifiants incorrects.' }, { status: 401 });
+        }
+
+        await base44.asServiceRole.entities.JournalAudit.create({
+          action: 'admin_login',
+          module: 'systeme',
+          details: `Connexion admin principal: ${matchedAdmin.full_name}`,
+          utilisateur: matchedAdmin.email,
+        }).catch(() => {});
+
+        return Response.json({
+          success: true,
+          session: {
+            type: 'admin',
+            role: 'admin',
+            email: matchedAdmin.email,
+            full_name: matchedAdmin.full_name,
+          }
+        });
 
     } else {
       return Response.json({ error: 'Invalid userType' }, { status: 400 });
