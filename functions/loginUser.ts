@@ -130,6 +130,8 @@ Deno.serve(async (req) => {
        // Chercher tous les admins sans filtre pour éviter les erreurs de permission
        try {
          const allAdmins = await base44.asServiceRole.entities.User.filter({ role: 'admin' });
+         console.log('[DEBUG] Found admins:', allAdmins.length);
+         allAdmins.forEach(a => console.log('[DEBUG] Admin:', a.email, 'username:', a.data?.username));
 
          // Si c'est un email, chercher par email; sinon par username
          if (validateEmail(email)) {
@@ -137,7 +139,10 @@ Deno.serve(async (req) => {
          } else {
            adminUsers = allAdmins.filter(u => u.data?.username === email);
          }
-       } catch (_) {}
+         console.log('[DEBUG] Matched admins:', adminUsers.length);
+       } catch (e) {
+         console.log('[DEBUG] Error finding admins:', e.message);
+       }
 
        if (adminUsers.length === 0) {
          return Response.json({ error: 'Identifiants incorrects.' }, { status: 401 });
