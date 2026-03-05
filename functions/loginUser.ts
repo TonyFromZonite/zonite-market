@@ -112,20 +112,32 @@ Deno.serve(async (req) => {
         });
       }
 
-      // PRIORITÉ 2: Si pas de sous-admin trouvé, vérifier l'admin principal via Base44
-      // À ce stade, on sait que ce n'est pas un sous-admin, donc on peut faire l'auth Base44
-      const user = await base44.auth.me().catch(() => null);
-      
-      if (!user || user.role !== 'admin') {
-        return Response.json({ error: 'Identifiants incorrects ou accès admin refusé.' }, { status: 401 });
+      // PRIORITÉ 2: Admin principal — vérification par email + hash bcrypt
+      // Chercher l'utilisateur admin par email dans Base44
+      const adminUsers = await base44.asServiceRole.entities.User.filter({ email: email });
+      if (adminUsers.length === 0 || adminUsers[0].role !== 'admin') {
+        return Response.json({ error: 'Identifiants incorrects.' }, { status: 401 });
       }
+
+      // Vérifier le hash bcrypt du mot de passe admin
+      const configs = await base44.asServiceRole.entities.ConfigApp.filter({ cle: 'admin_password_hash' });
+      if (configs.length === 0 || !configs[0].valeur) {
+        return Response.json({ error: 'Mot de passe admin non configuré. Contactez le super-administrateur.' }, { status: 403 });
+      }
+
+      const adminPasswordMatch = await bcrypt.compare(password, configs[0].valeur);
+      if (!adminPasswordMatch) {
+        return Response.json({ error: 'Identifiants incorrects.' }, { status: 401 });
+      }
+
+      const adminUser = adminUsers[0];
 
       // Audit log
       await base44.asServiceRole.entities.JournalAudit.create({
         action: 'admin_login',
         module: 'systeme',
-        details: `Connexion admin principal: ${user.full_name}`,
-        utilisateur: user.email,
+        details: `Connexion admin principal: ${adminUser.full_name}`,
+        utilisateur: adminUser.email,
       }).catch(() => {});
 
       return Response.json({
@@ -133,8 +145,8 @@ Deno.serve(async (req) => {
         session: {
           type: 'admin',
           role: 'admin',
-          email: user.email,
-          full_name: user.full_name,
+          email: adminUser.email,
+          full_name: adminUser.full_name,
         }
       });
 
