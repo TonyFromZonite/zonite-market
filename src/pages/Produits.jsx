@@ -956,8 +956,8 @@ export default function Produits() {
           </Tabs>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDialogOuvert(false)}>Annuler</Button>
-            <Button onClick={sauvegarder} disabled={enCours || !form.nom || !form.reference} className="bg-[#1a1f5e] hover:bg-[#141952]">
+            <Button variant="outline" onClick={() => { setDialogOuvert(false); setForm(initProduit); setProduitEdite(null); }}>Annuler</Button>
+            <Button onClick={sauvegarder} disabled={enCours} className="bg-[#1a1f5e] hover:bg-[#141952]">
               {enCours ? <Loader2 className="w-4 h-4 animate-spin" /> : produitEdite ? "Enregistrer" : "Créer"}
             </Button>
           </DialogFooter>
