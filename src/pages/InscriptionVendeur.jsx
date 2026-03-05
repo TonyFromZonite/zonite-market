@@ -86,8 +86,14 @@ export default function InscriptionVendeur() {
   };
 
   const soumettre = async () => {
-    if (!form.photo_identite_url || !form.selfie_url) {
-      setErreur("Veuillez uploader votre pièce d'identité et votre selfie."); return;
+    if (!form.photo_identite_url) {
+      setErreur("Veuillez uploader votre pièce d'identité."); return;
+    }
+    if (typeDocument === "cni" && !form.photo_identite_verso_url) {
+      setErreur("Veuillez uploader le verso de votre CNI."); return;
+    }
+    if (!form.selfie_url) {
+      setErreur("Veuillez uploader votre selfie."); return;
     }
     setEnCours(true);
     setErreur("");
