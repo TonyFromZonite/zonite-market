@@ -254,7 +254,7 @@ export default function Connexion() {
               {mdpOublieSucces ? (
                 <div className="bg-emerald-500/20 border border-emerald-400/30 rounded-xl px-4 py-4 text-center">
                   <p className="text-emerald-300 text-sm font-semibold">✓ Email envoyé !</p>
-                  <p className="text-emerald-200 text-xs mt-1">Vérifiez votre boîte mail et connectez-vous avec votre nouveau mot de passe.</p>
+                  <p className="text-emerald-200 text-xs mt-1">Vérifiez votre boîte mail et cliquez sur le lien pour choisir un nouveau mot de passe.</p>
                   <button onClick={() => { setModeMdpOublie(false); setMdpOublieSucces(false); }} className="mt-3 text-[#F5C518] text-xs underline">
                     Retour à la connexion
                   </button>
