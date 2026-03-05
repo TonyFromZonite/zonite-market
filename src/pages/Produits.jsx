@@ -475,15 +475,16 @@ export default function Produits() {
     }
   };
 
+  const [confirmSuppressionProduit, setConfirmSuppressionProduit] = useState(null);
+
   const supprimer = async (produit) => {
-    if (!confirm(`Supprimer le produit "${produit.nom}" ?`)) return;
     try {
       await base44.functions.invoke('deleteProduit', { produitId: produit.id });
       showSuccess("Produit supprimé", `${produit.nom} a été supprimé avec succès`);
       invalidateQuery('PRODUITS');
       queryClient.invalidateQueries({ queryKey: ["produits"] });
+      setConfirmSuppressionProduit(null);
     } catch (err) {
-      console.error("Erreur lors de la suppression:", err);
       showError("Erreur de suppression", err.message || "Échec de la suppression");
     }
   };
@@ -649,7 +650,7 @@ export default function Produits() {
                     <TableCell>
                       <div className="flex gap-1">
                         <Button variant="ghost" size="icon" onClick={() => ouvrir(p)}><Pencil className="w-4 h-4 text-slate-500" /></Button>
-                        <Button variant="ghost" size="icon" onClick={() => supprimer(p)}><Trash2 className="w-4 h-4 text-red-500" /></Button>
+                        <Button variant="ghost" size="icon" onClick={() => setConfirmSuppressionProduit(p)}><Trash2 className="w-4 h-4 text-red-500" /></Button>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -944,6 +945,20 @@ export default function Produits() {
             <Button variant="outline" onClick={() => setDialogOuvert(false)}>Annuler</Button>
             <Button onClick={sauvegarder} disabled={enCours || !form.nom || !form.reference} className="bg-[#1a1f5e] hover:bg-[#141952]">
               {enCours ? <Loader2 className="w-4 h-4 animate-spin" /> : produitEdite ? "Enregistrer" : "Créer"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog confirmation suppression produit */}
+      <Dialog open={!!confirmSuppressionProduit} onOpenChange={() => setConfirmSuppressionProduit(null)}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader><DialogTitle>Supprimer le produit</DialogTitle></DialogHeader>
+          <p className="text-sm text-slate-600">Êtes-vous sûr de vouloir supprimer <strong>"{confirmSuppressionProduit?.nom}"</strong> ? Cette action ne peut pas être annulée.</p>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setConfirmSuppressionProduit(null)}>Annuler</Button>
+            <Button variant="destructive" onClick={() => supprimer(confirmSuppressionProduit)} disabled={enCours}>
+              {enCours ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}Supprimer
             </Button>
           </DialogFooter>
         </DialogContent>
