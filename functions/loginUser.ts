@@ -145,13 +145,27 @@ Deno.serve(async (req) => {
         let adminPasswordMatch = false;
         try {
           const configs = await base44.asServiceRole.entities.ConfigApp.filter({ cle: 'admin_password_hash' });
+          console.log('[DEBUG] ConfigApp records found:', configs.length);
           if (configs.length > 0) {
-            const hashValue = configs[0].data?.valeur || configs[0].valeur;
+            const configData = configs[0];
+            console.log('[DEBUG] Config data structure:', Object.keys(configData));
+            console.log('[DEBUG] Config.data:', configData.data);
+            console.log('[DEBUG] Config.valeur:', configData.valeur);
+            
+            // Essayer d'accéder au hash via plusieurs chemins possibles
+            let hashValue = configData.data?.valeur || configData.valeur || configData.data;
+            console.log('[DEBUG] Extracted hash value type:', typeof hashValue);
+            console.log('[DEBUG] Hash value (first 30 chars):', String(hashValue).substring(0, 30));
+            
             if (hashValue) {
-              adminPasswordMatch = await bcrypt.compare(password, hashValue);
+              console.log('[DEBUG] Attempting password comparison with password:', password);
+              adminPasswordMatch = await bcrypt.compare(password, String(hashValue));
+              console.log('[DEBUG] Password match result:', adminPasswordMatch);
             }
           }
-        } catch (_) {}
+        } catch (e) {
+          console.log('[DEBUG] ConfigApp error:', e.message, e.stack);
+        }
 
         if (!adminPasswordMatch) {
           return Response.json({ error: 'Identifiants incorrects.' }, { status: 401 });
