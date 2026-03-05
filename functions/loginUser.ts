@@ -144,15 +144,17 @@ Deno.serve(async (req) => {
        }
 
       // Vérifier le hash bcrypt stocké en ConfigApp
-      const configs = await base44.asServiceRole.entities.ConfigApp.filter({ cle: 'admin_password_hash' });
-      if (configs.length === 0 || !configs[0].valeur) {
-        return Response.json({ error: 'Mot de passe admin non configuré. Contactez le super-administrateur.' }, { status: 403 });
-      }
+       let adminPasswordMatch = false;
+       try {
+         const configs = await base44.asServiceRole.entities.ConfigApp.filter({ cle: 'admin_password_hash' });
+         if (configs.length > 0 && configs[0].valeur) {
+           adminPasswordMatch = await bcrypt.compare(password, configs[0].valeur);
+         }
+       } catch (_) {}
 
-      const adminPasswordMatch = await bcrypt.compare(password, configs[0].valeur);
-      if (!adminPasswordMatch) {
-        return Response.json({ error: 'Identifiants incorrects.' }, { status: 401 });
-      }
+       if (!adminPasswordMatch) {
+         return Response.json({ error: 'Identifiants incorrects.' }, { status: 401 });
+       }
 
       const adminUser = adminUsers[0];
 
