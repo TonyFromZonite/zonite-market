@@ -503,8 +503,7 @@ export default function Produits() {
   const produitsFiltres = produits.filter((p) => {
     const matchRecherche = `${p.nom} ${p.reference} ${p.fournisseur_nom}`.toLowerCase().includes(recherche.toLowerCase());
     const matchCategorie = filtreCategorie === "all" || p.categorie_id === filtreCategorie;
-    const matchStatut = p.statut === "actif"; // Afficher seulement les produits actifs
-    return matchRecherche && matchCategorie && matchStatut;
+    return matchRecherche && matchCategorie;
   });
 
   const formater = (n) => `${Math.round(n || 0).toLocaleString("fr-FR")} FCFA`;
