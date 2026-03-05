@@ -94,6 +94,7 @@ Deno.serve(async (req) => {
 
   } catch (error) {
     console.error('Registration error:', error.message);
+    console.error('Error full:', error);
     return Response.json({ error: error.message }, { status: 500 });
   }
 });
