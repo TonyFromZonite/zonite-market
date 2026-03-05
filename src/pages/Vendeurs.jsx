@@ -540,6 +540,7 @@ function PaiementsTab() {
     }
     await base44.entities.NotificationVendeur.create({ vendeur_email: demande.vendeur_email, titre: "Paiement effectué !", message: `Votre paiement de ${demande.montant.toLocaleString("fr-FR")} FCFA a été envoyé sur votre numéro ${demande.numero_mobile_money} (${demande.operateur}).`, type: "paiement" });
     queryClient.invalidateQueries({ queryKey: ["demandes_paiement_admin"] });
+    queryClient.invalidateQueries({ queryKey: ["paiements_badge"] });
   };
 
   if (isLoading) return <div className="space-y-3">{Array(4).fill(0).map((_, i) => <Skeleton key={i} className="h-16 rounded-xl" />)}</div>;
