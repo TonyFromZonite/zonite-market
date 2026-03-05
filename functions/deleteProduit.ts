@@ -7,36 +7,23 @@ Deno.serve(async (req) => {
     }
 
     const base44 = createClientFromRequest(req);
-    const payload = await req.json();
-    const produitId = payload.produitId;
+    const user = await base44.auth.me();
+    
+    if (!user || !['admin', 'sous_admin'].includes(user.role)) {
+      return Response.json({ error: 'Unauthorized' }, { status: 403 });
+    }
 
+    const { produitId } = await req.json();
+    
     if (!produitId) {
-      return Response.json({ error: 'produitId required' }, { status: 400 });
+      return Response.json({ error: 'Produit ID requis' }, { status: 400 });
     }
 
-    // Vérifier que le produit existe
-    let produit;
-    try {
-      produit = await base44.asServiceRole.entities.Produit.get(produitId);
-    } catch (err) {
-      return Response.json({ error: 'Produit non trouvé' }, { status: 404 });
-    }
-
-    // Marquer le produit comme supprimé au lieu de le supprimer
-    await base44.asServiceRole.entities.Produit.update(produitId, { statut: "supprime" });
-
-    // Audit
-    await base44.asServiceRole.entities.JournalAudit.create({
-      action: "Produit supprimé",
-      module: "produit",
-      details: `Produit ${produit.nom} supprimé via fonction backend`,
-      entite_id: produitId,
-      utilisateur: (await base44.auth.me())?.email || "système"
-    }).catch(() => {});
-
+    // Soft delete : marquer comme supprimé
+    await base44.asServiceRole.entities.Produit.update(produitId, { statut: 'supprime' });
+    
     return Response.json({ success: true });
   } catch (error) {
-    console.error('deleteProduit error:', error.message);
     return Response.json({ error: error.message }, { status: 500 });
   }
 });

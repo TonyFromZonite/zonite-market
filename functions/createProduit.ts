@@ -15,9 +15,20 @@ Deno.serve(async (req) => {
 
     const data = await req.json();
     
-    const product = await base44.asServiceRole.entities.Produit.create(data);
+    // Validation stricte
+    if (!data.nom?.trim()) {
+      return Response.json({ error: 'Nom du produit requis' }, { status: 400 });
+    }
+    if (!data.reference?.trim()) {
+      return Response.json({ error: 'Référence requise' }, { status: 400 });
+    }
+    if (!data.prix_achat || data.prix_achat <= 0) {
+      return Response.json({ error: 'Prix d\'achat invalide' }, { status: 400 });
+    }
+
+    const produit = await base44.asServiceRole.entities.Produit.create(data);
     
-    return Response.json({ success: true, product });
+    return Response.json({ success: true, produit }, { status: 201 });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }

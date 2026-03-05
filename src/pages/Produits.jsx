@@ -451,22 +451,33 @@ export default function Produits() {
   };
 
   const sauvegarder = async () => {
+    // Validation complète
+    if (!form.nom?.trim()) { showError("Champ obligatoire", "Le nom du produit est requis"); return; }
+    if (!form.reference?.trim()) { showError("Champ obligatoire", "La référence est requise"); return; }
+    if (!form.prix_achat || form.prix_achat <= 0) { showError("Tarification invalide", "Le prix d'achat doit être > 0"); return; }
+
     setEnCours(true);
     try {
       const stockGlobal = recalculerStockGlobal(form.stocks_par_localisation || []);
       const data = { ...form, stock_global: stockGlobal };
+
       if (produitEdite) {
         await base44.entities.Produit.update(produitEdite.id, data);
         await base44.functions.invoke('createAudit', { action: "Produit modifié", module: "produit", details: `Produit ${form.nom} modifié`, entite_id: produitEdite.id });
         showSuccess("Produit modifié", `${form.nom} a été mis à jour avec succès`);
       } else {
-        await base44.functions.invoke('createProduit', data);
+        const res = await base44.functions.invoke('createProduit', data);
         await base44.functions.invoke('createAudit', { action: "Produit créé", module: "produit", details: `Nouveau produit: ${form.nom} (${form.reference})` });
         showSuccess("Produit créé", `${form.nom} a été créé avec succès`);
       }
+
       invalidateQuery('PRODUITS');
       invalidateQuery('CATEGORIES');
       queryClient.invalidateQueries({ queryKey: ["produits"] });
+
+      // Réinitialiser le formulaire ET fermer le dialog
+      setForm(initProduit);
+      setProduitEdite(null);
       setDialogOuvert(false);
     } catch (err) {
       showError("Erreur de sauvegarde", err.message || "Échec de la sauvegarde");
@@ -478,6 +489,7 @@ export default function Produits() {
   const [confirmSuppressionProduit, setConfirmSuppressionProduit] = useState(null);
 
   const supprimer = async (produit) => {
+    setEnCours(true);
     try {
       await base44.functions.invoke('deleteProduit', { produitId: produit.id });
       showSuccess("Produit supprimé", `${produit.nom} a été supprimé avec succès`);
@@ -486,6 +498,8 @@ export default function Produits() {
       setConfirmSuppressionProduit(null);
     } catch (err) {
       showError("Erreur de suppression", err.message || "Échec de la suppression");
+    } finally {
+      setEnCours(false);
     }
   };
 
