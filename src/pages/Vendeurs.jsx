@@ -599,9 +599,9 @@ function PaiementsTab() {
 export default function Vendeurs() {
   const [ongletActif, setOngletActif] = useState("liste");
 
-  const { data: candidatures = [] } = useQuery({ queryKey: ["candidatures"], queryFn: () => base44.entities.CandidatureVendeur.filter({ statut: "en_attente" }) });
-  const { data: kycs = [] } = useQuery({ queryKey: ["comptes_vendeurs_badge"], queryFn: () => base44.entities.CompteVendeur.filter({ statut_kyc: "en_attente" }) });
-  const { data: paiements = [] } = useQuery({ queryKey: ["paiements_badge"], queryFn: () => base44.entities.DemandePaiementVendeur.filter({ statut: "en_attente" }) });
+  const { data: candidatures = [] } = useQuery({ queryKey: ["candidatures"], queryFn: () => base44.entities.CandidatureVendeur.filter({ statut: "en_attente" }), refetchInterval: 30000 });
+  const { data: kycs = [] } = useQuery({ queryKey: ["comptes_vendeurs_badge"], queryFn: () => base44.entities.CompteVendeur.filter({ statut_kyc: "en_attente" }), refetchInterval: 30000 });
+  const { data: paiements = [] } = useQuery({ queryKey: ["paiements_badge"], queryFn: () => base44.entities.DemandePaiementVendeur.filter({ statut: "en_attente" }), refetchInterval: 30000 });
 
   const badges = { candidatures: candidatures.length, kyc: kycs.length, paiements: paiements.length };
 
