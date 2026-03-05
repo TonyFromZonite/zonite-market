@@ -185,6 +185,7 @@ export default function CommandesVendeurs() {
       message: `La livraison de ${commandeSelectionnee.produit_nom} pour ${commandeSelectionnee.client_nom} a échoué. Le stock a été restitué.`,
       type: "alerte",
     });
+    invalidateQuery('PRODUITS');
     queryClient.invalidateQueries({ queryKey: ["commandes_vendeurs_admin"] });
     setEnCours(false);
     setCommandeSelectionnee(null);
