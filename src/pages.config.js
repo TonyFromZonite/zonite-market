@@ -48,7 +48,6 @@
  * The mainPage value must match a key in the PAGES object exactly.
  */
 import AideVendeur from './pages/AideVendeur';
-import Candidature from './pages/Candidature';
 import CatalogueVendeur from './pages/CatalogueVendeur';
 import Categories from './pages/Categories';
 import Commandes from './pages/Commandes';
@@ -61,7 +60,6 @@ import DemandePaiement from './pages/DemandePaiement';
 import EnAttenteValidation from './pages/EnAttenteValidation';
 import EspaceSousAdmin from './pages/EspaceSousAdmin';
 import EspaceVendeur from './pages/EspaceVendeur';
-import GestionCandidatures from './pages/GestionCandidatures';
 import GestionCommandes from './pages/GestionCommandes';
 import GestionKYC from './pages/GestionKYC';
 import GestionSousAdmins from './pages/GestionSousAdmins';
@@ -79,7 +77,6 @@ import RapportsVentes from './pages/RapportsVentes';
 import RetoursAdmin from './pages/RetoursAdmin';
 import SupportAdmin from './pages/SupportAdmin';
 import TableauDeBord from './pages/TableauDeBord';
-import TableauDeBordVendeur from './pages/TableauDeBordVendeur';
 import Vendeurs from './pages/Vendeurs';
 import VideoFormation from './pages/VideoFormation';
 import __Layout from './Layout.jsx';
@@ -87,7 +84,6 @@ import __Layout from './Layout.jsx';
 
 export const PAGES = {
     "AideVendeur": AideVendeur,
-    "Candidature": Candidature,
     "CatalogueVendeur": CatalogueVendeur,
     "Categories": Categories,
     "Commandes": Commandes,
@@ -100,7 +96,6 @@ export const PAGES = {
     "EnAttenteValidation": EnAttenteValidation,
     "EspaceSousAdmin": EspaceSousAdmin,
     "EspaceVendeur": EspaceVendeur,
-    "GestionCandidatures": GestionCandidatures,
     "GestionCommandes": GestionCommandes,
     "GestionKYC": GestionKYC,
     "GestionSousAdmins": GestionSousAdmins,
@@ -118,7 +113,6 @@ export const PAGES = {
     "RetoursAdmin": RetoursAdmin,
     "SupportAdmin": SupportAdmin,
     "TableauDeBord": TableauDeBord,
-    "TableauDeBordVendeur": TableauDeBordVendeur,
     "Vendeurs": Vendeurs,
     "VideoFormation": VideoFormation,
 }
