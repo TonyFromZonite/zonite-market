@@ -82,9 +82,14 @@ Deno.serve(async (req) => {
     } else if (userType === 'admin') {
 
        // PRIORITÉ 1: Vérifier si c'est un sous-admin
-       const sousAdmins = await base44.asServiceRole.entities.SousAdmin.filter({
-         $or: [{ email: email }, { username: email }]
-       });
+       let sousAdmins = [];
+       try {
+         sousAdmins = await base44.asServiceRole.entities.SousAdmin.filter({ email: email });
+         if (sousAdmins.length === 0 && !validateEmail(email)) {
+           const allSousAdmins = await base44.asServiceRole.entities.SousAdmin.filter({});
+           sousAdmins = allSousAdmins.filter(s => s.username === email);
+         }
+       } catch (_) {}
 
        if (sousAdmins.length > 0) {
          const sousAdmin = sousAdmins[0];
