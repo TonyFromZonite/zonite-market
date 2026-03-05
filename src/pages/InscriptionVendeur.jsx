@@ -97,23 +97,32 @@ export default function InscriptionVendeur() {
     setEnCours(true);
     setErreur("");
 
-    // ✅ Tout est géré côté serveur : hachage, création, email
-    await base44.functions.invoke('registerVendor', {
-      email: form.email,
-      nom_complet: form.nom_complet,
-      telephone: form.telephone,
-      mot_de_passe: form.mot_de_passe, // envoyé en clair via HTTPS, haché côté serveur
-      ville: form.ville,
-      quartier: form.quartier,
-      numero_mobile_money: form.numero_mobile_money,
-      operateur_mobile_money: form.operateur_mobile_money,
-      photo_identite_url: form.photo_identite_url,
-      photo_identite_verso_url: form.photo_identite_verso_url || "",
-      selfie_url: form.selfie_url,
-    });
+    try {
+      // ✅ Tout est géré côté serveur : hachage, création, email
+      const response = await base44.functions.invoke('registerVendor', {
+        email: form.email,
+        nom_complet: form.nom_complet,
+        telephone: form.telephone,
+        mot_de_passe: form.mot_de_passe, // envoyé en clair via HTTPS, haché côté serveur
+        ville: form.ville,
+        quartier: form.quartier,
+        numero_mobile_money: form.numero_mobile_money,
+        operateur_mobile_money: form.operateur_mobile_money,
+        photo_identite_url: form.photo_identite_url,
+        photo_identite_verso_url: form.photo_identite_verso_url || "",
+        selfie_url: form.selfie_url,
+      });
 
-    setSucces(true);
-    setEnCours(false);
+      if (response.data?.success) {
+        setSucces(true);
+      } else {
+        setErreur(response.data?.error || "Erreur lors de la soumission. Veuillez réessayer.");
+      }
+    } catch (error) {
+      setErreur(error.response?.data?.error || error.message || "Erreur lors de la soumission. Veuillez réessayer.");
+    } finally {
+      setEnCours(false);
+    }
   };
 
   if (succes) {
