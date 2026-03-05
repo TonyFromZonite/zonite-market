@@ -59,11 +59,12 @@ const formaterDate = d => d ? new Date(d).toLocaleDateString("fr-FR", { day: "2-
 
 // ─── Sous-page Catégories ───────────────────────────────────────────────────
 function CategoriesTab() {
-  const [dialogOuvert, setDialogOuvert] = useState(false);
-  const [edite, setEdite] = useState(null);
-  const [form, setForm] = useState({ nom: "", description: "" });
-  const [enCours, setEnCours] = useState(false);
-  const queryClient = useQueryClient();
+   const [dialogOuvert, setDialogOuvert] = useState(false);
+   const [edite, setEdite] = useState(null);
+   const [form, setForm] = useState({ nom: "", description: "" });
+   const [enCours, setEnCours] = useState(false);
+   const [confirmSuppression, setConfirmSuppression] = useState(null);
+   const queryClient = useQueryClient();
 
   const { data: categories = [], isLoading } = useQuery({
     queryKey: ["categories"],
@@ -97,11 +98,11 @@ function CategoriesTab() {
   };
 
   const supprimer = async (cat) => {
-    if (!confirm(`Supprimer la catégorie "${cat.nom}" ?`)) return;
     try {
       await base44.functions.invoke('deleteCategorie', { categorieId: cat.id });
       showSuccess("Catégorie supprimée", "La catégorie a été supprimée avec succès");
       queryClient.invalidateQueries({ queryKey: ["categories"] });
+      setConfirmSuppression(null);
     } catch (err) {
       showError("Erreur de suppression", err.message || "Échec de la suppression");
     }
@@ -130,7 +131,7 @@ function CategoriesTab() {
             </div>
             <div className="flex gap-1 ml-2">
               <Button variant="ghost" size="icon" onClick={() => ouvrir(cat)}><Pencil className="w-4 h-4 text-slate-400" /></Button>
-              <Button variant="ghost" size="icon" onClick={() => supprimer(cat)}><Trash2 className="w-4 h-4 text-red-400" /></Button>
+              <Button variant="ghost" size="icon" onClick={() => setConfirmSuppression(cat)}><Trash2 className="w-4 h-4 text-red-400" /></Button>
             </div>
           </div>
         ))}
@@ -147,6 +148,19 @@ function CategoriesTab() {
             <Button variant="outline" onClick={() => setDialogOuvert(false)}>Annuler</Button>
             <Button onClick={sauvegarder} disabled={enCours || !form.nom.trim()} className="bg-[#1a1f5e] hover:bg-[#141952]">
               {enCours ? <Loader2 className="w-4 h-4 animate-spin" /> : edite ? "Enregistrer" : "Créer"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!confirmSuppression} onOpenChange={() => setConfirmSuppression(null)}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader><DialogTitle>Supprimer la catégorie</DialogTitle></DialogHeader>
+          <p className="text-sm text-slate-600">Êtes-vous sûr de vouloir supprimer <strong>"{confirmSuppression?.nom}"</strong> ? Cette action ne peut pas être annulée.</p>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setConfirmSuppression(null)}>Annuler</Button>
+            <Button variant="destructive" onClick={() => supprimer(confirmSuppression)} disabled={enCours}>
+              {enCours ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}Supprimer
             </Button>
           </DialogFooter>
         </DialogContent>
