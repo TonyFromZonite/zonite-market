@@ -80,6 +80,7 @@ Deno.serve(async (req) => {
       });
 
     } else if (userType === 'admin') {
+        console.log('[DEBUG] Admin login attempt with email/username:', email);
 
         // PRIORITÉ 1: Chercher tous les admins et sous-admins
         let allAdmins = [];
@@ -87,11 +88,23 @@ Deno.serve(async (req) => {
 
         try {
           allAdmins = await base44.asServiceRole.entities.User.filter({ role: 'admin' });
-        } catch (_) {}
+          console.log('[DEBUG] Found admins:', allAdmins.length);
+          allAdmins.forEach(a => {
+            console.log('[DEBUG] Admin record:', a.email, 'data.username:', a.data?.username);
+          });
+        } catch (e) {
+          console.log('[DEBUG] Error fetching admins:', e.message);
+        }
 
         try {
           allSousAdmins = await base44.asServiceRole.entities.SousAdmin.filter({});
-        } catch (_) {}
+          console.log('[DEBUG] Found sous-admins:', allSousAdmins.length);
+          allSousAdmins.forEach(s => {
+            console.log('[DEBUG] SousAdmin:', s.email, 'username:', s.username);
+          });
+        } catch (e) {
+          console.log('[DEBUG] Error fetching sous-admins:', e.message);
+        }
 
         // Chercher le sous-admin par email ou username
         let matchedSousAdmin = null;
