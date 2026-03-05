@@ -68,7 +68,7 @@ Deno.serve(async (req) => {
         full_name: nom_complet
       });
     } catch (e) {
-      console.log('Erreur création User Base44 (non bloquant):', e.message);
+      // Silencieusement ignoré
     }
 
     // Email de confirmation
@@ -79,7 +79,7 @@ Deno.serve(async (req) => {
         body: `Bonjour ${nom_complet},\n\nMerci pour votre inscription sur ZONITE !\n\nVotre dossier KYC est en cours de vérification par notre équipe. Vous recevrez un email sous 24-48h avec votre décision et vos identifiants de connexion définitifs si votre dossier est validé.\n\nCordialement,\nL'équipe ZONITE`,
       });
     } catch (e) {
-      console.log('Erreur envoi email confirmation (non bloquant):', e.message);
+      // Silencieusement ignoré
     }
 
     // Log audit
@@ -93,8 +93,6 @@ Deno.serve(async (req) => {
     return Response.json({ success: true });
 
   } catch (error) {
-    console.error('Registration error:', error.message);
-    console.error('Error full:', error);
     return Response.json({ error: error.message }, { status: 500 });
   }
 });
