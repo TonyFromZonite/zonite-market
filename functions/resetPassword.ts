@@ -1,30 +1,25 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 import bcrypt from 'npm:bcryptjs@2.4.3';
 
-function genererMdp(longueur = 8) {
-  // 8 caractères: majuscules + chiffres
-  const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
-  return Array.from({ length: longueur }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
-}
-
-// Rate limiting simple (en mémoire)
-const resetAttempts = new Map();
-
-function checkRateLimit(email) {
-  const now = Date.now();
-  const attempts = resetAttempts.get(email) || [];
-  
-  // Supprimer les tentatives de plus d'1 heure
-  const recentAttempts = attempts.filter(t => now - t < 3600000);
-  
-  // Max 3 tentatives par heure
-  if (recentAttempts.length >= 3) {
-    return false;
+// ✅ Rate limiting persistant via JournalAudit (remplace la Map en mémoire)
+async function checkRateLimit(base44, email) {
+  const windowStart = new Date(Date.now() - 3600000).toISOString(); // 1 heure
+  try {
+    const recentAttempts = await base44.asServiceRole.entities.JournalAudit.filter({
+      action: `rate_limit_check:reset:${email}`,
+      created_date: { $gte: windowStart }
+    });
+    if (recentAttempts.length >= 3) return false;
+    await base44.asServiceRole.entities.JournalAudit.create({
+      action: `rate_limit_check:reset:${email}`,
+      module: 'systeme',
+      details: `Reset password attempt for ${email}`,
+      utilisateur: email,
+    }).catch(() => {});
+    return true;
+  } catch (_) {
+    return true;
   }
-  
-  recentAttempts.push(now);
-  resetAttempts.set(email, recentAttempts);
-  return true;
 }
 
 Deno.serve(async (req) => {
@@ -40,63 +35,68 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Email is required' }, { status: 400 });
     }
 
-    // Valider email format
     if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
       return Response.json({ error: 'Invalid email format' }, { status: 400 });
     }
 
-    // Vérifier rate limiting AVANT toute opération
-    if (!checkRateLimit(email)) {
+    // ✅ Rate limiting persistant
+    if (!await checkRateLimit(base44, email)) {
       return Response.json({ error: 'Too many reset attempts. Try again later.' }, { status: 429 });
     }
 
-    // Vérifier que le compte existe (sans divulguer si l'email existe)
     const comptes = await base44.asServiceRole.entities.CompteVendeur.filter({ user_email: email });
-    
-    // SÉCURITÉ: Ne PAS logger ou révéler si un compte existe via audit
+
+    // Ne pas divulguer si le compte existe
     if (comptes.length === 0) {
-      // Ne pas divulguer si le compte existe ou non
       return Response.json({ success: true, message: 'If the email exists, a reset link will be sent' });
     }
 
     const compte = comptes[0];
-    
-    // Vérifier le statut KYC
+
     if (compte.statut === 'en_attente_kyc' || compte.statut_kyc === 'en_attente') {
-      return Response.json({ 
-        error: 'Account validation pending. Contact support.' 
+      return Response.json({
+        error: 'Account validation pending. Contact support.'
       }, { status: 403 });
     }
 
-    const nouveauMdp = genererMdp();
-    const hashedPassword = await bcrypt.hash(nouveauMdp, 10);
+    // ✅ Générer un token aléatoire sécurisé (pas un mot de passe en clair)
+    const token = crypto.randomUUID().replace(/-/g, '') + crypto.randomUUID().replace(/-/g, '');
+    const tokenHash = await bcrypt.hash(token, 8);
+    const expiry = new Date(Date.now() + 30 * 60 * 1000).toISOString(); // expire dans 30 min
 
-    // Atomique: Mettre à jour le mot de passe ET logger avant d'envoyer l'email
-    await base44.asServiceRole.entities.CompteVendeur.update(compte.id, { mot_de_passe_hash: hashedPassword });
+    // Stocker le token haché + expiration
+    await base44.asServiceRole.entities.CompteVendeur.update(compte.id, {
+      reset_token: tokenHash,
+      reset_token_expiry: expiry,
+    });
 
-    // Log audit APRÈS vérification du compte
+    // Log audit
     await base44.asServiceRole.entities.JournalAudit.create({
       action: 'password_reset_request',
       module: 'systeme',
-      details: `Password reset initiated for vendor account`,
+      details: `Password reset link generated for vendor account`,
       utilisateur: email,
       entite_id: compte.id,
-    });
+    }).catch(() => {});
 
-    // Envoyer l'email avec le nouveau mot de passe
+    // ✅ Envoyer un LIEN sécurisé, pas un mot de passe en clair
+    const appUrl = Deno.env.get("APP_URL") || "https://app.base44.com/app/69a304769dda004762ee3a57";
+    const resetLink = `${appUrl}/ResetPassword?token=${token}&email=${encodeURIComponent(email)}`;
+
     try {
-      await base44.integrations.Core.SendEmail({
+      await base44.asServiceRole.integrations.Core.SendEmail({
         to: email,
-        subject: '🔐 Votre nouveau mot de passe ZONITE',
-        body: `Bonjour ${compte.nom_complet},\n\nVotre nouveau mot de passe temporaire est :\n\n👉 ${nouveauMdp}\n\nConnectez-vous sur l'application ZONITE et changez-le dans votre profil.\n\nPour votre sécurité, ce mot de passe expire dans 24h.\n\nCordialement,\nL'équipe ZONITE`
+        subject: '🔐 Réinitialiser votre mot de passe ZONITE',
+        body: `Bonjour ${compte.nom_complet},\n\nVous avez demandé la réinitialisation de votre mot de passe ZONITE.\n\nCliquez sur ce lien pour choisir un nouveau mot de passe :\n\n${resetLink}\n\n⚠️ Ce lien expire dans 30 minutes et ne peut être utilisé qu'une seule fois.\n\nSi vous n'avez pas fait cette demande, ignorez cet email.\n\nCordialement,\nL'équipe ZONITE`
       });
     } catch (emailErr) {
       console.error('Reset email send failed:', emailErr.message);
-      // L'utilisateur peut toujours se connecter avec le nouveau mot de passe même si l'email a échoué
     }
 
-    return Response.json({ success: true, message: 'Password reset email sent' });
+    return Response.json({ success: true, message: 'If the email exists, a reset link will be sent' });
+
   } catch (error) {
+    console.error('Reset password error:', error.message);
     return Response.json({ error: error.message }, { status: 500 });
   }
 });

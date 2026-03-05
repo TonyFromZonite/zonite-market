@@ -105,16 +105,12 @@ export default function InscriptionVendeur() {
       return;
     }
 
-    const mdp = form.mot_de_passe || genererMdp();
-
-    // Hash password côté client
-    const hashedPassword = await bcrypt.hash(mdp, 10);
-
-    // Créer le CompteVendeur
-    await base44.entities.CompteVendeur.create({
-      user_email: form.email,
+    // ✅ Tout est géré côté serveur : hachage, création, email
+    await base44.functions.invoke('registerVendor', {
+      email: form.email,
       nom_complet: form.nom_complet,
       telephone: form.telephone,
+      mot_de_passe: form.mot_de_passe, // envoyé en clair via HTTPS, haché côté serveur
       ville: form.ville,
       quartier: form.quartier,
       numero_mobile_money: form.numero_mobile_money,
@@ -122,34 +118,6 @@ export default function InscriptionVendeur() {
       photo_identite_url: form.photo_identite_url,
       photo_identite_verso_url: form.photo_identite_verso_url || "",
       selfie_url: form.selfie_url,
-      mot_de_passe_hash: hashedPassword,
-      statut_kyc: "en_attente",
-      statut: "en_attente_kyc",
-      video_vue: false,
-      catalogue_debloque: false,
-      solde_commission: 0,
-      total_commissions_gagnees: 0,
-      total_commissions_payees: 0,
-      nombre_ventes: 0,
-      ventes_reussies: 0,
-      ventes_echouees: 0,
-    });
-
-    // Créer le User Base44 avec rôle 'vendeur'
-    try {
-      await base44.functions.invoke('createUserOnInscription', {
-        email: form.email,
-        full_name: form.nom_complet
-      });
-    } catch (e) {
-      console.log('Erreur création User Base44:', e.message);
-    }
-
-    // Email de confirmation d'inscription
-    await base44.integrations.Core.SendEmail({
-      to: form.email,
-      subject: "📩 Votre demande d'inscription ZONITE a bien été reçue",
-      body: `Bonjour ${form.nom_complet},\n\nMerci pour votre inscription sur ZONITE !\n\nVotre dossier KYC est en cours de vérification par notre équipe. Vous recevrez un email sous 24-48h avec votre décision et vos identifiants de connexion définitifs si votre dossier est validé.\n\nCordialement,\nL'équipe ZONITE`,
     });
 
     setSucces(true);
