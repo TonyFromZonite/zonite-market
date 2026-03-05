@@ -446,9 +446,11 @@ export default function Produits() {
       if (produitEdite) {
         await base44.entities.Produit.update(produitEdite.id, data);
         await base44.entities.JournalAudit.create({ action: "Produit modifié", module: "produit", details: `Produit ${form.nom} modifié`, entite_id: produitEdite.id });
+        showSuccess("Produit modifié", `${form.nom} a été mis à jour avec succès`);
       } else {
         await base44.entities.Produit.create(data);
         await base44.entities.JournalAudit.create({ action: "Produit créé", module: "produit", details: `Nouveau produit: ${form.nom} (${form.reference})` });
+        showSuccess("Produit créé", `${form.nom} a été créé avec succès`);
       }
       invalidateQuery('PRODUITS');
       invalidateQuery('CATEGORIES');
@@ -456,7 +458,7 @@ export default function Produits() {
       setDialogOuvert(false);
     } catch (err) {
       console.error("Erreur lors de la sauvegarde:", err);
-      alert("Erreur : " + (err.message || "Échec de la sauvegarde"));
+      showError("Erreur de sauvegarde", err.message || "Échec de la sauvegarde");
     } finally {
       setEnCours(false);
     }
