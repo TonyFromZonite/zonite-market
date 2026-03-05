@@ -80,13 +80,18 @@ function CategoriesTab() {
     if (!form.nom.trim()) return;
     setEnCours(true);
     try {
-      if (edite) await base44.entities.Categorie.update(edite.id, form);
-      else await base44.entities.Categorie.create(form);
+      if (edite) {
+        await base44.entities.Categorie.update(edite.id, form);
+        showSuccess("Catégorie modifiée", "La catégorie a été mise à jour avec succès");
+      } else {
+        await base44.entities.Categorie.create(form);
+        showSuccess("Catégorie créée", "La nouvelle catégorie a été créée avec succès");
+      }
       queryClient.invalidateQueries({ queryKey: ["categories"] });
       setDialogOuvert(false);
     } catch (err) {
       console.error("Erreur lors de la sauvegarde:", err);
-      alert("Erreur : " + (err.message || "Échec de la sauvegarde"));
+      showError("Erreur de sauvegarde", err.message || "Échec de la sauvegarde");
     } finally {
       setEnCours(false);
     }
