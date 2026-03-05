@@ -41,12 +41,11 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Too many login attempts. Try again later.' }, { status: 429 });
     }
 
-    // Validation email
-    if (!validateEmail(email)) {
-      return Response.json({ error: 'Invalid email format' }, { status: 400 });
-    }
-
     if (userType === 'vendeur') {
+      // Validation email pour vendeur
+      if (!validateEmail(email)) {
+        return Response.json({ error: 'Invalid email format' }, { status: 400 });
+      }
       // Connexion VENDEUR via CompteVendeur
       const comptes = await base44.asServiceRole.entities.CompteVendeur.filter({ user_email: email });
 
