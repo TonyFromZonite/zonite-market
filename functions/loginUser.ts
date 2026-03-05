@@ -127,20 +127,19 @@ Deno.serve(async (req) => {
        // PRIORITÉ 2: Admin principal — recherche par email ou username
        let adminUsers = [];
 
-       // Essayer d'abord par email
+       // Chercher tous les admins sans filtre pour éviter les erreurs de permission
        try {
-         adminUsers = await base44.asServiceRole.entities.User.filter({ email: email, role: 'admin' });
+         const allAdmins = await base44.asServiceRole.entities.User.filter({ role: 'admin' });
+
+         // Si c'est un email, chercher par email; sinon par username
+         if (validateEmail(email)) {
+           adminUsers = allAdmins.filter(u => u.email === email);
+         } else {
+           adminUsers = allAdmins.filter(u => u.data?.username === email);
+         }
        } catch (_) {}
 
-       // Si pas trouvé par email et le format n'est pas un email, chercher par "username" dans les données
-       if (adminUsers.length === 0 && !validateEmail(email)) {
-         try {
-           const allAdmins = await base44.asServiceRole.entities.User.filter({ role: 'admin' });
-           adminUsers = allAdmins.filter(u => u.data?.username === email);
-         } catch (_) {}
-       }
-
-       if (adminUsers.length === 0 || adminUsers[0].role !== 'admin') {
+       if (adminUsers.length === 0) {
          return Response.json({ error: 'Identifiants incorrects.' }, { status: 401 });
        }
 
