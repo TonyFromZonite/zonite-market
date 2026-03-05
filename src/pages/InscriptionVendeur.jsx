@@ -395,6 +395,43 @@ export default function InscriptionVendeur() {
             {/* Selfie */}
             <div>
               <Label className="text-slate-200 text-xs mb-1.5 block">Selfie avec votre pièce d'identité *</Label>
+
+              {/* Exemple visuel */}
+              <div className="mb-2 bg-white/5 border border-white/10 rounded-2xl p-3 flex items-center gap-3">
+                <div className="relative flex-shrink-0 w-20 h-20">
+                  {/* Illustration selfie avec ID */}
+                  <div className="w-20 h-20 rounded-xl bg-gradient-to-br from-slate-700 to-slate-800 border border-white/20 flex flex-col items-center justify-center overflow-hidden relative">
+                    {/* Visage */}
+                    <div className="w-10 h-10 rounded-full bg-amber-300 flex items-center justify-center mb-1 relative">
+                      <div className="w-5 h-2 bg-amber-400 rounded-full absolute bottom-2" />
+                      <div className="w-1.5 h-1.5 bg-slate-700 rounded-full absolute" style={{top:'10px',left:'9px'}} />
+                      <div className="w-1.5 h-1.5 bg-slate-700 rounded-full absolute" style={{top:'10px',right:'9px'}} />
+                    </div>
+                    {/* Carte ID */}
+                    <div className="w-14 h-8 rounded bg-blue-400 border border-blue-300 flex items-center justify-center shadow-md">
+                      <div className="w-4 h-4 rounded-full bg-blue-200 mr-1" />
+                      <div className="flex flex-col gap-0.5">
+                        <div className="w-5 h-1 bg-white/80 rounded" />
+                        <div className="w-4 h-1 bg-white/60 rounded" />
+                      </div>
+                    </div>
+                    {/* Checkmark vert */}
+                    <div className="absolute top-1 right-1 w-4 h-4 bg-emerald-500 rounded-full flex items-center justify-center">
+                      <span className="text-white text-[8px] font-bold">✓</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <p className="text-white text-xs font-semibold mb-1">Comment prendre votre selfie :</p>
+                  <ul className="space-y-0.5 text-slate-300 text-[10px]">
+                    <li>📸 Votre visage bien visible</li>
+                    <li>🪪 Tenez votre CNI/passeport devant vous</li>
+                    <li>💡 Bonne luminosité, fond neutre</li>
+                    <li>❌ Pas de lunettes de soleil</li>
+                  </ul>
+                </div>
+              </div>
+
               <label htmlFor="selfie" className={`flex flex-col items-center justify-center w-full h-24 rounded-2xl border-2 border-dashed cursor-pointer transition-all ${form.selfie_url ? "border-emerald-400 bg-emerald-500/10" : "border-white/20 bg-white/5 hover:bg-white/10"}`}>
                 {uploadEnCours.selfie ? (
                   <Loader2 className="w-6 h-6 text-white animate-spin" />
