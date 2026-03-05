@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
-import { useCachedQuery, invalidateCache } from "@/components/CacheManager";
+import { useCachedQuery, invalidateQuery } from "@/components/CacheManager";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -446,7 +446,7 @@ export default function Produits() {
       // Produit déjà supprimé, on continue pour rafraîchir la liste
     }
     queryClient.invalidateQueries({ queryKey: ["produits"] });
-    invalidateCache("PRODUITS");
+    invalidateQuery("PRODUITS");
   };
 
   const ajouterStock = async () => {
