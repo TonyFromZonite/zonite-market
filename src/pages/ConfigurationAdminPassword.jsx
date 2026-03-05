@@ -68,8 +68,8 @@ export default function ConfigurationAdminPassword() {
     setEntraitement(true);
 
     try {
-      // Appeler la fonction backend sécurisée
       if (necessiteAncien) {
+        // Vérifier ancien mot de passe via la fonction backend
         const response = await base44.functions.invoke('changePassword', {
           oldPassword: mdpActuel,
           newPassword: mdpNouveau,
@@ -80,16 +80,23 @@ export default function ConfigurationAdminPassword() {
           setMdpActuel("");
           setMdpNouveau("");
           setMdpConfirm("");
-          setAdminMdpHash("***");
+          setAdminMdpHash("set");
         } else {
-          setErreur(response.data.error || "Erreur lors de la mise à jour du mot de passe.");
+          setErreur(response.data.error || "Mot de passe actuel incorrect.");
         }
       } else {
-        // Créer le mot de passe initial via ConfigApp
+        // Création initiale — hash bcrypt côté client (bcryptjs disponible)
+        const hash = await bcrypt.hash(mdpNouveau, 10);
         const configs = await base44.entities.ConfigApp.filter({ cle: "admin_password_hash" });
-        // Note: On ne peut pas utiliser bcrypt côté client, donc on crée temporairement
-        // une valeur temporaire. Idéalement, créer une autre fonction backend
-        setErreur("Veuillez utiliser la fonction de réinitialisation. La création initiale requiert un backend.");
+        if (configs.length > 0) {
+          await base44.entities.ConfigApp.update(configs[0].id, { cle: "admin_password_hash", valeur: hash });
+        } else {
+          await base44.entities.ConfigApp.create({ cle: "admin_password_hash", valeur: hash, description: "Mot de passe chiffré de l'administrateur principal" });
+        }
+        setSucces("Mot de passe créé avec succès ! Vous pouvez maintenant vous connecter.");
+        setMdpNouveau("");
+        setMdpConfirm("");
+        setAdminMdpHash("set");
       }
     } catch (err) {
       const errorMsg = err.response?.data?.error || "Erreur lors de la mise à jour du mot de passe.";
