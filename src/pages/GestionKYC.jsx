@@ -14,12 +14,6 @@ const STATUTS_KYC = {
   rejete: { label: "Rejeté", couleur: "bg-red-100 text-red-800" },
 };
 
-// Générer un mot de passe aléatoire lisible
-function genererMdp(longueur = 8) {
-  const chars = "ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
-  return Array.from({ length: longueur }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
-}
-
 export default function GestionKYC() {
   const [compteSelectionne, setCompteSelectionne] = useState(null);
   const [notes, setNotes] = useState("");
@@ -31,69 +25,19 @@ export default function GestionKYC() {
     queryFn: () => base44.entities.CompteVendeur.list("-created_date"),
   });
 
+  // ✅ Tout le traitement KYC est délégué au backend sécurisé (hachage bcrypt serveur)
   const validerKYC = async (statut) => {
     setEnCours(true);
-
-    await base44.entities.CompteVendeur.update(compteSelectionne.id, {
-      statut_kyc: statut,
-      notes_admin: notes,
-      statut: statut === "valide" ? "actif" : "suspendu",
-    });
-
-    if (statut === "valide") {
-      // Générer les identifiants par défaut et les envoyer par email
-      const mdpDefaut = genererMdp();
-      await base44.entities.CompteVendeur.update(compteSelectionne.id, {
-        mot_de_passe_hash: btoa(mdpDefaut),
+    try {
+      const { data } = await base44.functions.invoke('validateKYC', {
+        compte_id: compteSelectionne.id,
+        statut,
+        notes: notes || '',
       });
-
-      // Créer le vendeur dans l'entité Vendeur si pas encore existant
-      const vendeurs = await base44.entities.Vendeur.list();
-      const dejaExistant = vendeurs.find(v => v.email === compteSelectionne.user_email);
-      if (!dejaExistant) {
-        await base44.entities.Vendeur.create({
-          nom_complet: compteSelectionne.nom_complet,
-          email: compteSelectionne.user_email,
-          telephone: compteSelectionne.telephone,
-          statut: "actif",
-          date_embauche: new Date().toISOString().split("T")[0],
-          solde_commission: 0,
-          total_commissions_gagnees: 0,
-          total_commissions_payees: 0,
-          nombre_ventes: 0,
-          chiffre_affaires_genere: 0,
-        });
-        await base44.entities.JournalAudit.create({
-          action: "Nouveau vendeur créé automatiquement",
-          module: "vendeur",
-          details: `Vendeur ${compteSelectionne.nom_complet} (${compteSelectionne.user_email}) créé suite à la validation KYC`,
-          entite_id: compteSelectionne.id,
-        });
-      }
-
-      // Envoyer email avec identifiants
-      await base44.integrations.Core.SendEmail({
-        to: compteSelectionne.user_email,
-        subject: "🎉 Bienvenue chez ZONITE – Vos identifiants de connexion",
-        body: `Bonjour ${compteSelectionne.nom_complet},\n\nFélicitations ! Votre compte vendeur ZONITE a été validé avec succès. 🚀\n\nVoici vos identifiants de connexion :\n\n📧 Email : ${compteSelectionne.user_email}\n🔐 Mot de passe : ${mdpDefaut}\n\nConnectez-vous dès maintenant sur l'application ZONITE et pensez à changer votre mot de passe depuis votre profil.\n\nBon courage et bonne vente !\n\nL'équipe ZONITE`,
-      });
-
-      // Notification in-app
-      await base44.entities.NotificationVendeur.create({
-        vendeur_email: compteSelectionne.user_email,
-        titre: "✅ Compte validé ! Vos identifiants ont été envoyés",
-        message: `Félicitations ${compteSelectionne.nom_complet} ! Votre compte a été validé. Consultez votre email pour récupérer vos identifiants de connexion, puis regardez la vidéo de formation.`,
-        type: "succes",
-      });
-    } else {
-      await base44.entities.NotificationVendeur.create({
-        vendeur_email: compteSelectionne.user_email,
-        titre: "Dossier rejeté",
-        message: `Votre dossier a été rejeté. ${notes || "Contactez notre équipe pour plus d'informations."}`,
-        type: "alerte",
-      });
+      if (!data.success) throw new Error(data.error || 'Erreur lors de la validation');
+    } catch (e) {
+      console.error('KYC error:', e.message);
     }
-
     queryClient.invalidateQueries({ queryKey: ["comptes_vendeurs"] });
     queryClient.invalidateQueries({ queryKey: ["vendeurs"] });
     setCompteSelectionne(null);
