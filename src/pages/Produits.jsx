@@ -446,10 +446,15 @@ export default function Produits() {
 
   const supprimer = async (produit) => {
     if (!confirm(`Supprimer le produit "${produit.nom}" ?`)) return;
-    await base44.entities.Produit.delete(produit.id);
-    await base44.entities.JournalAudit.create({ action: "Produit supprimé", module: "produit", details: `Produit ${produit.nom} supprimé`, entite_id: produit.id });
-    invalidateQuery('PRODUITS');
-    queryClient.invalidateQueries({ queryKey: ["produits"] });
+    try {
+      await base44.entities.Produit.delete(produit.id);
+      await base44.entities.JournalAudit.create({ action: "Produit supprimé", module: "produit", details: `Produit ${produit.nom} supprimé`, entite_id: produit.id });
+      invalidateQuery('PRODUITS');
+      queryClient.invalidateQueries({ queryKey: ["produits"] });
+    } catch (err) {
+      console.error("Erreur lors de la suppression:", err);
+      alert("Erreur : " + (err.message || "Échec de la suppression"));
+    }
   };
 
   const ajouterStock = async () => {
