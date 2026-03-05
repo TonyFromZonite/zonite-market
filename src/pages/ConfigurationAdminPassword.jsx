@@ -123,9 +123,12 @@ export default function ConfigurationAdminPassword() {
         <p className="text-slate-500 text-sm mb-6">Gérez votre mot de passe pour l'accès mobile et web.</p>
 
         {!adminMdpHash && (
-          <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 mb-6">
-            <p className="text-amber-800 text-sm font-medium">⚠️ Aucun mot de passe configuré</p>
-            <p className="text-amber-700 text-xs mt-1">Créez un mot de passe initial pour sécuriser l'accès admin.</p>
+          <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 mb-6 flex items-start gap-3">
+            <ShieldAlert className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-amber-800 text-sm font-medium">⚠️ Mot de passe non sécurisé</p>
+              <p className="text-amber-700 text-xs mt-1">Le mot de passe actuel n'est pas un hash bcrypt valide. Créez un nouveau mot de passe sécurisé ci-dessous.</p>
+            </div>
           </div>
         )}
 
