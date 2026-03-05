@@ -2,8 +2,9 @@ import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Eye, EyeOff, Check, X } from "lucide-react";
+import { Eye, EyeOff, Check, X, ShieldAlert } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import bcrypt from "bcryptjs";
 
 export default function ConfigurationAdminPassword() {
   const [chargement, setChargement] = useState(true);
