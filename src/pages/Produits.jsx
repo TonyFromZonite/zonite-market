@@ -327,17 +327,19 @@ export default function Produits() {
   const [uploadEnCours, setUploadEnCours] = useState(false);
   const queryClient = useQueryClient();
 
-  const { data: produits = [], isLoading } = useCachedQuery(
+  const { data: produitsRaw, isLoading } = useCachedQuery(
     'PRODUITS',
     () => base44.entities.Produit.list("-created_date"),
     { ttl: 30 * 60 * 1000 }
   );
+  const produits = produitsRaw || [];
 
-  const { data: categories = [] } = useCachedQuery(
+  const { data: categoriesRaw } = useCachedQuery(
     'CATEGORIES',
     () => base44.entities.Categorie.list("nom"),
     { ttl: 60 * 60 * 1000 }
   );
+  const categories = categoriesRaw || [];
 
   const modifier = (champ, valeur) => setForm((p) => ({ ...p, [champ]: valeur }));
 
