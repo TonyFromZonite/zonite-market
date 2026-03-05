@@ -147,10 +147,18 @@ Deno.serve(async (req) => {
        let adminPasswordMatch = false;
        try {
          const configs = await base44.asServiceRole.entities.ConfigApp.filter({ cle: 'admin_password_hash' });
-         if (configs.length > 0 && configs[0].data?.valeur) {
-           adminPasswordMatch = await bcrypt.compare(password, configs[0].data.valeur);
+         console.log('[DEBUG] ConfigApp found:', configs.length);
+         if (configs.length > 0) {
+           const hashValue = configs[0].data?.valeur || configs[0].valeur;
+           console.log('[DEBUG] Password:', password, 'Hash:', hashValue?.substring(0, 20) + '...');
+           if (hashValue) {
+             adminPasswordMatch = await bcrypt.compare(password, hashValue);
+             console.log('[DEBUG] Password match:', adminPasswordMatch);
+           }
          }
-       } catch (_) {}
+       } catch (e) {
+         console.log('[DEBUG] ConfigApp error:', e.message);
+       }
 
        if (!adminPasswordMatch) {
          return Response.json({ error: 'Identifiants incorrects.' }, { status: 401 });
