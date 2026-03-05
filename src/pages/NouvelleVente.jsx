@@ -35,8 +35,8 @@ export default function NouvelleVente() {
     const vendeur = donnees.vendeurSelectionne;
     const livraison = donnees.livraisonSelectionnee;
 
-    // 1. Créer la vente
-    await base44.entities.Vente.create({
+    // 1. Créer la vente via backend
+    await base44.functions.invoke('createVente', {
       produit_id: donnees.produit_id,
       produit_nom: produit.nom,
       vendeur_id: donnees.vendeur_id,
@@ -68,8 +68,8 @@ export default function NouvelleVente() {
       statut: nouveauStock <= 0 ? "rupture" : "actif",
     });
 
-    // 3. Mouvement stock
-    await base44.entities.MouvementStock.create({
+    // 3. Mouvement stock via backend
+    await base44.functions.invoke('createMouvementStock', {
       produit_id: produit.id,
       produit_nom: produit.nom,
       type_mouvement: "sortie",
@@ -87,8 +87,8 @@ export default function NouvelleVente() {
       chiffre_affaires_genere: (vendeur.chiffre_affaires_genere || 0) + donnees.montantTotal,
     });
 
-    // 5. Journal d'audit
-    await base44.entities.JournalAudit.create({
+    // 5. Journal d'audit via backend
+    await base44.functions.invoke('createAudit', {
       action: "Nouvelle vente enregistrée",
       module: "vente",
       details: `Vente de ${donnees.quantite}x ${produit.nom} par ${vendeur.nom_complet} – Total: ${donnees.montantTotal} FCFA`,
