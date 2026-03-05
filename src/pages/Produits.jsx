@@ -448,7 +448,7 @@ export default function Produits() {
         await base44.entities.JournalAudit.create({ action: "Produit modifié", module: "produit", details: `Produit ${form.nom} modifié`, entite_id: produitEdite.id });
         showSuccess("Produit modifié", `${form.nom} a été mis à jour avec succès`);
       } else {
-        await base44.entities.Produit.create(data);
+        await base44.functions.invoke('createProduit', data);
         await base44.entities.JournalAudit.create({ action: "Produit créé", module: "produit", details: `Nouveau produit: ${form.nom} (${form.reference})` });
         showSuccess("Produit créé", `${form.nom} a été créé avec succès`);
       }
@@ -457,7 +457,6 @@ export default function Produits() {
       queryClient.invalidateQueries({ queryKey: ["produits"] });
       setDialogOuvert(false);
     } catch (err) {
-      console.error("Erreur lors de la sauvegarde:", err);
       showError("Erreur de sauvegarde", err.message || "Échec de la sauvegarde");
     } finally {
       setEnCours(false);
