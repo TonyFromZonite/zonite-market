@@ -78,17 +78,28 @@ function CategoriesTab() {
   const sauvegarder = async () => {
     if (!form.nom.trim()) return;
     setEnCours(true);
-    if (edite) await base44.entities.Categorie.update(edite.id, form);
-    else await base44.entities.Categorie.create(form);
-    queryClient.invalidateQueries({ queryKey: ["categories"] });
-    setDialogOuvert(false);
-    setEnCours(false);
+    try {
+      if (edite) await base44.entities.Categorie.update(edite.id, form);
+      else await base44.entities.Categorie.create(form);
+      queryClient.invalidateQueries({ queryKey: ["categories"] });
+      setDialogOuvert(false);
+    } catch (err) {
+      console.error("Erreur lors de la sauvegarde:", err);
+      alert("Erreur : " + (err.message || "Échec de la sauvegarde"));
+    } finally {
+      setEnCours(false);
+    }
   };
 
   const supprimer = async (cat) => {
     if (!confirm(`Supprimer la catégorie "${cat.nom}" ?`)) return;
-    await base44.entities.Categorie.delete(cat.id);
-    queryClient.invalidateQueries({ queryKey: ["categories"] });
+    try {
+      await base44.entities.Categorie.delete(cat.id);
+      queryClient.invalidateQueries({ queryKey: ["categories"] });
+    } catch (err) {
+      console.error("Erreur lors de la suppression:", err);
+      alert("Erreur : " + (err.message || "Échec de la suppression"));
+    }
   };
 
   return (
