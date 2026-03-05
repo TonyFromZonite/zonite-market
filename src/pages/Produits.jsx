@@ -101,10 +101,11 @@ function CategoriesTab() {
     if (!confirm(`Supprimer la catégorie "${cat.nom}" ?`)) return;
     try {
       await base44.entities.Categorie.delete(cat.id);
+      showSuccess("Catégorie supprimée", "La catégorie a été supprimée avec succès");
       queryClient.invalidateQueries({ queryKey: ["categories"] });
     } catch (err) {
       console.error("Erreur lors de la suppression:", err);
-      alert("Erreur : " + (err.message || "Échec de la suppression"));
+      showError("Erreur de suppression", err.message || "Échec de la suppression");
     }
   };
 
