@@ -108,7 +108,7 @@ export default function GestionSousAdmins() {
       // Inviter l'utilisateur
       try { await base44.users.inviteUser(form.email, "user"); } catch (_) {}
     }
-    queryClient.invalidateQueries(["sous_admins"]);
+    queryClient.invalidateQueries({ queryKey: ["sous_admins"] });
     setDialogOuvert(false);
     setChargement(false);
   };
@@ -116,14 +116,14 @@ export default function GestionSousAdmins() {
   const supprimer = async (id) => {
     if (!confirm("Supprimer ce sous-administrateur ?")) return;
     await base44.entities.SousAdmin.delete(id);
-    queryClient.invalidateQueries(["sous_admins"]);
+    queryClient.invalidateQueries({ queryKey: ["sous_admins"] });
   };
 
   const toggleStatut = async (sa) => {
     await base44.entities.SousAdmin.update(sa.id, {
       statut: sa.statut === "actif" ? "suspendu" : "actif",
     });
-    queryClient.invalidateQueries(["sous_admins"]);
+    queryClient.invalidateQueries({ queryKey: ["sous_admins"] });
   };
 
   return (
