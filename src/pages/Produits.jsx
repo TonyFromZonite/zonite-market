@@ -438,9 +438,15 @@ export default function Produits() {
 
   const supprimer = async (produit) => {
     if (!confirm(`Supprimer le produit "${produit.nom}" ?`)) return;
-    await base44.entities.Produit.delete(produit.id);
-    await base44.entities.JournalAudit.create({ action: "Produit supprimé", module: "produit", details: `Produit ${produit.nom} supprimé`, entite_id: produit.id });
+    try {
+      await base44.entities.Produit.delete(produit.id);
+      await base44.entities.JournalAudit.create({ action: "Produit supprimé", module: "produit", details: `Produit ${produit.nom} supprimé`, entite_id: produit.id });
+    } catch (e) {
+      if (!e.message?.includes("not found")) throw e;
+      // Produit déjà supprimé, on continue pour rafraîchir la liste
+    }
     queryClient.invalidateQueries({ queryKey: ["produits"] });
+    invalidateCache("PRODUITS");
   };
 
   const ajouterStock = async () => {
