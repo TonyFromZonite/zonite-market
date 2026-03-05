@@ -1,6 +1,30 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 import bcrypt from 'npm:bcryptjs@2.4.3';
-import { checkRateLimit, validateEmail, logAudit } from './auditLoggingMiddleware.js';
+
+// Inline helpers (no local imports allowed in Deno Deploy)
+function validateEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+async function checkRateLimit(base44, identifier, maxRequests, windowMs) {
+  const windowStart = Date.now() - windowMs;
+  try {
+    const recentAttempts = await base44.asServiceRole.entities.JournalAudit.filter({
+      action: `rate_limit_check:${identifier}`,
+      created_date: { $gte: new Date(windowStart).toISOString() }
+    });
+    if (recentAttempts.length >= maxRequests) return { allowed: false };
+    await base44.asServiceRole.entities.JournalAudit.create({
+      action: `rate_limit_check:${identifier}`,
+      module: 'systeme',
+      details: `Rate limit check for ${identifier}`,
+      utilisateur: identifier,
+    }).catch(() => {});
+    return { allowed: true };
+  } catch (_) {
+    return { allowed: true };
+  }
+}
 
 Deno.serve(async (req) => {
   try {
@@ -14,12 +38,6 @@ Deno.serve(async (req) => {
     // Rate limiting: max 5 tentatives par 15 min par email
     const rateCheck = await checkRateLimit(base44, `login:${email}`, 5, 900000);
     if (!rateCheck.allowed) {
-      await logAudit(base44, {
-        action: 'login_rate_limit_exceeded',
-        module: 'systeme',
-        details: `Trop de tentatives de connexion pour ${email}`,
-        utilisateur: email,
-      });
       return Response.json({ error: 'Too many login attempts. Try again later.' }, { status: 429 });
     }
 
@@ -31,14 +49,13 @@ Deno.serve(async (req) => {
     if (userType === 'vendeur') {
       // Connexion VENDEUR via CompteVendeur
       const comptes = await base44.asServiceRole.entities.CompteVendeur.filter({ user_email: email });
-      
+
       if (comptes.length === 0) {
         return Response.json({ error: 'Identifiants incorrects.' }, { status: 401 });
       }
 
       const compte = comptes[0];
 
-      // Vérifier statut
       if (compte.statut === 'suspendu') {
         return Response.json({ error: 'Compte suspendu. Contactez le support.' }, { status: 403 });
       }
@@ -47,13 +64,11 @@ Deno.serve(async (req) => {
         return Response.json({ success: false, pendingApproval: true });
       }
 
-      // Vérifier password
       const passwordMatch = await bcrypt.compare(password, compte.mot_de_passe_hash || '');
       if (!passwordMatch) {
         return Response.json({ error: 'Identifiants incorrects.' }, { status: 401 });
       }
 
-      // Session vendeur
       return Response.json({
         success: true,
         session: {
@@ -66,15 +81,10 @@ Deno.serve(async (req) => {
       });
 
     } else if (userType === 'admin') {
-      // Connexion ADMIN/SOUS-ADMIN
-      
-      // PRIORITÉ 1: Vérifier si c'est un sous-admin avec un mot de passe personnalisé
-      // Ne pas faire d'authentification Base44 avant - risque de confusion
-      const sousAdmins = await base44.asServiceRole.entities.SousAdmin.filter({ 
-        $or: [
-          { email: email },
-          { username: email }
-        ]
+
+      // PRIORITÉ 1: Vérifier si c'est un sous-admin
+      const sousAdmins = await base44.asServiceRole.entities.SousAdmin.filter({
+        $or: [{ email: email }, { username: email }]
       });
 
       if (sousAdmins.length > 0) {
@@ -84,13 +94,11 @@ Deno.serve(async (req) => {
           return Response.json({ error: 'Compte suspendu.' }, { status: 403 });
         }
 
-        // Vérifier le mot de passe du sous-admin (AVANT toute auth Base44)
         const passwordMatch = await bcrypt.compare(password, sousAdmin.mot_de_passe_hash || '');
         if (!passwordMatch) {
           return Response.json({ error: 'Identifiants incorrects.' }, { status: 401 });
         }
 
-        // Audit log
         await base44.asServiceRole.entities.JournalAudit.create({
           action: 'sous_admin_login',
           module: 'systeme',
@@ -112,14 +120,13 @@ Deno.serve(async (req) => {
         });
       }
 
-      // PRIORITÉ 2: Admin principal — vérification par email + hash bcrypt
-      // Chercher l'utilisateur admin par email dans Base44
+      // PRIORITÉ 2: Admin principal — email + hash bcrypt obligatoire
       const adminUsers = await base44.asServiceRole.entities.User.filter({ email: email });
       if (adminUsers.length === 0 || adminUsers[0].role !== 'admin') {
         return Response.json({ error: 'Identifiants incorrects.' }, { status: 401 });
       }
 
-      // Vérifier le hash bcrypt du mot de passe admin
+      // Vérifier le hash bcrypt stocké en ConfigApp
       const configs = await base44.asServiceRole.entities.ConfigApp.filter({ cle: 'admin_password_hash' });
       if (configs.length === 0 || !configs[0].valeur) {
         return Response.json({ error: 'Mot de passe admin non configuré. Contactez le super-administrateur.' }, { status: 403 });
@@ -132,7 +139,6 @@ Deno.serve(async (req) => {
 
       const adminUser = adminUsers[0];
 
-      // Audit log
       await base44.asServiceRole.entities.JournalAudit.create({
         action: 'admin_login',
         module: 'systeme',
