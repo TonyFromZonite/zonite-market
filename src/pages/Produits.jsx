@@ -454,6 +454,7 @@ export default function Produits() {
     await base44.entities.Produit.update(produitEdite.id, { stock_global: nouveau, statut: nouveau > 0 ? "actif" : produitEdite.statut });
     await base44.entities.MouvementStock.create({ produit_id: produitEdite.id, produit_nom: produitEdite.nom, type_mouvement: "entree", quantite: stockAjout, stock_avant: ancien, stock_apres: nouveau, raison: "Approvisionnement" });
     await base44.entities.JournalAudit.create({ action: "Stock ajouté", module: "produit", details: `+${stockAjout} unités pour ${produitEdite.nom} (${ancien} → ${nouveau})`, entite_id: produitEdite.id });
+    invalidateQuery('PRODUITS');
     queryClient.invalidateQueries({ queryKey: ["produits"] });
     setDialogStock(false);
     setStockAjout(0);
