@@ -468,11 +468,12 @@ export default function Produits() {
   const commissionVendeur = (p) => (p.prix_vente || 0) - (p.prix_gros || 0);
   const beneficeZonite = (p) => (p.prix_gros || 0) - (p.prix_achat || 0);
 
-  const { data: retoursEnAttente = [] } = useCachedQuery(
+  const { data: retoursEnAttenteRaw } = useCachedQuery(
     'RETOURS',
     () => base44.entities.RetourProduit.filter({ statut: "en_attente" }),
     { ttl: 10 * 60 * 1000 }
   );
+  const retoursEnAttente = retoursEnAttenteRaw || [];
 
   if (isLoading) {
     return <div className="space-y-3">{Array(6).fill(0).map((_, i) => <Skeleton key={i} className="h-12 rounded-lg" />)}</div>;
