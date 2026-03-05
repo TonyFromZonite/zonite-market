@@ -180,6 +180,7 @@ function Candidatures({ nbBadge, onBadgeChange }) {
       });
     }
     queryClient.invalidateQueries({ queryKey: ["candidatures"] });
+    queryClient.invalidateQueries({ queryKey: ["comptes_vendeurs_badge"] });
     setCandidatureSelectionnee(null);
     setEnCours(false);
   };
