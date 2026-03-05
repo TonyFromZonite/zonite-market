@@ -81,16 +81,15 @@ function CategoriesTab() {
     setEnCours(true);
     try {
       if (edite) {
-        await base44.entities.Categorie.update(edite.id, form);
+        await base44.functions.invoke('updateCategorie', { categorieId: edite.id, data: form });
         showSuccess("Catégorie modifiée", "La catégorie a été mise à jour avec succès");
       } else {
-        await base44.entities.Categorie.create(form);
+        await base44.functions.invoke('createCategorie', form);
         showSuccess("Catégorie créée", "La nouvelle catégorie a été créée avec succès");
       }
       queryClient.invalidateQueries({ queryKey: ["categories"] });
       setDialogOuvert(false);
     } catch (err) {
-      console.error("Erreur lors de la sauvegarde:", err);
       showError("Erreur de sauvegarde", err.message || "Échec de la sauvegarde");
     } finally {
       setEnCours(false);
@@ -100,11 +99,10 @@ function CategoriesTab() {
   const supprimer = async (cat) => {
     if (!confirm(`Supprimer la catégorie "${cat.nom}" ?`)) return;
     try {
-      await base44.entities.Categorie.delete(cat.id);
+      await base44.functions.invoke('deleteCategorie', { categorieId: cat.id });
       showSuccess("Catégorie supprimée", "La catégorie a été supprimée avec succès");
       queryClient.invalidateQueries({ queryKey: ["categories"] });
     } catch (err) {
-      console.error("Erreur lors de la suppression:", err);
       showError("Erreur de suppression", err.message || "Échec de la suppression");
     }
   };
@@ -445,11 +443,11 @@ export default function Produits() {
       const data = { ...form, stock_global: stockGlobal };
       if (produitEdite) {
         await base44.entities.Produit.update(produitEdite.id, data);
-        await base44.entities.JournalAudit.create({ action: "Produit modifié", module: "produit", details: `Produit ${form.nom} modifié`, entite_id: produitEdite.id });
+        await base44.functions.invoke('createAudit', { action: "Produit modifié", module: "produit", details: `Produit ${form.nom} modifié`, entite_id: produitEdite.id });
         showSuccess("Produit modifié", `${form.nom} a été mis à jour avec succès`);
       } else {
         await base44.functions.invoke('createProduit', data);
-        await base44.entities.JournalAudit.create({ action: "Produit créé", module: "produit", details: `Nouveau produit: ${form.nom} (${form.reference})` });
+        await base44.functions.invoke('createAudit', { action: "Produit créé", module: "produit", details: `Nouveau produit: ${form.nom} (${form.reference})` });
         showSuccess("Produit créé", `${form.nom} a été créé avec succès`);
       }
       invalidateQuery('PRODUITS');
