@@ -120,12 +120,19 @@ Deno.serve(async (req) => {
        }
 
        // PRIORITÉ 2: Admin principal — recherche par email ou username
-       let adminUsers = await base44.asServiceRole.entities.User.filter({ email: email });
+       let adminUsers = [];
+
+       // Essayer d'abord par email
+       try {
+         adminUsers = await base44.asServiceRole.entities.User.filter({ email: email, role: 'admin' });
+       } catch (_) {}
 
        // Si pas trouvé par email et le format n'est pas un email, chercher par "username" dans les données
        if (adminUsers.length === 0 && !validateEmail(email)) {
-         const allAdmins = await base44.asServiceRole.entities.User.filter({ role: 'admin' });
-         adminUsers = allAdmins.filter(u => u.data?.username === email);
+         try {
+           const allAdmins = await base44.asServiceRole.entities.User.filter({ role: 'admin' });
+           adminUsers = allAdmins.filter(u => u.data?.username === email);
+         } catch (_) {}
        }
 
        if (adminUsers.length === 0 || adminUsers[0].role !== 'admin') {
