@@ -121,6 +121,7 @@ export default function InscriptionVendeur() {
       numero_mobile_money: form.numero_mobile_money,
       operateur_mobile_money: form.operateur_mobile_money,
       photo_identite_url: form.photo_identite_url,
+      photo_identite_verso_url: form.photo_identite_verso_url || "",
       selfie_url: form.selfie_url,
       mot_de_passe_hash: hashedPassword,
       statut_kyc: "en_attente",
