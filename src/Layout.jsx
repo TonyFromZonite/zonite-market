@@ -9,6 +9,7 @@ import {
 import { base44 } from "@/api/base44Client";
 import RechercheGlobale from "@/components/RechercheGlobale";
 import NotificationBell from "@/components/NotificationBell";
+import { NotificationToaster } from "@/components/NotificationSystem";
 
 // Pages de l'Application Vendeur (interface vendeur mobile, sans sidebar admin)
 const PAGES_VENDEUR = [
