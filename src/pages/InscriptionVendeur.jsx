@@ -46,7 +46,7 @@ export default function InscriptionVendeur() {
   });
   const [mdpVisible, setMdpVisible] = useState(false);
   const [enCours, setEnCours] = useState(false);
-  const [uploadEnCours, setUploadEnCours] = useState({ id: false, selfie: false });
+  const [uploadEnCours, setUploadEnCours] = useState({ id: false, idVerso: false, selfie: false });
   const [erreur, setErreur] = useState("");
   const [succes, setSucces] = useState(false);
 
