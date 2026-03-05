@@ -14,6 +14,14 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'produitId required' }, { status: 400 });
     }
 
+    // Vérifier que le produit existe
+    let produit;
+    try {
+      produit = await base44.asServiceRole.entities.Produit.get(produitId);
+    } catch (err) {
+      return Response.json({ error: 'Produit non trouvé' }, { status: 404 });
+    }
+
     // Utiliser asServiceRole pour ignorer les RLS
     await base44.asServiceRole.entities.Produit.delete(produitId);
 
@@ -21,7 +29,7 @@ Deno.serve(async (req) => {
     await base44.asServiceRole.entities.JournalAudit.create({
       action: "Produit supprimé",
       module: "produit",
-      details: `Produit supprimé via fonction backend`,
+      details: `Produit ${produit.nom} supprimé via fonction backend`,
       entite_id: produitId,
       utilisateur: (await base44.auth.me())?.email || "système"
     }).catch(() => {});
