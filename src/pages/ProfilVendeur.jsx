@@ -63,15 +63,16 @@ export default function ProfilVendeur() {
     if (nouveauMdp !== confirmerMdp) { setErreurMdp("Les mots de passe ne correspondent pas."); return; }
     setSaveMdpEnCours(true);
     try {
-      const response = await base44.functions.invoke('changePassword', {
+      // ✅ Utilise le nouveau endpoint dédié sans session Base44 requise
+      const emailVendeur = compteVendeur?.user_email;
+      const response = await base44.functions.invoke('changePasswordVendeur', {
+        email: emailVendeur,
         oldPassword: ancienMdp,
         newPassword: nouveauMdp,
-        userType: 'vendeur'
       });
       if (response.data.success) {
         setSuccesMdp(true);
         setAncienMdp(""); setNouveauMdp(""); setConfirmerMdp("");
-        // Invalider session et rediriger après 2s
         setTimeout(() => {
           sessionStorage.removeItem("vendeur_session");
           window.location.href = createPageUrl("Connexion");
@@ -79,8 +80,8 @@ export default function ProfilVendeur() {
       } else {
         setErreurMdp(response.data.error || "Erreur lors du changement de mot de passe.");
       }
-    } catch (_) {
-      setErreurMdp("Erreur lors du changement de mot de passe.");
+    } catch (err) {
+      setErreurMdp(err.response?.data?.error || "Erreur lors du changement de mot de passe.");
     }
     setSaveMdpEnCours(false);
   };
