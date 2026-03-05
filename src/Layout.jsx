@@ -30,6 +30,7 @@ const TOUS_LES_MENUS = [
   { nom: "Livreurs",             page: "Livraisons",           icone: Truck },
   { nom: "Support Vendeurs",     page: "SupportAdmin",         icone: MessageSquare },
   { nom: "Journal d'Audit",      page: "JournalAudit",         icone: Shield },
+  { nom: "Permissions Admin",    page: "GestionPermissionsAdmin", icone: Shield },
   { nom: "Sous-Admins",          page: "GestionSousAdmins",    icone: UserCog },
   { nom: "Configuration App",    page: "ConfigurationApp",     icone: Settings },
 ];
