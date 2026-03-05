@@ -25,6 +25,7 @@ function genererMdp() {
 
 export default function InscriptionVendeur() {
   const [etape, setEtape] = useState(1);
+  const [typeDocument, setTypeDocument] = useState("cni"); // "cni" ou "passeport"
   const [form, setForm] = useState({
     // Étape 1 - Compte
     nom_complet: "",
@@ -39,7 +40,8 @@ export default function InscriptionVendeur() {
     operateur_mobile_money: "orange_money",
     experience_vente: "",
     // Étape 3 - KYC
-    photo_identite_url: "",
+    photo_identite_url: "",      // passeport ou CNI recto
+    photo_identite_verso_url: "", // CNI verso uniquement
     selfie_url: "",
   });
   const [mdpVisible, setMdpVisible] = useState(false);
