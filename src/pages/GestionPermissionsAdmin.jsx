@@ -6,8 +6,8 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, Trash2, Edit2, X } from "lucide-react";
-import { NotificationSystem } from "@/components/NotificationSystem";
+import { Plus, Trash2, Edit2 } from "lucide-react";
+import { showSuccess, showError, showWarning } from "@/components/NotificationSystem";
 
 const MODULES_DISPONIBLES = [
   "TableauDeBord",
@@ -43,7 +43,7 @@ export default function GestionPermissionsAdmin() {
         const data = await base44.entities.AdminPermissions.list();
         setPermissions(data || []);
       } catch (error) {
-        NotificationSystem.error("Erreur au chargement des permissions");
+        showError("Erreur au chargement des permissions");
       } finally {
         setLoading(false);
       }
@@ -55,17 +55,17 @@ export default function GestionPermissionsAdmin() {
     e.preventDefault();
     
     if (!formData.admin_email || formData.permissions.length === 0) {
-      NotificationSystem.warning("Email et au moins une permission requis");
+      showWarning("Email et au moins une permission requis");
       return;
     }
 
     try {
       if (editingId) {
         await base44.entities.AdminPermissions.update(editingId, formData);
-        NotificationSystem.success("Permissions mises à jour");
+        showSuccess("Permissions mises à jour");
       } else {
         await base44.entities.AdminPermissions.create(formData);
-        NotificationSystem.success("Admin et permissions créés");
+        showSuccess("Admin et permissions créés");
       }
       
       // Recharger
@@ -74,7 +74,7 @@ export default function GestionPermissionsAdmin() {
       setDialogOpen(false);
       resetForm();
     } catch (error) {
-      NotificationSystem.error("Erreur lors de la sauvegarde");
+      showError("Erreur lors de la sauvegarde");
     }
   };
 
@@ -84,9 +84,9 @@ export default function GestionPermissionsAdmin() {
     try {
       await base44.entities.AdminPermissions.delete(id);
       setPermissions(permissions.filter(p => p.id !== id));
-      NotificationSystem.success("Admin supprimé");
+      showSuccess("Admin supprimé");
     } catch (error) {
-      NotificationSystem.error("Erreur lors de la suppression");
+      showError("Erreur lors de la suppression");
     }
   };
 
