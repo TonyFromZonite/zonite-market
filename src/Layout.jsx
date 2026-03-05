@@ -116,6 +116,7 @@ export default function Layout({ children, currentPageName }) {
 
   return (
     <div className="min-h-screen bg-slate-50 flex">
+      <NotificationToaster />
       {/* Overlay mobile */}
       {menuOuvert && (
         <div className="fixed inset-0 bg-black/40 z-40 lg:hidden" onClick={() => setMenuOuvert(false)} />
