@@ -53,7 +53,7 @@ export default function InscriptionVendeur() {
   const modifier = (champ, val) => setForm(p => ({ ...p, [champ]: val }));
 
   const uploadFichier = async (fichier, champ) => {
-    const key = champ === "photo_identite_url" ? "id" : "selfie";
+    const key = champ === "photo_identite_url" ? "id" : champ === "photo_identite_verso_url" ? "idVerso" : "selfie";
     setUploadEnCours(p => ({ ...p, [key]: true }));
     const { file_url } = await base44.integrations.Core.UploadFile({ file: fichier });
     modifier(champ, file_url);
