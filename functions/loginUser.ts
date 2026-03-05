@@ -147,8 +147,8 @@ Deno.serve(async (req) => {
        let adminPasswordMatch = false;
        try {
          const configs = await base44.asServiceRole.entities.ConfigApp.filter({ cle: 'admin_password_hash' });
-         if (configs.length > 0 && configs[0].valeur) {
-           adminPasswordMatch = await bcrypt.compare(password, configs[0].valeur);
+         if (configs.length > 0 && configs[0].data?.valeur) {
+           adminPasswordMatch = await bcrypt.compare(password, configs[0].data.valeur);
          }
        } catch (_) {}
 
