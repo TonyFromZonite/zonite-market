@@ -458,8 +458,7 @@ export default function Produits() {
   const supprimer = async (produit) => {
     if (!confirm(`Supprimer le produit "${produit.nom}" ?`)) return;
     try {
-      await base44.entities.Produit.delete(produit.id);
-      await base44.entities.JournalAudit.create({ action: "Produit supprimé", module: "produit", details: `Produit ${produit.nom} supprimé`, entite_id: produit.id });
+      await base44.functions.invoke('deleteProduit', { produitId: produit.id });
       invalidateQuery('PRODUITS');
       queryClient.invalidateQueries({ queryKey: ["produits"] });
     } catch (err) {
