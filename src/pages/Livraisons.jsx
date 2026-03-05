@@ -18,12 +18,13 @@ const initForm = { nom: "", telephone: "", vehicule: "", notes: "", statut: "act
 const fmt = (n) => `${Math.round(n || 0).toLocaleString("fr-FR")} FCFA`;
 
 export default function Livraisons() {
-  const [dialogOuvert, setDialogOuvert] = useState(false);
-  const [livreurEdite, setLivreurEdite] = useState(null);
-  const [form, setForm] = useState(initForm);
-  const [enCours, setEnCours] = useState(false);
-  const [expanded, setExpanded] = useState(null);
-  const queryClient = useQueryClient();
+   const [dialogOuvert, setDialogOuvert] = useState(false);
+   const [livreurEdite, setLivreurEdite] = useState(null);
+   const [form, setForm] = useState(initForm);
+   const [enCours, setEnCours] = useState(false);
+   const [expanded, setExpanded] = useState(null);
+   const [confirmSuppression, setConfirmSuppression] = useState(null);
+   const queryClient = useQueryClient();
 
   const { data: livraisons = [], isLoading } = useQuery({
     queryKey: ["livraisons"],
@@ -73,10 +74,10 @@ export default function Livraisons() {
   };
 
   const supprimer = async (l) => {
-    if (!confirm(`Supprimer le livreur "${l.nom}" ?`)) return;
     await base44.functions.invoke('deleteLivraison', { livraisonId: l.id });
     await base44.functions.invoke('createAudit', { action: "Livreur supprimé", module: "livraison", details: `Livreur ${l.nom} supprimé`, entite_id: l.id });
     queryClient.invalidateQueries({ queryKey: ["livraisons"] });
+    setConfirmSuppression(null);
   };
 
   const statutBadge = (s) => ({
@@ -128,7 +129,7 @@ export default function Livraisons() {
                 </div>
                 <div className="flex items-center gap-1">
                   <Button variant="ghost" size="icon" onClick={() => ouvrir(l)}><Pencil className="w-4 h-4 text-slate-500" /></Button>
-                  <Button variant="ghost" size="icon" onClick={() => supprimer(l)}><Trash2 className="w-4 h-4 text-red-500" /></Button>
+                  <Button variant="ghost" size="icon" onClick={() => setConfirmSuppression(l)}><Trash2 className="w-4 h-4 text-red-500" /></Button>
                   {zones.length > 0 && (
                     <Button variant="ghost" size="icon" onClick={() => setExpanded(isOpen ? null : l.id)}>
                       {isOpen ? <ChevronUp className="w-4 h-4 text-slate-500" /> : <ChevronDown className="w-4 h-4 text-slate-500" />}
@@ -271,7 +272,21 @@ export default function Livraisons() {
             </Button>
           </DialogFooter>
         </DialogContent>
-      </Dialog>
-    </div>
-  );
-}
+        </Dialog>
+
+        {/* Dialog confirmation suppression livreur */}
+        <Dialog open={!!confirmSuppression} onOpenChange={() => setConfirmSuppression(null)}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader><DialogTitle>Supprimer le livreur</DialogTitle></DialogHeader>
+          <p className="text-sm text-slate-600">Êtes-vous sûr de vouloir supprimer <strong>"{confirmSuppression?.nom}"</strong> ? Cette action ne peut pas être annulée.</p>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setConfirmSuppression(null)}>Annuler</Button>
+            <Button variant="destructive" onClick={() => supprimer(confirmSuppression)} disabled={enCours}>
+              {enCours ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}Supprimer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+        </Dialog>
+        </div>
+        );
+        }
