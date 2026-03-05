@@ -468,11 +468,12 @@ export default function Produits() {
     if (!confirm(`Supprimer le produit "${produit.nom}" ?`)) return;
     try {
       await base44.functions.invoke('deleteProduit', { produitId: produit.id });
+      showSuccess("Produit supprimé", `${produit.nom} a été supprimé avec succès`);
       invalidateQuery('PRODUITS');
       queryClient.invalidateQueries({ queryKey: ["produits"] });
     } catch (err) {
       console.error("Erreur lors de la suppression:", err);
-      alert("Erreur : " + (err.message || "Échec de la suppression"));
+      showError("Erreur de suppression", err.message || "Échec de la suppression");
     }
   };
 
