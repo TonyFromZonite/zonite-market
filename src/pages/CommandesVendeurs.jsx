@@ -244,6 +244,7 @@ export default function CommandesVendeurs() {
       message: `Votre commande de ${commandeSelectionnee.produit_nom} pour ${commandeSelectionnee.client_nom} a été annulée.`,
       type: "alerte",
     });
+    invalidateQuery('PRODUITS');
     queryClient.invalidateQueries({ queryKey: ["commandes_vendeurs_admin"] });
     setEnCours(false);
     setCommandeSelectionnee(null);
