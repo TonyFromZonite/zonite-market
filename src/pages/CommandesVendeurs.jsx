@@ -145,6 +145,7 @@ export default function CommandesVendeurs() {
       details: `Commande ${commandeSelectionnee.id} livrée — Commission: ${commandeSelectionnee.commission_vendeur} FCFA`,
       entite_id: commandeSelectionnee.id,
     });
+    invalidateQuery('PRODUITS');
     queryClient.invalidateQueries({ queryKey: ["commandes_vendeurs_admin"] });
     setEnCours(false);
     setCommandeSelectionnee(null);
