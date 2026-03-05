@@ -81,36 +81,37 @@ export default function GestionSousAdmins() {
     if (!form.nom_complet || !form.nom_role || !form.username || !form.email) return;
     if (!editing && !form.mot_de_passe) return; // Mot de passe requis pour création
     setChargement(true);
-    const data = {
-      nom_complet: form.nom_complet,
-      nom_role: form.nom_role,
-      username: form.username,
-      email: form.email,
-      permissions: form.permissions,
-      statut: form.statut,
-      notes: form.notes,
-    };
-    if (form.mot_de_passe) {
-      try {
+    try {
+      const data = {
+        nom_complet: form.nom_complet,
+        nom_role: form.nom_role,
+        username: form.username,
+        email: form.email,
+        permissions: form.permissions,
+        statut: form.statut,
+        notes: form.notes,
+      };
+      if (form.mot_de_passe) {
         const response = await base44.functions.invoke('hashPassword', {
           password: form.mot_de_passe
         });
         data.mot_de_passe_hash = response.data.hashedPassword;
-      } catch (_) {
-        setChargement(false);
-        return;
       }
+      if (editing) {
+        await base44.entities.SousAdmin.update(editing.id, data);
+      } else {
+        await base44.entities.SousAdmin.create(data);
+        // Inviter l'utilisateur
+        try { await base44.users.inviteUser(form.email, "user"); } catch (_) {}
+      }
+      queryClient.invalidateQueries({ queryKey: ["sous_admins"] });
+      setDialogOuvert(false);
+    } catch (err) {
+      console.error("Erreur lors de la sauvegarde:", err);
+      alert("Erreur : " + (err.message || "Échec de la sauvegarde"));
+    } finally {
+      setChargement(false);
     }
-    if (editing) {
-      await base44.entities.SousAdmin.update(editing.id, data);
-    } else {
-      await base44.entities.SousAdmin.create(data);
-      // Inviter l'utilisateur
-      try { await base44.users.inviteUser(form.email, "user"); } catch (_) {}
-    }
-    queryClient.invalidateQueries({ queryKey: ["sous_admins"] });
-    setDialogOuvert(false);
-    setChargement(false);
   };
 
   const supprimer = async (id) => {
