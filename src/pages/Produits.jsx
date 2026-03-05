@@ -422,20 +422,26 @@ export default function Produits() {
 
   const sauvegarder = async () => {
     setEnCours(true);
-    const stockGlobal = recalculerStockGlobal(form.stocks_par_localisation || []);
-    const data = { ...form, stock_global: stockGlobal };
-    if (produitEdite) {
-      await base44.entities.Produit.update(produitEdite.id, data);
-      await base44.entities.JournalAudit.create({ action: "Produit modifié", module: "produit", details: `Produit ${form.nom} modifié`, entite_id: produitEdite.id });
-    } else {
-      await base44.entities.Produit.create(data);
-      await base44.entities.JournalAudit.create({ action: "Produit créé", module: "produit", details: `Nouveau produit: ${form.nom} (${form.reference})` });
+    try {
+      const stockGlobal = recalculerStockGlobal(form.stocks_par_localisation || []);
+      const data = { ...form, stock_global: stockGlobal };
+      if (produitEdite) {
+        await base44.entities.Produit.update(produitEdite.id, data);
+        await base44.entities.JournalAudit.create({ action: "Produit modifié", module: "produit", details: `Produit ${form.nom} modifié`, entite_id: produitEdite.id });
+      } else {
+        await base44.entities.Produit.create(data);
+        await base44.entities.JournalAudit.create({ action: "Produit créé", module: "produit", details: `Nouveau produit: ${form.nom} (${form.reference})` });
+      }
+      invalidateQuery('PRODUITS');
+      invalidateQuery('CATEGORIES');
+      queryClient.invalidateQueries({ queryKey: ["produits"] });
+      setDialogOuvert(false);
+    } catch (err) {
+      console.error("Erreur lors de la sauvegarde:", err);
+      alert("Erreur : " + (err.message || "Échec de la sauvegarde"));
+    } finally {
+      setEnCours(false);
     }
-    invalidateQuery('PRODUITS');
-    invalidateQuery('CATEGORIES');
-    queryClient.invalidateQueries({ queryKey: ["produits"] });
-    setDialogOuvert(false);
-    setEnCours(false);
   };
 
   const supprimer = async (produit) => {
