@@ -22,8 +22,8 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Produit non trouvé' }, { status: 404 });
     }
 
-    // Utiliser asServiceRole pour ignorer les RLS
-    await base44.asServiceRole.entities.Produit.delete(produitId);
+    // Marquer le produit comme supprimé au lieu de le supprimer
+    await base44.asServiceRole.entities.Produit.update(produitId, { statut: "supprime" });
 
     // Audit
     await base44.asServiceRole.entities.JournalAudit.create({
