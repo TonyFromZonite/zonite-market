@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { useCachedQuery, cacheStore } from "@/components/CacheManager";
+import { useCachedQuery } from "@/components/CacheManager";
 import {
   DollarSign, TrendingUp, Wallet, AlertTriangle,
   ShoppingCart, Package, Users, ShieldCheck, Lock
@@ -13,10 +13,9 @@ import GraphiqueVentes from "@/components/dashboard/GraphiqueVentes";
 import TopProduits from "@/components/dashboard/TopProduits";
 import TopVendeurs from "@/components/dashboard/TopVendeurs";
 import StockCritique from "@/components/dashboard/StockCritique";
+import { getAdminSession, getSousAdminSession } from "@/components/useSessionGuard";
 
 const formaterMontant = (n) => `${Math.round(n || 0).toLocaleString("fr-FR")} FCFA`;
-
-import { getAdminSession, getSousAdminSession } from "@/components/useSessionGuard";
 
 // Dashboard simplifié pour sous-admins
 function DashboardSousAdmin({ sousAdmin }) {
