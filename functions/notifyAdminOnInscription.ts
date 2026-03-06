@@ -20,7 +20,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized: Invalid automation context' }, { status: 401 });
     }
 
-    const { vendeur_id, vendeur_nom, vendeur_email } = payload;
+    const { vendeur_id, vendeur_nom, vendeur_email } = payload.data || payload;
 
     if (!vendeur_id || !vendeur_nom || !vendeur_email) {
       return Response.json({ error: 'Données manquantes' }, { status: 400 });
