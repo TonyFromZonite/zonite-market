@@ -512,7 +512,7 @@ export default function Produits() {
     try {
       const ancien = produitEdite.stock_global || 0;
       const nouveau = ancien + stockAjout;
-      await base44.entities.Produit.update(produitEdite.id, { stock_global: nouveau, statut: nouveau > 0 ? "actif" : produitEdite.statut });
+      await base44.functions.invoke('updateProduit', { produitId: produitEdite.id, data: { stock_global: nouveau, statut: nouveau > 0 ? "actif" : produitEdite.statut } });
       await base44.entities.MouvementStock.create({ produit_id: produitEdite.id, produit_nom: produitEdite.nom, type_mouvement: "entree", quantite: stockAjout, stock_avant: ancien, stock_apres: nouveau, raison: "Approvisionnement" });
       await base44.entities.JournalAudit.create({ action: "Stock ajouté", module: "produit", details: `+${stockAjout} unités pour ${produitEdite.nom} (${ancien} → ${nouveau})`, entite_id: produitEdite.id });
       showSuccess("Stock ajouté", `+${stockAjout} unité(s) pour ${produitEdite.nom}`);
