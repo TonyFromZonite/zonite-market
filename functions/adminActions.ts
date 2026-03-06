@@ -170,6 +170,12 @@ Deno.serve(async (req) => {
         return Response.json({ success: true, result });
       }
 
+      // ─── PRODUIT (create) ─────────────────────────────────────────────────────
+      case 'createProduit': {
+        const result = await db.Produit.create(payload.data);
+        return Response.json({ success: true, result });
+      }
+
       default:
         return Response.json({ error: `Action inconnue: ${action}` }, { status: 400 });
     }
