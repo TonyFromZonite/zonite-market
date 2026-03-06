@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { getVendeurSession } from "@/components/useSessionGuard";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Badge } from "@/components/ui/badge";
@@ -28,25 +29,13 @@ export default function MesCommandesVendeur() {
 
   useEffect(() => {
     const charger = async () => {
-      let emailVendeur = null;
-      
-      try {
-        const session = sessionStorage.getItem("vendeur_session");
-        if (session) {
-          const parsed = JSON.parse(session);
-          emailVendeur = parsed.email;
-        }
-      } catch (_) {}
-
-      if (!emailVendeur) {
-        const u = await base44.auth.me().catch(() => null);
-        if (u?.email) emailVendeur = u.email;
+      const session = getVendeurSession();
+      if (!session) {
+        window.location.href = createPageUrl("Connexion");
+        return;
       }
-
-      if (emailVendeur) {
-        const comptes = await base44.entities.CompteVendeur.filter({ user_email: emailVendeur });
-        if (comptes.length > 0) setCompteVendeur(comptes[0]);
-      }
+      const comptes = await base44.entities.CompteVendeur.filter({ user_email: session.email });
+      if (comptes.length > 0) setCompteVendeur(comptes[0]);
     };
     charger();
   }, []);

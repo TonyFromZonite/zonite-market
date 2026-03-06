@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { getVendeurSession } from "@/components/useSessionGuard";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -36,7 +37,12 @@ export default function NotificationsVendeur() {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    base44.auth.me().then(u => setUtilisateur(u));
+    const session = getVendeurSession();
+    if (!session) {
+      window.location.href = createPageUrl("Connexion");
+      return;
+    }
+    setUtilisateur({ email: session.email });
   }, []);
 
   const { data: notifications = [], isLoading } = useQuery({

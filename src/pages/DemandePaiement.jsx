@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { getVendeurSession } from "@/components/useSessionGuard";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
@@ -26,8 +27,12 @@ export default function DemandePaiement() {
 
   useEffect(() => {
     const charger = async () => {
-      const u = await base44.auth.me();
-      const comptes = await base44.entities.CompteVendeur.filter({ user_email: u.email });
+      const session = getVendeurSession();
+      if (!session) {
+        window.location.href = createPageUrl("Connexion");
+        return;
+      }
+      const comptes = await base44.entities.CompteVendeur.filter({ user_email: session.email });
       if (comptes.length > 0) {
         setCompteVendeur(comptes[0]);
         setForm(f => ({
