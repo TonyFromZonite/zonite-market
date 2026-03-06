@@ -14,15 +14,17 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'action requise' }, { status: 400 });
     }
 
+    // Vérification du rôle admin ou sous_admin
+    const user = await base44.auth.me();
+    if (!user || !['admin', 'sous_admin'].includes(user.role)) {
+      return Response.json({ error: 'Accès refusé: droits insuffisants' }, { status: 403 });
+    }
+
     const db = base44.asServiceRole.entities;
 
     switch (action) {
 
       // ─── PRODUIT ────────────────────────────────────────────────────────────
-      case 'createProduit': {
-        const result = await db.Produit.create(payload.data);
-        return Response.json({ success: true, result });
-      }
       case 'updateProduit': {
         const result = await db.Produit.update(payload.produitId, payload.data);
         return Response.json({ success: true, result });
@@ -171,6 +173,12 @@ Deno.serve(async (req) => {
       }
       case 'createConfigApp': {
         const result = await db.ConfigApp.create(payload.data);
+        return Response.json({ success: true, result });
+      }
+
+      // ─── PRODUIT (create) ─────────────────────────────────────────────────────
+      case 'createProduit': {
+        const result = await db.Produit.create(payload.data);
         return Response.json({ success: true, result });
       }
 
