@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { requireAdminOrSousAdmin } from "@/components/useSessionGuard";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { invalidateQuery } from "@/components/CacheManager";
 import { base44 } from "@/api/base44Client";
@@ -24,6 +25,7 @@ const STATUTS = {
 };
 
 export default function CommandesVendeurs() {
+  useEffect(() => { requireAdminOrSousAdmin(); }, []);
   const [recherche, setRecherche] = useState("");
   const [filtreStatut, setFiltreStatut] = useState("tous");
   const [commandeSelectionnee, setCommandeSelectionnee] = useState(null);
