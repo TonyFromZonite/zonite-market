@@ -14,9 +14,25 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'action requise' }, { status: 400 });
     }
 
-    // Vérification du rôle admin ou sous_admin
-    const user = await base44.auth.me();
-    if (!user || !['admin', 'sous_admin'].includes(user.role)) {
+    // Vérification du rôle admin ou sous_admin (session Base44 ou session custom)
+    let authorized = false;
+    try {
+      const user = await base44.auth.me();
+      if (user && ['admin', 'sous_admin'].includes(user.role)) authorized = true;
+    } catch (_) {}
+
+    // Fallback: vérifier via la session custom stockée dans le header
+    if (!authorized) {
+      const sessionHeader = req.headers.get('x-admin-session');
+      if (sessionHeader) {
+        try {
+          const session = JSON.parse(sessionHeader);
+          if (session && ['admin', 'sous_admin'].includes(session.role)) authorized = true;
+        } catch (_) {}
+      }
+    }
+
+    if (!authorized) {
       return Response.json({ error: 'Accès refusé: droits insuffisants' }, { status: 403 });
     }
 
