@@ -3,9 +3,12 @@
  * Évite les appels directs aux entités base44 depuis le frontend (session non authentifiée).
  */
 import { base44 } from "@/api/base44Client";
+import { getAdminSession, getSousAdminSession } from "@/components/useSessionGuard";
 
 const invoke = async (action, payload = {}) => {
-  const res = await base44.functions.invoke('adminActions', { action, payload });
+  const session = getAdminSession() || getSousAdminSession();
+  const headers = session ? { 'x-admin-session': JSON.stringify(session) } : {};
+  const res = await base44.functions.invoke('adminActions', { action, payload }, { headers });
   return res.data;
 };
 
