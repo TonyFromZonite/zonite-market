@@ -10,6 +10,7 @@ import { base44 } from "@/api/base44Client";
 import RechercheGlobale from "@/components/RechercheGlobale";
 import NotificationBell from "@/components/NotificationBell";
 import { NotificationToaster } from "@/components/NotificationSystem";
+import { getAdminSession, getSousAdminSession, getVendeurSession, clearAllSessions } from "@/components/useSessionGuard";
 
 // Pages de l'Application Vendeur (interface vendeur mobile, sans sidebar admin)
 const PAGES_VENDEUR = [
@@ -19,45 +20,27 @@ const PAGES_VENDEUR = [
   "Connexion", "EspaceSousAdmin"
 ];
 
-const TOUS_LES_MENUS = [
-  { nom: "Tableau de Bord",      page: "TableauDeBord",        icone: LayoutDashboard },
-  { nom: "Nouvelle Vente",       page: "NouvelleVente",        icone: ShoppingCart },
-  { nom: "Commandes Admin",      page: "Commandes",            icone: ClipboardList },
-  { nom: "Gestion Livraisons",   page: "GestionCommandes",     icone: Truck },
-  { nom: "Commandes Vendeurs",   page: "CommandesVendeurs",    icone: ShoppingCart },
-  { nom: "Produits",             page: "Produits",             icone: Package },
-  { nom: "Vendeurs",             page: "Vendeurs",             icone: Users },
-  { nom: "Livreurs",             page: "Livraisons",           icone: Truck },
-  { nom: "Support Vendeurs",     page: "SupportAdmin",         icone: MessageSquare },
-  { nom: "Journal d'Audit",      page: "JournalAudit",         icone: Shield },
+// Menus admin principal complets
+const MENUS_ADMIN = [
+  { nom: "Tableau de Bord",      page: "TableauDeBord",           icone: LayoutDashboard },
+  { nom: "Nouvelle Vente",       page: "NouvelleVente",           icone: ShoppingCart },
+  { nom: "Commandes Admin",      page: "Commandes",               icone: ClipboardList },
+  { nom: "Gestion Livraisons",   page: "GestionCommandes",        icone: Truck },
+  { nom: "Commandes Vendeurs",   page: "CommandesVendeurs",       icone: ShoppingCart },
+  { nom: "Produits",             page: "Produits",                icone: Package },
+  { nom: "Vendeurs",             page: "Vendeurs",                icone: Users },
+  { nom: "Livreurs",             page: "Livraisons",              icone: Truck },
+  { nom: "Support Vendeurs",     page: "SupportAdmin",            icone: MessageSquare },
+  { nom: "Journal d'Audit",      page: "JournalAudit",            icone: Shield },
   { nom: "Permissions Admin",    page: "GestionPermissionsAdmin", icone: Shield },
-  { nom: "Sous-Admins",          page: "GestionSousAdmins",    icone: UserCog },
-  { nom: "Configuration App",    page: "ConfigurationApp",     icone: Settings },
+  { nom: "Sous-Admins",          page: "GestionSousAdmins",       icone: UserCog },
+  { nom: "Configuration App",    page: "ConfigurationApp",        icone: Settings },
 ];
 
+// Tous les menus possibles (pour sous-admin, filtré par permissions)
+const TOUS_LES_MENUS = MENUS_ADMIN;
+
 const LOGO = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69a304769dda004762ee3a57/be2e82d8c_410287629_332500566218921_7304714630055582730_n.jpg";
-
-// Récupérer les sessions depuis sessionStorage
-function getSousAdminSession() {
-  try {
-    const data = sessionStorage.getItem("sous_admin");
-    return data ? JSON.parse(data) : null;
-  } catch (_) { return null; }
-}
-
-function getAdminSession() {
-  try {
-    const data = sessionStorage.getItem("admin_session");
-    return data ? JSON.parse(data) : null;
-  } catch (_) { return null; }
-}
-
-function getVendeurSession() {
-  try {
-    const data = sessionStorage.getItem("vendeur_session");
-    return data ? JSON.parse(data) : null;
-  } catch (_) { return null; }
-}
 
 export default function Layout({ children, currentPageName }) {
   const [menuOuvert, setMenuOuvert] = useState(false);

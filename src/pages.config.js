@@ -62,6 +62,7 @@ import EspaceSousAdmin from './pages/EspaceSousAdmin';
 import EspaceVendeur from './pages/EspaceVendeur';
 import GestionCommandes from './pages/GestionCommandes';
 import GestionKYC from './pages/GestionKYC';
+import GestionPermissionsAdmin from './pages/GestionPermissionsAdmin';
 import GestionSousAdmins from './pages/GestionSousAdmins';
 import InscriptionVendeur from './pages/InscriptionVendeur';
 import JournalAudit from './pages/JournalAudit';
@@ -80,7 +81,6 @@ import SupportAdmin from './pages/SupportAdmin';
 import TableauDeBord from './pages/TableauDeBord';
 import Vendeurs from './pages/Vendeurs';
 import VideoFormation from './pages/VideoFormation';
-import GestionPermissionsAdmin from './pages/GestionPermissionsAdmin';
 import __Layout from './Layout.jsx';
 
 
@@ -100,6 +100,7 @@ export const PAGES = {
     "EspaceVendeur": EspaceVendeur,
     "GestionCommandes": GestionCommandes,
     "GestionKYC": GestionKYC,
+    "GestionPermissionsAdmin": GestionPermissionsAdmin,
     "GestionSousAdmins": GestionSousAdmins,
     "InscriptionVendeur": InscriptionVendeur,
     "JournalAudit": JournalAudit,
@@ -118,7 +119,6 @@ export const PAGES = {
     "TableauDeBord": TableauDeBord,
     "Vendeurs": Vendeurs,
     "VideoFormation": VideoFormation,
-    "GestionPermissionsAdmin": GestionPermissionsAdmin,
 }
 
 export const pagesConfig = {
