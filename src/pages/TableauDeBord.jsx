@@ -16,19 +16,7 @@ import StockCritique from "@/components/dashboard/StockCritique";
 
 const formaterMontant = (n) => `${Math.round(n || 0).toLocaleString("fr-FR")} FCFA`;
 
-function getSousAdminSession() {
-  try {
-    const data = sessionStorage.getItem("sous_admin");
-    return data ? JSON.parse(data) : null;
-  } catch (_) { return null; }
-}
-
-function getAdminSession() {
-  try {
-    const data = sessionStorage.getItem("admin_session");
-    return data ? JSON.parse(data) : null;
-  } catch (_) { return null; }
-}
+import { getAdminSession, getSousAdminSession } from "@/components/useSessionGuard";
 
 // Dashboard simplifié pour sous-admins
 function DashboardSousAdmin({ sousAdmin }) {

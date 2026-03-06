@@ -20,12 +20,7 @@ const TOUS_MODULES = [
   { page: "JournalAudit",      label: "Journal d'Audit",    emoji: "🛡️", icone: Shield,      desc: "Historique des actions" },
 ];
 
-function getSousAdminSession() {
-  try {
-    const data = sessionStorage.getItem("sous_admin");
-    return data ? JSON.parse(data) : null;
-  } catch (_) { return null; }
-}
+import { getSousAdminSession } from "@/components/useSessionGuard";
 
 export default function EspaceSousAdmin() {
   const [sousAdmin] = useState(() => getSousAdminSession());
