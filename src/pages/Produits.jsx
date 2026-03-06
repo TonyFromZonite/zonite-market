@@ -205,7 +205,7 @@ function RetoursTab() {
       const [produit] = await base44.entities.Produit.filter({ id: retourSelectionne.produit_id });
       if (produit) {
         await base44.functions.invoke('updateProduit', { produitId: produit.id, data: { stock_global: (produit.stock_global || 0) + retourSelectionne.quantite_retournee } });
-        await base44.entities.MouvementStock.create({ produit_id: produit.id, produit_nom: produit.nom, type_mouvement: "entree", quantite: retourSelectionne.quantite_retournee, stock_avant: produit.stock_global || 0, stock_apres: (produit.stock_global || 0) + retourSelectionne.quantite_retournee, raison: `Retour produit — ${RAISONS[retourSelectionne.raison]}` });
+        await adminApi.createMouvementStock({ produit_id: produit.id, produit_nom: produit.nom, type_mouvement: "entree", quantite: retourSelectionne.quantite_retournee, stock_avant: produit.stock_global || 0, stock_apres: (produit.stock_global || 0) + retourSelectionne.quantite_retournee, raison: `Retour produit — ${RAISONS[retourSelectionne.raison]}` });
       }
     }
     if (actionVendeur !== "aucune" && montant > 0) {
@@ -215,12 +215,12 @@ function RetoursTab() {
         await base44.entities.CompteVendeur.update(compte.id, { solde_commission: Math.max(0, (compte.solde_commission || 0) + delta) });
       }
     }
-    await base44.entities.RetourProduit.update(retourSelectionne.id, { statut: "traite", stock_reintegre: stockReintegre, action_vendeur: actionVendeur, montant_ajustement: montant, notes_admin: notesAdmin });
+    await adminApi.updateRetourProduit(retourSelectionne.id, { statut: "traite", stock_reintegre: stockReintegre, action_vendeur: actionVendeur, montant_ajustement: montant, notes_admin: notesAdmin });
     let msgAction = "";
     if (actionVendeur === "deduire_commission" && montant > 0) msgAction = ` Déduction de ${fmt(montant)} sur votre solde.`;
     if (actionVendeur === "crediter_bonus" && montant > 0) msgAction = ` Crédit de ${fmt(montant)} sur votre solde.`;
-    await base44.entities.NotificationVendeur.create({ vendeur_email: retourSelectionne.vendeur_email, titre: "Retour produit traité", message: `Le retour de ${retourSelectionne.quantite_retournee}x ${retourSelectionne.produit_nom} a été traité.${msgAction}`, type: "info" });
-    await base44.entities.JournalAudit.create({ action: "Retour produit traité", module: "commande", details: `Retour ${retourSelectionne.id} — ${retourSelectionne.produit_nom} × ${retourSelectionne.quantite_retournee}`, entite_id: retourSelectionne.id });
+    await adminApi.createNotificationVendeur({ vendeur_email: retourSelectionne.vendeur_email, titre: "Retour produit traité", message: `Le retour de ${retourSelectionne.quantite_retournee}x ${retourSelectionne.produit_nom} a été traité.${msgAction}`, type: "info" });
+    await adminApi.createJournalAudit({ action: "Retour produit traité", module: "commande", details: `Retour ${retourSelectionne.id} — ${retourSelectionne.produit_nom} × ${retourSelectionne.quantite_retournee}`, entite_id: retourSelectionne.id });
     queryClient.invalidateQueries({ queryKey: ["retours_admin"] });
     setEnCours(false);
     setRetourSelectionne(null);
@@ -228,8 +228,8 @@ function RetoursTab() {
 
   const rejeterRetour = async () => {
     setEnCours(true);
-    await base44.entities.RetourProduit.update(retourSelectionne.id, { statut: "rejete", notes_admin: notesAdmin });
-    await base44.entities.NotificationVendeur.create({ vendeur_email: retourSelectionne.vendeur_email, titre: "Retour produit rejeté", message: `Le retour de ${retourSelectionne.produit_nom} a été rejeté.${notesAdmin ? ` Raison : ${notesAdmin}` : ""}`, type: "alerte" });
+    await adminApi.updateRetourProduit(retourSelectionne.id, { statut: "rejete", notes_admin: notesAdmin });
+    await adminApi.createNotificationVendeur({ vendeur_email: retourSelectionne.vendeur_email, titre: "Retour produit rejeté", message: `Le retour de ${retourSelectionne.produit_nom} a été rejeté.${notesAdmin ? ` Raison : ${notesAdmin}` : ""}`, type: "alerte" });
     queryClient.invalidateQueries({ queryKey: ["retours_admin"] });
     setEnCours(false);
     setRetourSelectionne(null);
@@ -466,11 +466,11 @@ export default function Produits() {
 
       if (produitEdite) {
         await base44.functions.invoke('updateProduit', { produitId: produitEdite.id, data });
-        await base44.entities.JournalAudit.create({ action: "Produit modifié", module: "produit", details: `Produit ${form.nom} modifié`, entite_id: produitEdite.id });
+        await adminApi.createJournalAudit({ action: "Produit modifié", module: "produit", details: `Produit ${form.nom} modifié`, entite_id: produitEdite.id });
         showSuccess("Produit modifié", `${form.nom} a été mis à jour avec succès`);
       } else {
         const newProd = await base44.entities.Produit.create(data);
-        await base44.entities.JournalAudit.create({ action: "Produit créé", module: "produit", details: `Nouveau produit: ${form.nom} (${form.reference})`, entite_id: newProd.id });
+        await adminApi.createJournalAudit({ action: "Produit créé", module: "produit", details: `Nouveau produit: ${form.nom} (${form.reference})`, entite_id: newProd.id });
         showSuccess("Produit créé", `${form.nom} a été créé avec succès`);
       }
 
@@ -495,7 +495,7 @@ export default function Produits() {
     setEnCours(true);
     try {
       await base44.functions.invoke('updateProduit', { produitId: produit.id, data: { statut: "supprime" } });
-      await base44.entities.JournalAudit.create({ action: "Produit supprimé", module: "produit", details: `Produit ${produit.nom} supprimé`, entite_id: produit.id });
+      await adminApi.createJournalAudit({ action: "Produit supprimé", module: "produit", details: `Produit ${produit.nom} supprimé`, entite_id: produit.id });
       showSuccess("Produit supprimé", `${produit.nom} a été supprimé avec succès`);
       invalidateQuery('PRODUITS');
       queryClient.invalidateQueries({ queryKey: ["produits"] });
@@ -514,8 +514,8 @@ export default function Produits() {
       const ancien = produitEdite.stock_global || 0;
       const nouveau = ancien + stockAjout;
       await base44.functions.invoke('updateProduit', { produitId: produitEdite.id, data: { stock_global: nouveau, statut: nouveau > 0 ? "actif" : produitEdite.statut } });
-      await base44.entities.MouvementStock.create({ produit_id: produitEdite.id, produit_nom: produitEdite.nom, type_mouvement: "entree", quantite: stockAjout, stock_avant: ancien, stock_apres: nouveau, raison: "Approvisionnement" });
-      await base44.entities.JournalAudit.create({ action: "Stock ajouté", module: "produit", details: `+${stockAjout} unités pour ${produitEdite.nom} (${ancien} → ${nouveau})`, entite_id: produitEdite.id });
+      await adminApi.createMouvementStock({ produit_id: produitEdite.id, produit_nom: produitEdite.nom, type_mouvement: "entree", quantite: stockAjout, stock_avant: ancien, stock_apres: nouveau, raison: "Approvisionnement" });
+      await adminApi.createJournalAudit({ action: "Stock ajouté", module: "produit", details: `+${stockAjout} unités pour ${produitEdite.nom} (${ancien} → ${nouveau})`, entite_id: produitEdite.id });
       showSuccess("Stock ajouté", `+${stockAjout} unité(s) pour ${produitEdite.nom}`);
       invalidateQuery('PRODUITS');
       queryClient.invalidateQueries({ queryKey: ["produits"] });
