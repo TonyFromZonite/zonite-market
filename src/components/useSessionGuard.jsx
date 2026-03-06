@@ -1,31 +1,46 @@
 /**
- * Hook centralisé de gestion des sessions.
- * Fournit des helpers pour vérifier et lire les sessions de chaque type d'utilisateur.
+ * Module centralisé de gestion des sessions.
+ * SOURCE DE VÉRITÉ pour toutes les vérifications de session dans l'app.
+ * 
+ * Sessions stockées dans sessionStorage :
+ *   - "admin_session"   → admin principal
+ *   - "sous_admin"      → sous-administrateur
+ *   - "vendeur_session" → vendeur
  */
+
+import { createPageUrl } from "@/utils";
+
+// ─── Lecture des sessions ────────────────────────────────────────────────────
 
 export function getAdminSession() {
   try {
     const data = sessionStorage.getItem("admin_session");
-    return data ? JSON.parse(data) : null;
+    if (!data) return null;
+    const parsed = JSON.parse(data);
+    return parsed?.role === 'admin' ? parsed : null;
   } catch (_) { return null; }
 }
 
 export function getSousAdminSession() {
   try {
     const data = sessionStorage.getItem("sous_admin");
-    return data ? JSON.parse(data) : null;
+    if (!data) return null;
+    const parsed = JSON.parse(data);
+    return parsed?.role === 'sous_admin' ? parsed : null;
   } catch (_) { return null; }
 }
 
 export function getVendeurSession() {
   try {
     const data = sessionStorage.getItem("vendeur_session");
-    return data ? JSON.parse(data) : null;
+    if (!data) return null;
+    const parsed = JSON.parse(data);
+    return parsed?.role === 'vendeur' ? parsed : null;
   } catch (_) { return null; }
 }
 
 /**
- * Retourne le type de session active : 'admin' | 'sous_admin' | 'vendeur' | null
+ * Retourne la session active : { type, data } ou null
  */
 export function getActiveSession() {
   const admin = getAdminSession();
@@ -40,39 +55,44 @@ export function getActiveSession() {
   return null;
 }
 
+// ─── Guards (à utiliser dans useEffect) ─────────────────────────────────────
+
 /**
- * Protège une page admin : redirige vers /Connexion si pas de session admin ou sous_admin.
- * À utiliser dans useEffect.
+ * Protège une page admin/sous-admin.
+ * Redirige vers /Connexion si aucun admin ou sous-admin connecté.
+ * Retourne true si l'accès est autorisé.
  */
-export function requireAdminSession(redirectFn) {
+export function requireAdminOrSousAdmin() {
   const admin = getAdminSession();
   const sousAdmin = getSousAdminSession();
   if (!admin && !sousAdmin) {
-    redirectFn();
+    window.location.href = createPageUrl("Connexion");
     return false;
   }
   return true;
 }
 
 /**
- * Protège une page sous-admin : redirige si pas de session sous_admin.
+ * Protège une page sous-admin seulement (pas l'admin principal).
+ * Redirige si pas de session sous_admin.
  */
-export function requireSousAdminSession(redirectFn) {
+export function requireSousAdminSession() {
   const sousAdmin = getSousAdminSession();
   if (!sousAdmin) {
-    redirectFn();
+    window.location.href = createPageUrl("Connexion");
     return false;
   }
   return true;
 }
 
 /**
- * Protège une page vendeur : redirige si pas de session vendeur.
+ * Protège une page vendeur.
+ * Redirige vers /Connexion si pas de session vendeur.
  */
-export function requireVendeurSession(redirectFn) {
+export function requireVendeurSession() {
   const vendeur = getVendeurSession();
   if (!vendeur) {
-    redirectFn();
+    window.location.href = createPageUrl("Connexion");
     return false;
   }
   return true;
@@ -80,9 +100,14 @@ export function requireVendeurSession(redirectFn) {
 
 /**
  * Vérifie qu'un sous-admin a la permission pour une page donnée.
+ * L'admin principal a toujours accès.
  */
 export function hasPermission(sousAdminData, page) {
-  if (!sousAdminData || !page) return false;
+  if (!page) return false;
+  // Admin principal : accès total
+  if (getAdminSession()) return true;
+  // Sous-admin : vérifier les permissions
+  if (!sousAdminData) return false;
   return (sousAdminData.permissions || []).includes(page);
 }
 
