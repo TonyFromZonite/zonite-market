@@ -531,6 +531,7 @@ export default function Produits() {
 
   // ── Filtrage ──────────────────────────────────────────────────────────────────
   const produitsFiltres = produits.filter((p) => {
+    if (p.statut === "supprime") return false;
     const matchRecherche = `${p.nom} ${p.reference} ${p.fournisseur_nom}`.toLowerCase().includes(recherche.toLowerCase());
     const matchCategorie = filtreCategorie === "all" || p.categorie_id === filtreCategorie;
     return matchRecherche && matchCategorie;
