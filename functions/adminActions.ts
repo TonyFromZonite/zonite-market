@@ -19,6 +19,10 @@ Deno.serve(async (req) => {
     switch (action) {
 
       // ─── PRODUIT ────────────────────────────────────────────────────────────
+      case 'createProduit': {
+        const result = await db.Produit.create(payload.data);
+        return Response.json({ success: true, result });
+      }
       case 'updateProduit': {
         const result = await db.Produit.update(payload.produitId, payload.data);
         return Response.json({ success: true, result });
@@ -167,12 +171,6 @@ Deno.serve(async (req) => {
       }
       case 'createConfigApp': {
         const result = await db.ConfigApp.create(payload.data);
-        return Response.json({ success: true, result });
-      }
-
-      // ─── PRODUIT (create) ─────────────────────────────────────────────────────
-      case 'createProduit': {
-        const result = await db.Produit.create(payload.data);
         return Response.json({ success: true, result });
       }
 

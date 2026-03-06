@@ -11,6 +11,7 @@ const invoke = async (action, payload = {}) => {
 
 export const adminApi = {
   // Produit
+  createProduit: (data) => invoke('createProduit', { data }),
   updateProduit: (produitId, data) => invoke('updateProduit', { produitId, data }),
 
   // Commande Vendeur
@@ -70,7 +71,4 @@ export const adminApi = {
   // Config App
   updateConfigApp: (configId, data) => invoke('updateConfigApp', { configId, data }),
   createConfigApp: (data) => invoke('createConfigApp', { data }),
-
-  // Produit (create)
-  createProduit: (data) => invoke('createProduit', { data }),
 };
