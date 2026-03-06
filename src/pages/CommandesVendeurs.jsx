@@ -56,13 +56,13 @@ export default function CommandesVendeurs() {
       statut: "validee_admin",
       notes_admin: notesAdmin || commandeSelectionnee.notes_admin,
     });
-    await base44.entities.NotificationVendeur.create({
+    await adminApi.createNotificationVendeur({
       vendeur_email: commandeSelectionnee.vendeur_email,
       titre: "Commande validée ✓",
       message: `Votre commande de ${commandeSelectionnee.quantite}x ${commandeSelectionnee.produit_nom} pour ${commandeSelectionnee.client_nom} a été validée par l'équipe ZONITE.`,
       type: "succes",
     });
-    await base44.entities.JournalAudit.create({
+    await adminApi.createJournalAudit({
       action: "Validation commande vendeur",
       module: "commande",
       details: `Commande ${commandeSelectionnee.id} validée — Vendeur: ${commandeSelectionnee.vendeur_nom}`,
@@ -81,13 +81,13 @@ export default function CommandesVendeurs() {
       livreur_nom: livreurNom,
       notes_admin: notesAdmin || commandeSelectionnee.notes_admin,
     });
-    await base44.entities.NotificationVendeur.create({
+    await adminApi.createNotificationVendeur({
       vendeur_email: commandeSelectionnee.vendeur_email,
       titre: "Livreur attribué",
       message: `Un livreur (${livreurNom}) a été attribué à votre commande pour ${commandeSelectionnee.client_nom}.`,
       type: "info",
     });
-    await base44.entities.JournalAudit.create({
+    await adminApi.createJournalAudit({
       action: "Attribution livreur",
       module: "commande",
       details: `Livreur "${livreurNom}" attribué à la commande ${commandeSelectionnee.id}`,
@@ -101,7 +101,7 @@ export default function CommandesVendeurs() {
   const marquerEnLivraison = async () => {
     setEnCours(true);
     await adminApi.updateCommandeVendeur(commandeSelectionnee.id, { statut: "en_livraison" });
-    await base44.entities.NotificationVendeur.create({
+    await adminApi.createNotificationVendeur({
       vendeur_email: commandeSelectionnee.vendeur_email,
       titre: "Commande en livraison 🚚",
       message: `La commande de ${commandeSelectionnee.produit_nom} pour ${commandeSelectionnee.client_nom} est en cours de livraison.`,
@@ -134,13 +134,13 @@ export default function CommandesVendeurs() {
     }
 
     await adminApi.updateCommandeVendeur(commandeSelectionnee.id, { statut: "livree", notes_admin: notesAdmin || commandeSelectionnee.notes_admin });
-    await base44.entities.NotificationVendeur.create({
+    await adminApi.createNotificationVendeur({
       vendeur_email: commandeSelectionnee.vendeur_email,
       titre: "Commande livrée ✓",
       message: `La commande de ${commandeSelectionnee.produit_nom} a été livrée à ${commandeSelectionnee.client_nom}. Commission de ${Math.round(commandeSelectionnee.commission_vendeur || 0).toLocaleString("fr-FR")} FCFA créditée.`,
       type: "succes",
     });
-    await base44.entities.JournalAudit.create({
+    await adminApi.createJournalAudit({
       action: "Livraison confirmée",
       module: "commande",
       details: `Commande ${commandeSelectionnee.id} livrée — Commission: ${commandeSelectionnee.commission_vendeur} FCFA`,
@@ -179,7 +179,7 @@ export default function CommandesVendeurs() {
       });
     }
     await adminApi.updateCommandeVendeur(commandeSelectionnee.id, { statut: "echec_livraison", notes_admin: notesAdmin || commandeSelectionnee.notes_admin });
-    await base44.entities.NotificationVendeur.create({
+    await adminApi.createNotificationVendeur({
       vendeur_email: commandeSelectionnee.vendeur_email,
       titre: "Échec de livraison",
       message: `La livraison de ${commandeSelectionnee.produit_nom} pour ${commandeSelectionnee.client_nom} a échoué. Le stock a été restitué.`,
@@ -205,13 +205,13 @@ export default function CommandesVendeurs() {
       raison_detail: retourForm.raison_detail,
       statut: "en_attente",
     });
-    await base44.entities.NotificationVendeur.create({
+    await adminApi.createNotificationVendeur({
       vendeur_email: commandeSelectionnee.vendeur_email,
       titre: "Retour enregistré",
       message: `Un retour de ${retourForm.quantite}x ${commandeSelectionnee.produit_nom} a été enregistré et est en cours de traitement.`,
       type: "alerte",
     });
-    await base44.entities.JournalAudit.create({
+    await adminApi.createJournalAudit({
       action: "Retour produit enregistré",
       module: "commande",
       details: `Retour de ${retourForm.quantite}x ${commandeSelectionnee.produit_nom} — Raison: ${retourForm.raison}`,
@@ -238,13 +238,13 @@ export default function CommandesVendeurs() {
       }
     }
     await adminApi.updateCommandeVendeur(commandeSelectionnee.id, { statut: "annulee", notes_admin: notesAdmin || commandeSelectionnee.notes_admin });
-    await base44.entities.NotificationVendeur.create({
+    await adminApi.createNotificationVendeur({
       vendeur_email: commandeSelectionnee.vendeur_email,
       titre: "Commande annulée",
       message: `Votre commande de ${commandeSelectionnee.produit_nom} pour ${commandeSelectionnee.client_nom} a été annulée.`,
       type: "alerte",
     });
-    await base44.entities.JournalAudit.create({ action: "Commande annulée", module: "commande", details: `Commande ${commandeSelectionnee.id} annulée`, entite_id: commandeSelectionnee.id });
+    await adminApi.createJournalAudit({ action: "Commande annulée", module: "commande", details: `Commande ${commandeSelectionnee.id} annulée`, entite_id: commandeSelectionnee.id });
     invalidateQuery('PRODUITS');
     queryClient.invalidateQueries({ queryKey: ["commandes_vendeurs_admin"] });
     setEnCours(false);
