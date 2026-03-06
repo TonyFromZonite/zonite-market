@@ -101,7 +101,7 @@ function CategoriesTab() {
 
   const supprimer = async (cat) => {
     try {
-      await base44.functions.invoke('deleteCategorie', { categorieId: cat.id });
+      await adminApi.deleteCategorie(cat.id);
       showSuccess("Catégorie supprimée", "La catégorie a été supprimée avec succès");
       queryClient.invalidateQueries({ queryKey: ["categories"] });
       setConfirmSuppression(null);
