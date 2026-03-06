@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { vendeurApi } from "@/components/vendeurApi";
+import { LOGO_URL } from "@/components/constants";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, Loader2, AlertCircle } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
