@@ -84,10 +84,10 @@ function CategoriesTab() {
     setEnCours(true);
     try {
       if (edite) {
-        await base44.functions.invoke('updateCategorie', { categorieId: edite.id, data: form });
+        await adminApi.updateCategorie(edite.id, form);
         showSuccess("Catégorie modifiée", "La catégorie a été mise à jour avec succès");
       } else {
-        await base44.functions.invoke('createCategorie', form);
+        await adminApi.createCategorie(form);
         showSuccess("Catégorie créée", "La nouvelle catégorie a été créée avec succès");
       }
       queryClient.invalidateQueries({ queryKey: ["categories"] });
