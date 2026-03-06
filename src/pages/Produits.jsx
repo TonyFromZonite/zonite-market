@@ -469,7 +469,7 @@ export default function Produits() {
         await adminApi.createJournalAudit({ action: "Produit modifié", module: "produit", details: `Produit ${form.nom} modifié`, entite_id: produitEdite.id });
         showSuccess("Produit modifié", `${form.nom} a été mis à jour avec succès`);
       } else {
-        const newProd = await base44.entities.Produit.create(data);
+        const { result: newProd } = await adminApi.createProduit(data);
         await adminApi.createJournalAudit({ action: "Produit créé", module: "produit", details: `Nouveau produit: ${form.nom} (${form.reference})`, entite_id: newProd.id });
         showSuccess("Produit créé", `${form.nom} a été créé avec succès`);
       }
