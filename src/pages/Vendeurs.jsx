@@ -54,11 +54,11 @@ function ListeVendeurs() {
   const sauvegarder = async () => {
     setEnCours(true);
     if (vendeurEdite) {
-      await base44.entities.Vendeur.update(vendeurEdite.id, { nom_complet: form.nom_complet, email: form.email, telephone: form.telephone, statut: form.statut, date_embauche: form.date_embauche });
-      await base44.entities.JournalAudit.create({ action: "Vendeur modifié", module: "vendeur", details: `Vendeur ${form.nom_complet} modifié`, entite_id: vendeurEdite.id });
+      await adminApi.updateVendeur(vendeurEdite.id, { nom_complet: form.nom_complet, email: form.email, telephone: form.telephone, statut: form.statut, date_embauche: form.date_embauche });
+      await adminApi.createJournalAudit({ action: "Vendeur modifié", module: "vendeur", details: `Vendeur ${form.nom_complet} modifié`, entite_id: vendeurEdite.id });
     } else {
-      await base44.entities.Vendeur.create(form);
-      await base44.entities.JournalAudit.create({ action: "Vendeur créé", module: "vendeur", details: `Nouveau vendeur: ${form.nom_complet}` });
+      await adminApi.createVendeur(form);
+      await adminApi.createJournalAudit({ action: "Vendeur créé", module: "vendeur", details: `Nouveau vendeur: ${form.nom_complet}` });
     }
     queryClient.invalidateQueries({ queryKey: ["vendeurs"] });
     setDialogOuvert(false);
@@ -67,8 +67,8 @@ function ListeVendeurs() {
 
   const supprimer = async (vendeur) => {
     if (!confirm(`Supprimer le vendeur "${vendeur.nom_complet}" ?`)) return;
-    await base44.entities.Vendeur.delete(vendeur.id);
-    await base44.entities.JournalAudit.create({ action: "Vendeur supprimé", module: "vendeur", details: `Vendeur ${vendeur.nom_complet} supprimé`, entite_id: vendeur.id });
+    await adminApi.deleteVendeur(vendeur.id);
+    await adminApi.createJournalAudit({ action: "Vendeur supprimé", module: "vendeur", details: `Vendeur ${vendeur.nom_complet} supprimé`, entite_id: vendeur.id });
     queryClient.invalidateQueries({ queryKey: ["vendeurs"] });
   };
 
@@ -171,9 +171,9 @@ function Candidatures({ nbBadge, onBadgeChange }) {
 
   const traiter = async (statut) => {
     setEnCours(true);
-    await base44.entities.CandidatureVendeur.update(candidatureSelectionnee.id, { statut, notes_admin: notes });
+    await adminApi.updateCandidature(candidatureSelectionnee.id, { statut, notes_admin: notes });
     if (statut === "approuve") {
-      await base44.entities.NotificationVendeur.create({
+      await adminApi.createNotificationVendeur({
         vendeur_email: candidatureSelectionnee.email,
         titre: "Candidature approuvée !",
         message: "Félicitations ! Votre candidature a été approuvée. Créez votre compte vendeur ZONITE pour commencer.",
@@ -287,16 +287,16 @@ function ValidationKYC() {
 
   const validerKYC = async (statut) => {
     setEnCours(true);
-    await base44.entities.CompteVendeur.update(compteSelectionne.id, { statut_kyc: statut, notes_admin: notes, statut: statut === "valide" ? "actif" : "suspendu" });
+    await adminApi.updateCompteVendeur(compteSelectionne.id, { statut_kyc: statut, notes_admin: notes, statut: statut === "valide" ? "actif" : "suspendu" });
     if (statut === "valide") {
       const vendeurs = await base44.entities.Vendeur.list();
       const dejaExistant = vendeurs.find(v => v.email === compteSelectionne.user_email);
       if (!dejaExistant) {
-        await base44.entities.Vendeur.create({ nom_complet: compteSelectionne.nom_complet, email: compteSelectionne.user_email, telephone: compteSelectionne.telephone, statut: "actif", date_embauche: new Date().toISOString().split("T")[0], solde_commission: 0, total_commissions_gagnees: 0, total_commissions_payees: 0, nombre_ventes: 0, chiffre_affaires_genere: 0 });
-        await base44.entities.JournalAudit.create({ action: "Nouveau vendeur créé automatiquement", module: "vendeur", details: `Vendeur ${compteSelectionne.nom_complet} (${compteSelectionne.user_email}) créé suite à la validation KYC`, entite_id: compteSelectionne.id });
+        await adminApi.createVendeur({ nom_complet: compteSelectionne.nom_complet, email: compteSelectionne.user_email, telephone: compteSelectionne.telephone, statut: "actif", date_embauche: new Date().toISOString().split("T")[0], solde_commission: 0, total_commissions_gagnees: 0, total_commissions_payees: 0, nombre_ventes: 0, chiffre_affaires_genere: 0 });
+        await adminApi.createJournalAudit({ action: "Nouveau vendeur créé automatiquement", module: "vendeur", details: `Vendeur ${compteSelectionne.nom_complet} (${compteSelectionne.user_email}) créé suite à la validation KYC`, entite_id: compteSelectionne.id });
       }
     }
-    await base44.entities.NotificationVendeur.create({
+    await adminApi.createNotificationVendeur({
       vendeur_email: compteSelectionne.user_email,
       titre: statut === "valide" ? "Compte validé !" : "Dossier rejeté",
       message: statut === "valide" ? "Votre compte a été validé. Regardez la vidéo de formation pour débloquer le catalogue !" : `Votre dossier a été rejeté. ${notes || "Contactez notre équipe pour plus d'informations."}`,
@@ -420,9 +420,9 @@ function CommissionsTab() {
   const payerCommission = async () => {
     if (!vendeurPaiement || montantPaiement <= 0) return;
     setEnCours(true);
-    await base44.entities.PaiementCommission.create({ vendeur_id: vendeurPaiement.id, vendeur_nom: vendeurPaiement.nom_complet, montant: montantPaiement, methode_paiement: methodePaiement, notes: notesPaiement });
-    await base44.entities.Vendeur.update(vendeurPaiement.id, { solde_commission: Math.max(0, (vendeurPaiement.solde_commission || 0) - montantPaiement), total_commissions_payees: (vendeurPaiement.total_commissions_payees || 0) + montantPaiement });
-    await base44.entities.JournalAudit.create({ action: "Commission payée", module: "paiement", details: `Paiement de ${montantPaiement} FCFA à ${vendeurPaiement.nom_complet}`, entite_id: vendeurPaiement.id });
+    await adminApi.createPaiementCommission({ vendeur_id: vendeurPaiement.id, vendeur_nom: vendeurPaiement.nom_complet, montant: montantPaiement, methode_paiement: methodePaiement, notes: notesPaiement });
+    await adminApi.updateVendeur(vendeurPaiement.id, { solde_commission: Math.max(0, (vendeurPaiement.solde_commission || 0) - montantPaiement), total_commissions_payees: (vendeurPaiement.total_commissions_payees || 0) + montantPaiement });
+    await adminApi.createJournalAudit({ action: "Commission payée", module: "paiement", details: `Paiement de ${montantPaiement} FCFA à ${vendeurPaiement.nom_complet}`, entite_id: vendeurPaiement.id });
     queryClient.invalidateQueries({ queryKey: ["vendeurs"] });
     queryClient.invalidateQueries({ queryKey: ["paiements_commissions"] });
     setDialogPaiement(false);
@@ -533,13 +533,13 @@ function PaiementsTab() {
   const { data: demandes = [], isLoading } = useQuery({ queryKey: ["demandes_paiement_admin"], queryFn: () => base44.entities.DemandePaiementVendeur.list("-created_date") });
 
   const marquerPaye = async (demande) => {
-    await base44.entities.DemandePaiementVendeur.update(demande.id, { statut: "paye" });
+    await adminApi.updateDemandePaiement(demande.id, { statut: "paye" });
     const comptes = await base44.entities.CompteVendeur.filter({ id: demande.vendeur_id });
     if (comptes.length > 0) {
       const compte = comptes[0];
-      await base44.entities.CompteVendeur.update(compte.id, { solde_commission: Math.max(0, (compte.solde_commission || 0) - demande.montant), total_commissions_payees: (compte.total_commissions_payees || 0) + demande.montant });
+      await adminApi.updateCompteVendeur(compte.id, { solde_commission: Math.max(0, (compte.solde_commission || 0) - demande.montant), total_commissions_payees: (compte.total_commissions_payees || 0) + demande.montant });
     }
-    await base44.entities.NotificationVendeur.create({ vendeur_email: demande.vendeur_email, titre: "Paiement effectué !", message: `Votre paiement de ${demande.montant.toLocaleString("fr-FR")} FCFA a été envoyé sur votre numéro ${demande.numero_mobile_money} (${demande.operateur}).`, type: "paiement" });
+    await adminApi.createNotificationVendeur({ vendeur_email: demande.vendeur_email, titre: "Paiement effectué !", message: `Votre paiement de ${demande.montant.toLocaleString("fr-FR")} FCFA a été envoyé sur votre numéro ${demande.numero_mobile_money} (${demande.operateur}).`, type: "paiement" });
     queryClient.invalidateQueries({ queryKey: ["demandes_paiement_admin"] });
     queryClient.invalidateQueries({ queryKey: ["paiements_badge"] });
   };
