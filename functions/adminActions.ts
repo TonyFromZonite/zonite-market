@@ -160,6 +160,16 @@ Deno.serve(async (req) => {
         return Response.json({ success: true, result });
       }
 
+      // ─── CONFIG APP ──────────────────────────────────────────────────────────
+      case 'updateConfigApp': {
+        const result = await db.ConfigApp.update(payload.configId, payload.data);
+        return Response.json({ success: true, result });
+      }
+      case 'createConfigApp': {
+        const result = await db.ConfigApp.create(payload.data);
+        return Response.json({ success: true, result });
+      }
+
       default:
         return Response.json({ error: `Action inconnue: ${action}` }, { status: 400 });
     }
