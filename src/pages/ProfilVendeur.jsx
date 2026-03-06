@@ -14,7 +14,6 @@ const LOGO = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/
 export default function ProfilVendeur() {
   const [compteVendeur, setCompteVendeur] = useState(null);
   const [chargement, setChargement] = useState(true);
-  const session = getVendeurSession();
 
   // Changement de mot de passe
   const [ouvrirChangeMdp, setOuvrirChangeMdp] = useState(false);
@@ -28,26 +27,13 @@ export default function ProfilVendeur() {
 
   useEffect(() => {
     const charger = async () => {
-      let emailVendeur = null;
-      
-      // Session vendeur prioritaire
-      try {
-        const session = sessionStorage.getItem("vendeur_session");
-        if (session) {
-          const parsed = JSON.parse(session);
-          emailVendeur = parsed.email;
-        }
-      } catch (_) {}
-
-      if (!emailVendeur) {
-        const u = await base44.auth.me().catch(() => null);
-        if (u?.email) emailVendeur = u.email;
+      const session = getVendeurSession();
+      if (!session) {
+        window.location.href = createPageUrl("Connexion");
+        return;
       }
-
-      if (emailVendeur) {
-        const comptes = await base44.entities.CompteVendeur.filter({ user_email: emailVendeur });
-        if (comptes.length > 0) setCompteVendeur(comptes[0]);
-      }
+      const comptes = await base44.entities.CompteVendeur.filter({ user_email: session.email });
+      if (comptes.length > 0) setCompteVendeur(comptes[0]);
       setChargement(false);
     };
     charger();
@@ -239,7 +225,7 @@ export default function ProfilVendeur() {
           </Link>
         )}
 
-        <Button variant="outline" onClick={() => base44.auth.logout(createPageUrl("Connexion"))} className="w-full border-red-200 text-red-600 hover:bg-red-50">
+        <Button variant="outline" onClick={() => { clearAllSessions(); window.location.href = createPageUrl("Connexion"); }} className="w-full border-red-200 text-red-600 hover:bg-red-50">
           <LogOut className="w-4 h-4 mr-2" /> Se déconnecter
         </Button>
       </div>
