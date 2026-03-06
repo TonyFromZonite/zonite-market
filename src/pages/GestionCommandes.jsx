@@ -69,7 +69,7 @@ export default function GestionCommandes() {
         }
       }
 
-      await base44.entities.CommandeVendeur.update(commandeSelectionnee.id, updateData);
+      await adminApi.updateCommandeVendeur(commandeSelectionnee.id, updateData);
 
       // Créer une notification pour le vendeur
       const statusLabels = {
@@ -81,7 +81,7 @@ export default function GestionCommandes() {
         annulee: "🚫 Annulée",
       };
 
-      await base44.entities.NotificationVendeur.create({
+      await adminApi.createNotificationVendeur({
         vendeur_email: commandeSelectionnee.vendeur_email,
         titre: "📦 Mise à jour commande",
         message: `${commandeSelectionnee.produit_nom} - Statut: ${statusLabels[nouveauStatut] || nouveauStatut}`,
@@ -91,7 +91,7 @@ export default function GestionCommandes() {
       });
 
       // Journal d'audit
-      await base44.entities.JournalAudit.create({
+      await adminApi.createJournalAudit({
         action: "Statut commande modifié",
         module: "commande",
         details: `Commande ${commandeSelectionnee.id} - Nouveau statut: ${nouveauStatut}${livreurSelectionne ? ` - Livreur assigné: ${updateData.livreur_nom}` : ""}`,
