@@ -64,8 +64,8 @@ export default function Commandes() {
   });
 
   const changerStatut = async (vente, nouveauStatut) => {
-    await base44.entities.Vente.update(vente.id, { statut_commande: nouveauStatut });
-    await base44.entities.JournalAudit.create({
+    await adminApi.updateVente(vente.id, { statut_commande: nouveauStatut });
+    await adminApi.createJournalAudit({
       action: `Statut commande changé: ${STATUTS[vente.statut_commande]?.label} → ${STATUTS[nouveauStatut]?.label}`,
       module: "commande",
       details: `Commande ${vente.produit_nom} – ${vente.client_nom || "Client"}`,
@@ -77,11 +77,11 @@ export default function Commandes() {
       const produits = await base44.entities.Produit.list();
       const produit = produits.find(p => p.id === vente.produit_id);
       if (produit) {
-        await base44.entities.Produit.update(produit.id, {
+        await adminApi.updateProduit(produit.id, {
           stock_actuel: (produit.stock_actuel || 0) + vente.quantite,
           total_vendu: Math.max(0, (produit.total_vendu || 0) - vente.quantite),
         });
-        await base44.entities.MouvementStock.create({
+        await adminApi.createMouvementStock({
           produit_id: produit.id,
           produit_nom: produit.nom,
           type_mouvement: "entree",
@@ -96,7 +96,7 @@ export default function Commandes() {
       const vendeurs = await base44.entities.Vendeur.list();
       const vendeur = vendeurs.find(v => v.id === vente.vendeur_id);
       if (vendeur) {
-        await base44.entities.Vendeur.update(vendeur.id, {
+        await adminApi.updateVendeur(vendeur.id, {
           solde_commission: Math.max(0, (vendeur.solde_commission || 0) - (vente.commission_vendeur || 0)),
           total_commissions_gagnees: Math.max(0, (vendeur.total_commissions_gagnees || 0) - (vente.commission_vendeur || 0)),
           nombre_ventes: Math.max(0, (vendeur.nombre_ventes || 0) - 1),
