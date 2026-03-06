@@ -65,9 +65,9 @@ export default function SupportAdmin() {
     if (!faqForm.question.trim() || !faqForm.reponse.trim()) return;
     setFaqEnCours(true);
     if (faqEdit === "new") {
-      await base44.entities.FaqItem.create({ ...faqForm, ordre: faqItems.length });
+      await adminApi.createFaqItem({ ...faqForm, ordre: faqItems.length });
     } else {
-      await base44.entities.FaqItem.update(faqEdit.id, faqForm);
+      await adminApi.updateFaqItem(faqEdit.id, faqForm);
     }
     queryClient.invalidateQueries({ queryKey: ["faq_items"] });
     setFaqEdit(null);
@@ -76,12 +76,12 @@ export default function SupportAdmin() {
 
   const supprimerFaq = async (id) => {
     if (!confirm("Supprimer cette question ?")) return;
-    await base44.entities.FaqItem.delete(id);
+    await adminApi.deleteFaqItem(id);
     queryClient.invalidateQueries({ queryKey: ["faq_items"] });
   };
 
   const toggleFaqActif = async (item) => {
-    await base44.entities.FaqItem.update(item.id, { actif: !item.actif });
+    await adminApi.updateFaqItem(item.id, { actif: !item.actif });
     queryClient.invalidateQueries({ queryKey: ["faq_items"] });
   };
 
@@ -112,12 +112,12 @@ export default function SupportAdmin() {
   });
 
   const toggleImportante = async (notif) => {
-    await base44.entities.NotificationVendeur.update(notif.id, { importante: !notif.importante });
+    await adminApi.updateNotificationVendeur(notif.id, { importante: !notif.importante });
     queryClient.invalidateQueries({ queryKey: ["toutes_notifs_admin"] });
   };
 
   const marquerLueAdmin = async (notif) => {
-    await base44.entities.NotificationVendeur.update(notif.id, { lue: !notif.lue });
+    await adminApi.updateNotificationVendeur(notif.id, { lue: !notif.lue });
     queryClient.invalidateQueries({ queryKey: ["toutes_notifs_admin"] });
   };
 
@@ -130,17 +130,19 @@ export default function SupportAdmin() {
   const envoyerReponse = async () => {
     if (!reponse.trim()) return;
     setEnCours(true);
-    const user = await base44.auth.me();
-    await base44.entities.TicketSupport.update(ticketSelectionne.id, {
+    const sousAdminSession = JSON.parse(sessionStorage.getItem('sousAdminSession') || 'null');
+    const adminSession = JSON.parse(sessionStorage.getItem('adminSession') || 'null');
+    const adminEmail = sousAdminSession?.email || adminSession?.email || '';
+    await adminApi.updateTicketSupport(ticketSelectionne.id, {
       reponse_admin: reponse,
       statut: nouveauStatut || "en_cours",
-      admin_email: user.email,
+      admin_email: adminEmail,
       date_reponse: new Date().toISOString(),
       lu_par_vendeur: false,
     });
 
     // Notifier le vendeur
-    await base44.entities.NotificationVendeur.create({
+    await adminApi.createNotificationVendeur({
       vendeur_email: ticketSelectionne.vendeur_email,
       titre: "Réponse à votre ticket",
       message: `Votre ticket "${ticketSelectionne.sujet}" a reçu une réponse. Consultez votre espace Aide.`,
