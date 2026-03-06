@@ -34,27 +34,15 @@ export default function EspaceVendeur() {
 
   useEffect(() => {
     const charger = async () => {
-      let emailVendeur = null;
-      try {
-        const session = sessionStorage.getItem("vendeur_session");
-        if (session) {
-          const parsed = JSON.parse(session);
-          emailVendeur = parsed.email;
-        }
-      } catch (_) {}
-
-      if (!emailVendeur) {
-        try {
-          const u = await base44.auth.me();
-          if (u?.email) emailVendeur = u.email;
-        } catch (_) {}
+      const session = getVendeurSession();
+      if (!session) {
+        window.location.href = createPageUrl("Connexion");
+        return;
       }
-
-      if (emailVendeur) {
-        setUtilisateur({ email: emailVendeur });
-        const comptes = await base44.entities.CompteVendeur.filter({ user_email: emailVendeur });
-        if (comptes.length > 0) setCompteVendeur(comptes[0]);
-      }
+      const emailVendeur = session.email;
+      setUtilisateur({ email: emailVendeur });
+      const comptes = await base44.entities.CompteVendeur.filter({ user_email: emailVendeur });
+      if (comptes.length > 0) setCompteVendeur(comptes[0]);
       setChargement(false);
     };
     charger();
