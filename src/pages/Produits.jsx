@@ -203,7 +203,7 @@ function RetoursTab() {
     if (stockReintegre) {
       const [produit] = await base44.entities.Produit.filter({ id: retourSelectionne.produit_id });
       if (produit) {
-        await base44.entities.Produit.update(produit.id, { stock_global: (produit.stock_global || 0) + retourSelectionne.quantite_retournee });
+        await base44.functions.invoke('updateProduit', { produitId: produit.id, data: { stock_global: (produit.stock_global || 0) + retourSelectionne.quantite_retournee } });
         await base44.entities.MouvementStock.create({ produit_id: produit.id, produit_nom: produit.nom, type_mouvement: "entree", quantite: retourSelectionne.quantite_retournee, stock_avant: produit.stock_global || 0, stock_apres: (produit.stock_global || 0) + retourSelectionne.quantite_retournee, raison: `Retour produit — ${RAISONS[retourSelectionne.raison]}` });
       }
     }
