@@ -102,13 +102,14 @@ Deno.serve(async (req) => {
         });
       }
 
-      // 2. Chercher parmi les admins principaux (uniquement par email)
-      if (!isEmail) {
+      // 2. Chercher parmi les admins principaux (par email ou username "admin")
+      const isAdminUsername = email.trim().toLowerCase() === 'admin';
+      if (!isEmail && !isAdminUsername) {
         return Response.json({ error: 'Identifiants incorrects.' }, { status: 401 });
       }
 
       const admins = await base44.asServiceRole.entities.User.filter({ role: 'admin' });
-      const matchedAdmin = admins.find(u => u.email === email);
+      const matchedAdmin = isAdminUsername ? admins[0] : admins.find(u => u.email === email);
 
       if (!matchedAdmin) {
         return Response.json({ error: 'Identifiants incorrects.' }, { status: 401 });
