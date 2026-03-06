@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { getVendeurSession } from "@/components/useSessionGuard";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
@@ -26,35 +27,15 @@ export default function NouvelleCommandeVendeur() {
 
   useEffect(() => {
     const charger = async () => {
-      let emailVendeur = null;
-      
-      // Récupérer email depuis session vendeur (priorité)
-      try {
-        const session = sessionStorage.getItem("vendeur_session");
-        if (session) {
-          const parsed = JSON.parse(session);
-          emailVendeur = parsed.email;
-        }
-      } catch (_) {}
-
-      if (!emailVendeur) {
-        // Fallback Base44 auth
-        const u = await base44.auth.me().catch(() => null);
-        if (u?.email) emailVendeur = u.email;
-      }
-
-      if (!emailVendeur) {
+      const session = getVendeurSession();
+      if (!session) {
         window.location.href = createPageUrl("Connexion");
         return;
       }
-
-      const comptes = await base44.entities.CompteVendeur.filter({ user_email: emailVendeur });
+      const comptes = await base44.entities.CompteVendeur.filter({ user_email: session.email });
       if (comptes.length > 0) setCompteVendeur(comptes[0]);
-      else {
-        setErreur("Compte vendeur introuvable");
-      }
+      else setErreur("Compte vendeur introuvable");
 
-      // Pré-remplir produit depuis URL
       const params = new URLSearchParams(window.location.search);
       const produitId = params.get("produit_id");
       if (produitId) setForm(f => ({ ...f, produit_id: produitId }));
