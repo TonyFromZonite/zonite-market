@@ -68,6 +68,11 @@ export const adminApi = {
   // Journal Audit
   createJournalAudit: (data) => invoke('createJournalAudit', { data }),
 
+  // Catégories
+  createCategorie: (data) => invoke('createCategorie', { data }),
+  updateCategorie: (categorieId, data) => invoke('updateCategorie', { categorieId, data }),
+  deleteCategorie: (categorieId) => invoke('deleteCategorie', { categorieId }),
+
   // Config App
   updateConfigApp: (configId, data) => invoke('updateConfigApp', { configId, data }),
   createConfigApp: (data) => invoke('createConfigApp', { data }),
