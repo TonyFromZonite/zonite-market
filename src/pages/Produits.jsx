@@ -493,7 +493,7 @@ export default function Produits() {
   const supprimer = async (produit) => {
     setEnCours(true);
     try {
-      await base44.entities.Produit.update(produit.id, { statut: "supprime" });
+      await base44.functions.invoke('updateProduit', { produitId: produit.id, data: { statut: "supprime" } });
       await base44.entities.JournalAudit.create({ action: "Produit supprimé", module: "produit", details: `Produit ${produit.nom} supprimé`, entite_id: produit.id });
       showSuccess("Produit supprimé", `${produit.nom} a été supprimé avec succès`);
       invalidateQuery('PRODUITS');
