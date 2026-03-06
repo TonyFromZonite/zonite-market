@@ -41,10 +41,10 @@ export default function ConfigurationApp() {
     for (const { cle } of CONFIGS) {
       const valeur = valeurs[cle] || "";
       if (ids[cle]) {
-        await base44.entities.ConfigApp.update(ids[cle], { cle, valeur });
+        await adminApi.updateConfigApp(ids[cle], { cle, valeur });
       } else if (valeur) {
-        const created = await base44.entities.ConfigApp.create({ cle, valeur });
-        setIds((prev) => ({ ...prev, [cle]: created.id }));
+        const res = await adminApi.createConfigApp({ cle, valeur });
+        setIds((prev) => ({ ...prev, [cle]: res.result?.id }));
       }
     }
     setChargement(false);
