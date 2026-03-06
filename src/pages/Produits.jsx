@@ -204,7 +204,7 @@ function RetoursTab() {
     if (stockReintegre) {
       const [produit] = await base44.entities.Produit.filter({ id: retourSelectionne.produit_id });
       if (produit) {
-        await base44.functions.invoke('updateProduit', { produitId: produit.id, data: { stock_global: (produit.stock_global || 0) + retourSelectionne.quantite_retournee } });
+        await adminApi.updateProduit(produit.id, { stock_global: (produit.stock_global || 0) + retourSelectionne.quantite_retournee });
         await adminApi.createMouvementStock({ produit_id: produit.id, produit_nom: produit.nom, type_mouvement: "entree", quantite: retourSelectionne.quantite_retournee, stock_avant: produit.stock_global || 0, stock_apres: (produit.stock_global || 0) + retourSelectionne.quantite_retournee, raison: `Retour produit — ${RAISONS[retourSelectionne.raison]}` });
       }
     }
@@ -465,7 +465,7 @@ export default function Produits() {
       const data = { ...form, stock_global: stockGlobal };
 
       if (produitEdite) {
-        await base44.functions.invoke('updateProduit', { produitId: produitEdite.id, data });
+        await adminApi.updateProduit(produitEdite.id, data);
         await adminApi.createJournalAudit({ action: "Produit modifié", module: "produit", details: `Produit ${form.nom} modifié`, entite_id: produitEdite.id });
         showSuccess("Produit modifié", `${form.nom} a été mis à jour avec succès`);
       } else {
