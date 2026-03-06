@@ -13,6 +13,7 @@ const LOGO = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/
 export default function ProfilVendeur() {
   const [compteVendeur, setCompteVendeur] = useState(null);
   const [chargement, setChargement] = useState(true);
+  const session = getVendeurSession();
 
   // Changement de mot de passe
   const [ouvrirChangeMdp, setOuvrirChangeMdp] = useState(false);

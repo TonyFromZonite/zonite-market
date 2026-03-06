@@ -34,7 +34,7 @@ export default function EspaceSousAdmin() {
   const modules = TOUS_MODULES.filter(m => (sousAdmin?.permissions || []).includes(m.page));
 
   const deconnexion = () => {
-    sessionStorage.removeItem("sous_admin");
+    clearAllSessions();
     window.location.href = createPageUrl("Connexion");
   };
 
