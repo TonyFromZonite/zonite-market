@@ -464,7 +464,7 @@ export default function Produits() {
       const data = { ...form, stock_global: stockGlobal };
 
       if (produitEdite) {
-        await base44.entities.Produit.update(produitEdite.id, data);
+        await base44.functions.invoke('updateProduit', { produitId: produitEdite.id, data });
         await base44.entities.JournalAudit.create({ action: "Produit modifié", module: "produit", details: `Produit ${form.nom} modifié`, entite_id: produitEdite.id });
         showSuccess("Produit modifié", `${form.nom} a été mis à jour avec succès`);
       } else {
