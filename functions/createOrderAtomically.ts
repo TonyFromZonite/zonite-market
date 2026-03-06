@@ -4,7 +4,20 @@
  */
 
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
-import { logAudit } from './auditLoggingMiddleware.js';
+
+async function logAudit(base44, data) {
+  try {
+    await base44.asServiceRole.entities.JournalAudit.create({
+      action: data.action,
+      module: data.module,
+      details: data.details,
+      utilisateur: data.utilisateur || '',
+      entite_id: data.entite_id || '',
+      donnees_avant: data.donnees_avant ? JSON.stringify(data.donnees_avant) : '',
+      donnees_apres: data.donnees_apres ? JSON.stringify(data.donnees_apres) : '',
+    });
+  } catch (_) {}
+}
 
 Deno.serve(async (req) => {
   try {
