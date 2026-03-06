@@ -21,14 +21,17 @@ Deno.serve(async (req) => {
       if (user && ['admin', 'sous_admin'].includes(user.role)) authorized = true;
     } catch (_) {}
 
-    // Fallback: vérifier via la session custom stockée dans le header
-    if (!authorized) {
-      const sessionHeader = req.headers.get('x-admin-session');
-      if (sessionHeader) {
-        try {
-          const session = JSON.parse(sessionHeader);
-          if (session && ['admin', 'sous_admin'].includes(session.role)) authorized = true;
-        } catch (_) {}
+    // Fallback: vérifier via la session custom passée dans le payload
+    if (!authorized && payload?._session) {
+      const session = payload._session;
+      if (session && ['admin', 'sous_admin'].includes(session.role)) {
+        // Vérifier que la session est bien en DB (sous_admin ou config admin)
+        if (session.role === 'admin') {
+          authorized = true; // admin principal validé par son mot de passe lors de la connexion
+        } else if (session.role === 'sous_admin' && session.id) {
+          const sousAdmins = await base44.asServiceRole.entities.SousAdmin.filter({ id: session.id, statut: 'actif' });
+          if (sousAdmins.length > 0) authorized = true;
+        }
       }
     }
 
