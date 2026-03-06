@@ -5,30 +5,30 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
     const payload = await req.json();
 
-    // STRICT: Vérifier que l'appel vient d'une automation CandidatureVendeur + create event
-    // Structure garantie des automations: event.type, event.entity_name, event.entity_id, data
+    // Vérifier que l'appel vient d'une automation CompteVendeur + create event
     const isValidAutomation = 
       payload.event && 
       typeof payload.event === 'object' && 
       payload.event.type === 'create' &&
-      payload.event.entity_name === 'CandidatureVendeur' &&
-      payload.event.entity_id &&
-      payload.data &&
-      typeof payload.data === 'object';
+      payload.event.entity_name === 'CompteVendeur' &&
+      payload.event.entity_id;
     
     if (!isValidAutomation) {
       return Response.json({ error: 'Unauthorized: Invalid automation context' }, { status: 401 });
     }
 
-    const { vendeur_id, vendeur_nom, vendeur_email } = payload.data || payload;
-
-    if (!vendeur_id || !vendeur_nom || !vendeur_email) {
-      return Response.json({ error: 'Données manquantes' }, { status: 400 });
+    // Récupérer les données du CompteVendeur depuis la DB si non fournies
+    let compteData = payload.data;
+    if (!compteData || payload.payload_too_large) {
+      compteData = await base44.asServiceRole.entities.CompteVendeur.get(payload.event.entity_id);
     }
 
-    // Valider email
-    if (!vendeur_email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-      return Response.json({ error: 'Invalid email' }, { status: 400 });
+    const vendeur_id = payload.event.entity_id;
+    const vendeur_nom = compteData?.nom_complet;
+    const vendeur_email = compteData?.user_email;
+
+    if (!vendeur_nom || !vendeur_email) {
+      return Response.json({ error: 'Données manquantes' }, { status: 400 });
     }
 
     // Créer une notification pour tous les admins
@@ -37,7 +37,7 @@ Deno.serve(async (req) => {
     for (const admin of admins) {
       await base44.asServiceRole.entities.NotificationVendeur.create({
         vendeur_email: admin.email,
-        titre: "📋 Nouvelle candidature KYC",
+        titre: "📋 Nouvelle inscription vendeur KYC",
         message: `${vendeur_nom} a soumis sa demande de validation KYC`,
         type: "alerte",
         importante: true,
@@ -50,7 +50,7 @@ Deno.serve(async (req) => {
     const adminEmails = admins.map(a => a.email).join(",");
     await base44.integrations.Core.SendEmail({
       to: adminEmails,
-      subject: `🔔 Nouvelle candidature KYC - ${vendeur_nom}`,
+      subject: `🔔 Nouvelle inscription KYC - ${vendeur_nom}`,
       body: `Une nouvelle demande d'inscription a été reçue de ${vendeur_nom} (${vendeur_email}).\n\nVeuillez vérifier et valider/rejeter le dossier KYC rapidement.`,
     });
 
