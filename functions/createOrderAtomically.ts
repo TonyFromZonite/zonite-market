@@ -43,6 +43,11 @@ Deno.serve(async (req) => {
       livraison_incluse, client_nom, client_telephone, client_ville, client_quartier, client_adresse, notes
     } = await req.json();
 
+    // ✅ Vérification d'identité : vendeur_email doit correspondre à l'utilisateur connecté
+    if (vendeur_email !== user.email) {
+      return Response.json({ error: 'Forbidden: vendeur_email does not match authenticated user' }, { status: 403 });
+    }
+
     // Validation
     if (!produit_id || quantite < 1) {
       return Response.json({ error: 'Invalid product or quantity' }, { status: 400 });
