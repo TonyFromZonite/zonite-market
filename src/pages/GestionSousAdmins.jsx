@@ -99,9 +99,9 @@ export default function GestionSousAdmins() {
         data.mot_de_passe_hash = response.data.hashedPassword;
       }
       if (editing) {
-        await base44.entities.SousAdmin.update(editing.id, data);
+        await adminApi.updateSousAdmin(editing.id, data);
       } else {
-        await base44.entities.SousAdmin.create(data);
+        await adminApi.createSousAdmin(data);
         // Inviter l'utilisateur
         try { await base44.users.inviteUser(form.email, "user"); } catch (_) {}
       }
@@ -117,12 +117,12 @@ export default function GestionSousAdmins() {
 
   const supprimer = async (id) => {
     if (!confirm("Supprimer ce sous-administrateur ?")) return;
-    await base44.entities.SousAdmin.delete(id);
+    await adminApi.deleteSousAdmin(id);
     queryClient.invalidateQueries({ queryKey: ["sous_admins"] });
   };
 
   const toggleStatut = async (sa) => {
-    await base44.entities.SousAdmin.update(sa.id, {
+    await adminApi.updateSousAdmin(sa.id, {
       statut: sa.statut === "actif" ? "suspendu" : "actif",
     });
     queryClient.invalidateQueries({ queryKey: ["sous_admins"] });
