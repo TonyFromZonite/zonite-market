@@ -66,7 +66,7 @@ export default function AideVendeur() {
   const soumettre = async () => {
     if (!form.sujet || !form.categorie || !form.message) return;
     setEnCours(true);
-    await vendeurApi.createTicketSupport({
+    await base44.entities.TicketSupport.create({
       vendeur_email: compteVendeur.user_email,
       vendeur_nom: compteVendeur.nom_complet,
       sujet: form.sujet,
@@ -88,7 +88,7 @@ export default function AideVendeur() {
   const ouvrirTicket = async (ticket) => {
     setTicketOuvert(ticket);
     if (ticket.reponse_admin && !ticket.lu_par_vendeur) {
-      await vendeurApi.marquerTicketLu(ticket.id);
+      await base44.entities.TicketSupport.update(ticket.id, { lu_par_vendeur: true });
       queryClient.invalidateQueries({ queryKey: ["tickets_vendeur"] });
     }
   };

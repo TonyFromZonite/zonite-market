@@ -208,7 +208,20 @@ export default function VideoFormation() {
                      setEnCours(true);
                      setErreur("");
                      try {
-                       await vendeurApi.validerFormationEtDebloquerCatalogue();
+                       await Promise.all([
+                         base44.entities.CompteVendeur.update(compteVendeur.id, {
+                           video_vue: true,
+                           conditions_acceptees: true,
+                           catalogue_debloque: true,
+                         }),
+                         base44.entities.NotificationVendeur.create({
+                           vendeur_email: compteVendeur.user_email,
+                           titre: "Catalogue débloqué !",
+                           message: "Félicitations ! Vous avez accès au catalogue ZONITE.",
+                           type: "succes",
+                         })
+                       ]);
+                       // Légère pause avant redirection
                        await new Promise(r => setTimeout(r, 500));
                      } catch (err) {
                        console.error("Finalisation:", err);

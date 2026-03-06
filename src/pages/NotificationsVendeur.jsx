@@ -54,13 +54,14 @@ export default function NotificationsVendeur() {
 
   const marquerLue = async (notif) => {
     if (!notif.lue) {
-      await vendeurApi.marquerNotificationLue(notif.id);
+      await base44.entities.NotificationVendeur.update(notif.id, { lue: true });
       queryClient.invalidateQueries({ queryKey: ["notifs_vendeur", utilisateur?.email] });
     }
   };
 
   const toutMarquerLu = async () => {
-    await vendeurApi.marquerToutesNotificationsLues();
+    const nonLues = notifications.filter(n => !n.lue);
+    await Promise.all(nonLues.map(n => base44.entities.NotificationVendeur.update(n.id, { lue: true })));
     queryClient.invalidateQueries({ queryKey: ["notifs_vendeur", utilisateur?.email] });
   };
 

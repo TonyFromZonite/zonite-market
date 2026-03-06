@@ -64,7 +64,7 @@ export default function DemandePaiement() {
     setEnCours(true);
     setErreur("");
 
-    await vendeurApi.createDemandePaiement({
+    await base44.entities.DemandePaiementVendeur.create({
       vendeur_id: compteVendeur.id,
       vendeur_nom: compteVendeur.nom_complet,
       vendeur_email: compteVendeur.user_email,
@@ -72,6 +72,13 @@ export default function DemandePaiement() {
       numero_mobile_money: form.numero_mobile_money,
       operateur: form.operateur === "orange_money" ? "Orange Money" : "MTN MoMo",
       statut: "en_attente",
+    });
+
+    await base44.entities.NotificationVendeur.create({
+      vendeur_email: compteVendeur.user_email,
+      titre: "Demande de paiement envoyée",
+      message: `Votre demande de paiement de ${formater(montant)} a été transmise à l'équipe ZONITE.`,
+      type: "paiement",
     });
 
     queryClient.invalidateQueries({ queryKey: ["demandes_paiement"] });
