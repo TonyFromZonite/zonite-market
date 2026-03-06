@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { getVendeurSession, clearAllSessions } from "@/components/useSessionGuard";
 import { base44 } from "@/api/base44Client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

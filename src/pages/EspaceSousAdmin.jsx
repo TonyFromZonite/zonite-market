@@ -20,7 +20,7 @@ const TOUS_MODULES = [
   { page: "JournalAudit",      label: "Journal d'Audit",    emoji: "🛡️", icone: Shield,      desc: "Historique des actions" },
 ];
 
-import { getSousAdminSession } from "@/components/useSessionGuard";
+import { getSousAdminSession, clearAllSessions } from "@/components/useSessionGuard";
 
 export default function EspaceSousAdmin() {
   const [sousAdmin] = useState(() => getSousAdminSession());
