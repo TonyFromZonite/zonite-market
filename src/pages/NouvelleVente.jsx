@@ -63,7 +63,7 @@ export default function NouvelleVente() {
     // 2. Diminuer le stock global
     const ancienStock = produit.stock_global || 0;
     const nouveauStock = ancienStock - donnees.quantite;
-    await base44.entities.Produit.update(produit.id, {
+    await adminApi.updateProduit(produit.id, {
       stock_global: nouveauStock,
       total_vendu: (produit.total_vendu || 0) + donnees.quantite,
       statut: nouveauStock <= 0 ? "rupture" : "actif",
@@ -81,7 +81,7 @@ export default function NouvelleVente() {
     });
 
     // 4. Mettre à jour le vendeur
-    await base44.entities.Vendeur.update(vendeur.id, {
+    await adminApi.updateVendeur(vendeur.id, {
       solde_commission: (vendeur.solde_commission || 0) + donnees.commission,
       total_commissions_gagnees: (vendeur.total_commissions_gagnees || 0) + donnees.commission,
       nombre_ventes: (vendeur.nombre_ventes || 0) + 1,
