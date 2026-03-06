@@ -182,6 +182,20 @@ Deno.serve(async (req) => {
         return Response.json({ success: true, result });
       }
 
+      // ─── CATEGORIE ────────────────────────────────────────────────────────────
+      case 'createCategorie': {
+        const result = await db.Categorie.create(payload.data);
+        return Response.json({ success: true, result });
+      }
+      case 'updateCategorie': {
+        const result = await db.Categorie.update(payload.categorieId, payload.data);
+        return Response.json({ success: true, result });
+      }
+      case 'deleteCategorie': {
+        await db.Categorie.delete(payload.categorieId);
+        return Response.json({ success: true });
+      }
+
       default:
         return Response.json({ error: `Action inconnue: ${action}` }, { status: 400 });
     }
