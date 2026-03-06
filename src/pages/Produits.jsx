@@ -212,7 +212,7 @@ function RetoursTab() {
       const [compte] = await base44.entities.CompteVendeur.filter({ id: retourSelectionne.vendeur_id });
       if (compte) {
         const delta = actionVendeur === "deduire_commission" ? -montant : montant;
-        await base44.entities.CompteVendeur.update(compte.id, { solde_commission: Math.max(0, (compte.solde_commission || 0) + delta) });
+        await adminApi.updateCompteVendeur(compte.id, { solde_commission: Math.max(0, (compte.solde_commission || 0) + delta) });
       }
     }
     await adminApi.updateRetourProduit(retourSelectionne.id, { statut: "traite", stock_reintegre: stockReintegre, action_vendeur: actionVendeur, montant_ajustement: montant, notes_admin: notesAdmin });
