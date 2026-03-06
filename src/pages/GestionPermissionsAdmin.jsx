@@ -41,8 +41,8 @@ export default function GestionPermissionsAdmin() {
   useEffect(() => {
     const chargerPermissions = async () => {
       try {
-        const data = await base44.entities.AdminPermissions.list();
-        setPermissions(data || []);
+        const res = await adminApi.listAdminPermissions();
+        setPermissions(res.result || []);
       } catch (error) {
         showError("Erreur au chargement des permissions");
       } finally {
@@ -62,16 +62,16 @@ export default function GestionPermissionsAdmin() {
 
     try {
       if (editingId) {
-        await base44.entities.AdminPermissions.update(editingId, formData);
+        await adminApi.updateAdminPermissions(editingId, formData);
         showSuccess("Permissions mises à jour");
       } else {
-        await base44.entities.AdminPermissions.create(formData);
+        await adminApi.createAdminPermissions(formData);
         showSuccess("Admin et permissions créés");
       }
       
       // Recharger
-      const data = await base44.entities.AdminPermissions.list();
-      setPermissions(data || []);
+      const res = await adminApi.listAdminPermissions();
+      setPermissions(res.result || []);
       setDialogOpen(false);
       resetForm();
     } catch (error) {
@@ -83,7 +83,7 @@ export default function GestionPermissionsAdmin() {
     if (!confirm("Supprimer cet admin et ses permissions ?")) return;
     
     try {
-      await base44.entities.AdminPermissions.delete(id);
+      await adminApi.deleteAdminPermissions(id);
       setPermissions(permissions.filter(p => p.id !== id));
       showSuccess("Admin supprimé");
     } catch (error) {
