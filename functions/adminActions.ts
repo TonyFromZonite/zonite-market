@@ -8,7 +8,8 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const { action, payload } = await req.json();
+    const body = await req.json();
+    const { action, payload, _session: rootSession } = body;
 
     if (!action) {
       return Response.json({ error: 'action requise' }, { status: 400 });
@@ -21,9 +22,9 @@ Deno.serve(async (req) => {
       if (user && ['admin', 'sous_admin'].includes(user.role)) authorized = true;
     } catch (_) {}
 
-    // Fallback: vérifier via la session custom passée dans le payload
-    if (!authorized && payload?._session) {
-      const session = payload._session;
+    // Fallback: vérifier via la session custom passée dans le body (racine ou payload)
+    if (!authorized) {
+      const session = rootSession || payload?._session;
       if (session && ['admin', 'sous_admin'].includes(session.role)) {
         // Vérifier que la session est bien en DB (sous_admin ou config admin)
         if (session.role === 'admin') {
