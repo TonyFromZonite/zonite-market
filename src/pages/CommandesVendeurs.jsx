@@ -52,7 +52,7 @@ export default function CommandesVendeurs() {
 
   const validerCommande = async () => {
     setEnCours(true);
-    await base44.entities.CommandeVendeur.update(commandeSelectionnee.id, {
+    await adminApi.updateCommandeVendeur(commandeSelectionnee.id, {
       statut: "validee_admin",
       notes_admin: notesAdmin || commandeSelectionnee.notes_admin,
     });
@@ -76,7 +76,7 @@ export default function CommandesVendeurs() {
   const attribuerLivreur = async () => {
     if (!livreurNom.trim()) return;
     setEnCours(true);
-    await base44.entities.CommandeVendeur.update(commandeSelectionnee.id, {
+    await adminApi.updateCommandeVendeur(commandeSelectionnee.id, {
       statut: "attribuee_livreur",
       livreur_nom: livreurNom,
       notes_admin: notesAdmin || commandeSelectionnee.notes_admin,
@@ -100,7 +100,7 @@ export default function CommandesVendeurs() {
 
   const marquerEnLivraison = async () => {
     setEnCours(true);
-    await base44.entities.CommandeVendeur.update(commandeSelectionnee.id, { statut: "en_livraison" });
+    await adminApi.updateCommandeVendeur(commandeSelectionnee.id, { statut: "en_livraison" });
     await base44.entities.NotificationVendeur.create({
       vendeur_email: commandeSelectionnee.vendeur_email,
       titre: "Commande en livraison 🚚",
@@ -117,25 +117,23 @@ export default function CommandesVendeurs() {
     const produits = await base44.entities.Produit.list();
     const produit = produits.find(p => p.id === commandeSelectionnee.produit_id);
     if (produit) {
-      // Libérer le stock réservé (la sortie physique est définitive)
-      await base44.entities.Produit.update(produit.id, {
+      await adminApi.updateProduit(produit.id, {
         stock_reserve: Math.max(0, (produit.stock_reserve || 0) - commandeSelectionnee.quantite),
         total_vendu: (produit.total_vendu || 0) + commandeSelectionnee.quantite,
       });
     }
 
-    // Attribuer la commission au vendeur
     const tousComptes = await base44.entities.CompteVendeur.list();
     const compte = tousComptes.find(c => c.id === commandeSelectionnee.vendeur_id);
     if (compte) {
-      await base44.entities.CompteVendeur.update(compte.id, {
+      await adminApi.updateCompteVendeur(compte.id, {
         solde_commission: (compte.solde_commission || 0) + (commandeSelectionnee.commission_vendeur || 0),
         total_commissions_gagnees: (compte.total_commissions_gagnees || 0) + (commandeSelectionnee.commission_vendeur || 0),
         ventes_reussies: (compte.ventes_reussies || 0) + 1,
       });
     }
 
-    await base44.entities.CommandeVendeur.update(commandeSelectionnee.id, { statut: "livree", notes_admin: notesAdmin || commandeSelectionnee.notes_admin });
+    await adminApi.updateCommandeVendeur(commandeSelectionnee.id, { statut: "livree", notes_admin: notesAdmin || commandeSelectionnee.notes_admin });
     await base44.entities.NotificationVendeur.create({
       vendeur_email: commandeSelectionnee.vendeur_email,
       titre: "Commande livrée ✓",
@@ -159,12 +157,11 @@ export default function CommandesVendeurs() {
     const produits = await base44.entities.Produit.list();
     const produit = produits.find(p => p.id === commandeSelectionnee.produit_id);
     if (produit) {
-      // Remettre le stock réservé dans le stock disponible
-      await base44.entities.Produit.update(produit.id, {
+      await adminApi.updateProduit(produit.id, {
         stock_global: (produit.stock_global || 0) + commandeSelectionnee.quantite,
         stock_reserve: Math.max(0, (produit.stock_reserve || 0) - commandeSelectionnee.quantite),
       });
-      await base44.entities.MouvementStock.create({
+      await adminApi.createMouvementStock({
         produit_id: produit.id,
         produit_nom: produit.nom,
         type_mouvement: "entree",
@@ -177,11 +174,11 @@ export default function CommandesVendeurs() {
     const tousComptesEchec = await base44.entities.CompteVendeur.list();
     const compteEchec = tousComptesEchec.find(c => c.id === commandeSelectionnee.vendeur_id);
     if (compteEchec) {
-      await base44.entities.CompteVendeur.update(compteEchec.id, {
+      await adminApi.updateCompteVendeur(compteEchec.id, {
         ventes_echouees: (compteEchec.ventes_echouees || 0) + 1,
       });
     }
-    await base44.entities.CommandeVendeur.update(commandeSelectionnee.id, { statut: "echec_livraison", notes_admin: notesAdmin || commandeSelectionnee.notes_admin });
+    await adminApi.updateCommandeVendeur(commandeSelectionnee.id, { statut: "echec_livraison", notes_admin: notesAdmin || commandeSelectionnee.notes_admin });
     await base44.entities.NotificationVendeur.create({
       vendeur_email: commandeSelectionnee.vendeur_email,
       titre: "Échec de livraison",
@@ -196,7 +193,7 @@ export default function CommandesVendeurs() {
 
   const enregistrerRetour = async () => {
     setEnCours(true);
-    await base44.entities.RetourProduit.create({
+    await adminApi.createRetourProduit({
       commande_id: commandeSelectionnee.id,
       vendeur_id: commandeSelectionnee.vendeur_id,
       vendeur_nom: commandeSelectionnee.vendeur_nom,
@@ -234,13 +231,13 @@ export default function CommandesVendeurs() {
       const produits = await base44.entities.Produit.list();
       const produit = produits.find(p => p.id === commandeSelectionnee.produit_id);
       if (produit) {
-        await base44.entities.Produit.update(produit.id, {
+        await adminApi.updateProduit(produit.id, {
           stock_global: (produit.stock_global || 0) + commandeSelectionnee.quantite,
           stock_reserve: Math.max(0, (produit.stock_reserve || 0) - commandeSelectionnee.quantite),
         });
       }
     }
-    await base44.entities.CommandeVendeur.update(commandeSelectionnee.id, { statut: "annulee", notes_admin: notesAdmin || commandeSelectionnee.notes_admin });
+    await adminApi.updateCommandeVendeur(commandeSelectionnee.id, { statut: "annulee", notes_admin: notesAdmin || commandeSelectionnee.notes_admin });
     await base44.entities.NotificationVendeur.create({
       vendeur_email: commandeSelectionnee.vendeur_email,
       titre: "Commande annulée",
