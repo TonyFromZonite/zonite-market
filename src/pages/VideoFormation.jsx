@@ -99,7 +99,7 @@ export default function VideoFormation() {
       <div className="max-w-lg mx-auto">
         <div className="text-center mb-6">
           <img
-            src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69a304769dda004762ee3a57/be2e82d8c_410287629_332500566218921_7304714630055582730_n.jpg"
+            src={LOGO_URL}
             alt="Zonite" className="h-12 w-12 rounded-xl object-contain mx-auto mb-2"
           />
           <h1 className="text-xl font-bold text-[#1a1f5e]">Formation ZONITE</h1>

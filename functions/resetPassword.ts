@@ -80,7 +80,7 @@ Deno.serve(async (req) => {
     }).catch(() => {});
 
     // ✅ Envoyer un LIEN sécurisé, pas un mot de passe en clair
-    const appUrl = Deno.env.get("APP_URL") || "https://app.base44.com/app/69a304769dda004762ee3a57";
+    const appUrl = Deno.env.get("APP_URL") || "https://app.base44.com/app/69a304769dda004762ee3a57"; // Configurer APP_URL dans les variables d'environnement
     const resetLink = `${appUrl}/ResetPassword?token=${token}&email=${encodeURIComponent(email)}`;
 
     try {

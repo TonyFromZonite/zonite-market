@@ -9,7 +9,7 @@ import {
   Shield, LogOut, Lock, ShieldCheck
 } from "lucide-react";
 
-const LOGO = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69a304769dda004762ee3a57/be2e82d8c_410287629_332500566218921_7304714630055582730_n.jpg";
+import { LOGO_URL as LOGO } from "@/components/constants";
 
 const TOUS_MODULES = [
   { page: "CommandesVendeurs", label: "Commandes Vendeurs", emoji: "📋", icone: ShoppingCart, desc: "Valider et gérer les commandes" },
