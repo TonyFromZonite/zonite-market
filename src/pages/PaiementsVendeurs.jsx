@@ -22,18 +22,18 @@ export default function PaiementsVendeurs() {
   });
 
   const marquerPaye = async (demande) => {
-    await base44.entities.DemandePaiementVendeur.update(demande.id, { statut: "paye" });
+    await adminApi.updateDemandePaiement(demande.id, { statut: "paye" });
 
-    const comptes = await base44.entities.CompteVendeur.filter({ id: demande.vendeur_id });
+    const comptes = await base44.entities.CompteVendeur.filter({ user_email: demande.vendeur_email });
     if (comptes.length > 0) {
       const compte = comptes[0];
-      await base44.entities.CompteVendeur.update(compte.id, {
+      await adminApi.updateCompteVendeur(compte.id, {
         solde_commission: Math.max(0, (compte.solde_commission || 0) - demande.montant),
         total_commissions_payees: (compte.total_commissions_payees || 0) + demande.montant,
       });
     }
 
-    await base44.entities.NotificationVendeur.create({
+    await adminApi.createNotificationVendeur({
       vendeur_email: demande.vendeur_email,
       titre: "Paiement effectué !",
       message: `Votre paiement de ${demande.montant.toLocaleString("fr-FR")} FCFA a été envoyé sur votre numéro ${demande.numero_mobile_money} (${demande.operateur}).`,
