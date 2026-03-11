@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2, Loader2, Tag } from "lucide-react";
+import { Plus, Pencil, Trash2, Tag, Loader2 } from "lucide-react";
 
 export default function CategoriesTab() {
   const [dialogOuvert, setDialogOuvert] = useState(false);
@@ -23,13 +23,8 @@ export default function CategoriesTab() {
   });
 
   const ouvrir = (cat) => {
-    if (cat) {
-      setEdite(cat);
-      setForm({ nom: cat.nom, description: cat.description || "" });
-    } else {
-      setEdite(null);
-      setForm({ nom: "", description: "" });
-    }
+    if (cat) { setEdite(cat); setForm({ nom: cat.nom, description: cat.description || "" }); }
+    else { setEdite(null); setForm({ nom: "", description: "" }); }
     setDialogOuvert(true);
   };
 
@@ -39,15 +34,15 @@ export default function CategoriesTab() {
     try {
       if (edite) {
         await adminApi.updateCategorie(edite.id, form);
-        showSuccess("Catégorie modifiée", "La catégorie a été mise à jour avec succès");
+        showSuccess("Catégorie modifiée");
       } else {
         await adminApi.createCategorie(form);
-        showSuccess("Catégorie créée", "La nouvelle catégorie a été créée avec succès");
+        showSuccess("Catégorie créée");
       }
       queryClient.invalidateQueries({ queryKey: ["categories"] });
       setDialogOuvert(false);
     } catch (err) {
-      showError("Erreur de sauvegarde", err.message || "Échec de la sauvegarde");
+      showError("Erreur", err.message);
     } finally {
       setEnCours(false);
     }
@@ -57,11 +52,11 @@ export default function CategoriesTab() {
     setEnCours(true);
     try {
       await adminApi.deleteCategorie(cat.id);
-      showSuccess("Catégorie supprimée", "La catégorie a été supprimée avec succès");
+      showSuccess("Catégorie supprimée");
       queryClient.invalidateQueries({ queryKey: ["categories"] });
       setConfirmSuppression(null);
     } catch (err) {
-      showError("Erreur de suppression", err.message || "Échec de la suppression");
+      showError("Erreur", err.message);
     } finally {
       setEnCours(false);
     }
@@ -96,7 +91,6 @@ export default function CategoriesTab() {
         ))}
         {!isLoading && categories.length === 0 && <div className="col-span-3 text-center py-10 text-slate-400">Aucune catégorie.</div>}
       </div>
-      
       <Dialog open={dialogOuvert} onOpenChange={setDialogOuvert}>
         <DialogContent className="max-w-sm">
           <DialogHeader><DialogTitle>{edite ? "Modifier la Catégorie" : "Nouvelle Catégorie"}</DialogTitle></DialogHeader>
@@ -116,7 +110,7 @@ export default function CategoriesTab() {
       <Dialog open={!!confirmSuppression} onOpenChange={() => setConfirmSuppression(null)}>
         <DialogContent className="max-w-sm">
           <DialogHeader><DialogTitle>Supprimer la catégorie</DialogTitle></DialogHeader>
-          <p className="text-sm text-slate-600">Êtes-vous sûr de vouloir supprimer <strong>"{confirmSuppression?.nom}"</strong> ? Cette action ne peut pas être annulée.</p>
+          <p className="text-sm text-slate-600">Êtes-vous sûr de vouloir supprimer <strong>"{confirmSuppression?.nom}"</strong> ?</p>
           <DialogFooter>
             <Button variant="outline" onClick={() => setConfirmSuppression(null)}>Annuler</Button>
             <Button variant="destructive" onClick={() => supprimer(confirmSuppression)} disabled={enCours}>

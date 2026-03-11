@@ -1,23 +1,24 @@
 import React, { useState } from "react";
+import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Loader2, ImagePlus, X, Layers, Plus, MapPin, Trash2 } from "lucide-react";
-import { base44 } from "@/api/base44Client";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Loader2, ImagePlus, X, Plus, Layers, MapPin, Trash2 } from "lucide-react";
 
 const initLocalisation = { ville: "", zone: "", quantite: 0, seuil_alerte: 5 };
 const initVariation = { attributs: "", prix_vente_specifique: "", stock: 0, seuil_alerte: 5 };
 
-export default function DialogProduit({ open, onOpenChange, produit, form, setForm, categories, enCours, onSauvegarder }) {
-  const [urlImageAjout, setUrlImageAjout] = useState("");
+export default function DialogProduit({ open, onOpenChange, produit, form, setForm, categories, onSave, enCours }) {
   const [locAjout, setLocAjout] = useState(initLocalisation);
   const [varAjout, setVarAjout] = useState(initVariation);
+  const [urlImageAjout, setUrlImageAjout] = useState("");
   const [uploadEnCours, setUploadEnCours] = useState(false);
 
-  const modifier = (champ, valeur) => setForm((p) => ({ ...p, [champ]: valeur }));
+  const modifier = (champ, valeur) => setForm(p => ({ ...p, [champ]: valeur }));
 
   const modifierCategorie = (id) => {
     const cat = categories.find(c => c.id === id);
@@ -35,13 +36,10 @@ export default function DialogProduit({ open, onOpenChange, produit, form, setFo
     const file = e.target.files?.[0];
     if (!file) return;
     setUploadEnCours(true);
-    try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      const imgs = [...(form.images_urls || []), file_url];
-      setForm(p => ({ ...p, images_urls: imgs, image_url: imgs[0] }));
-    } finally {
-      setUploadEnCours(false);
-    }
+    const { file_url } = await base44.integrations.Core.UploadFile({ file });
+    const imgs = [...(form.images_urls || []), file_url];
+    setForm(p => ({ ...p, images_urls: imgs, image_url: imgs[0] }));
+    setUploadEnCours(false);
   };
 
   const supprimerImage = (idx) => {
@@ -83,7 +81,7 @@ export default function DialogProduit({ open, onOpenChange, produit, form, setFo
     return stockLoc + stockVar;
   };
 
-  const formater = (n) => `${Math.round(n || 0).toLocaleString("fr-FR")} FCFA`;
+  const formater = n => `${Math.round(n || 0).toLocaleString("fr-FR")} FCFA`;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -107,7 +105,7 @@ export default function DialogProduit({ open, onOpenChange, produit, form, setFo
               <div className="space-y-2">
                 <Label>Catégorie</Label>
                 <Select value={form.categorie_id} onValueChange={modifierCategorie}>
-                  <SelectTrigger><SelectValue placeholder="Choisir une catégorie" /></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder="Choisir" /></SelectTrigger>
                   <SelectContent>
                     {categories.map(c => <SelectItem key={c.id} value={c.id}>{c.nom}</SelectItem>)}
                   </SelectContent>
@@ -149,7 +147,7 @@ export default function DialogProduit({ open, onOpenChange, produit, form, setFo
               </div>
               {(parseFloat(form.prix_gros) > 0 && parseFloat(form.prix_achat) > 0) && (
                 <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3 text-sm mt-3">
-                  <p className="text-slate-500">Bénéfice ZONITE par unité</p>
+                  <p className="text-slate-500">Bénéfice ZONITE</p>
                   <p className="font-bold text-emerald-700">{formater((parseFloat(form.prix_gros) || 0) - (parseFloat(form.prix_achat) || 0))}</p>
                 </div>
               )}
@@ -158,56 +156,53 @@ export default function DialogProduit({ open, onOpenChange, produit, form, setFo
             <div>
               <p className="text-sm font-semibold text-slate-700 mb-3 border-b pb-1">Fournisseur</p>
               <div className="grid grid-cols-3 gap-4">
-                <div className="space-y-2"><Label>Nom du Fournisseur</Label><Input value={form.fournisseur_nom} onChange={(e) => modifier("fournisseur_nom", e.target.value)} /></div>
+                <div className="space-y-2"><Label>Nom</Label><Input value={form.fournisseur_nom} onChange={(e) => modifier("fournisseur_nom", e.target.value)} /></div>
                 <div className="space-y-2"><Label>Pays</Label><Input value={form.fournisseur_pays} onChange={(e) => modifier("fournisseur_pays", e.target.value)} placeholder="ex: Chine" /></div>
-                <div className="space-y-2"><Label>Délai d'Acquisition</Label><Input value={form.delai_acquisition} onChange={(e) => modifier("delai_acquisition", e.target.value)} placeholder="ex: 15 jours" /></div>
+                <div className="space-y-2"><Label>Délai</Label><Input value={form.delai_acquisition} onChange={(e) => modifier("delai_acquisition", e.target.value)} placeholder="15 jours" /></div>
               </div>
             </div>
 
             <div>
               <p className="text-sm font-semibold text-slate-700 mb-3 border-b pb-1">Marketing</p>
               <div className="space-y-2">
-                <Label>Lien Telegram (images et vidéos publicitaires)</Label>
-                <Input value={form.lien_telegram} onChange={(e) => modifier("lien_telegram", e.target.value)} placeholder="https://t.me/votre_groupe_ou_canal_privé" />
-                <p className="text-xs text-slate-400">Collez le lien du groupe/canal Telegram privé avec les visuels marketing de ce produit</p>
+                <Label>Lien Telegram</Label>
+                <Input value={form.lien_telegram} onChange={(e) => modifier("lien_telegram", e.target.value)} placeholder="https://t.me/..." />
               </div>
             </div>
           </TabsContent>
 
           <TabsContent value="images" className="space-y-4">
-            <p className="text-sm text-slate-500">Ajoutez plusieurs images pour ce produit. La première image sera utilisée comme image principale.</p>
             <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
               {(form.images_urls || []).map((url, idx) => (
                 <div key={idx} className="relative group rounded-lg overflow-hidden border border-slate-200 aspect-square">
                   <img src={url} alt={`Image ${idx + 1}`} className="w-full h-full object-cover" />
                   {idx === 0 && <span className="absolute top-1 left-1 text-[10px] bg-[#1a1f5e] text-white rounded px-1">Principale</span>}
-                  <button onClick={() => supprimerImage(idx)} className="absolute top-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button onClick={() => supprimerImage(idx)} className="absolute top-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100">
                     <X className="w-3 h-3" />
                   </button>
                 </div>
               ))}
-              <label className="border-2 border-dashed border-slate-300 rounded-lg aspect-square flex flex-col items-center justify-center cursor-pointer hover:border-[#1a1f5e] hover:bg-slate-50 transition-colors">
-                {uploadEnCours ? <Loader2 className="w-6 h-6 animate-spin text-slate-400" /> : <><ImagePlus className="w-6 h-6 text-slate-400 mb-1" /><span className="text-xs text-slate-400">Uploader</span></>}
+              <label className="border-2 border-dashed border-slate-300 rounded-lg aspect-square flex flex-col items-center justify-center cursor-pointer hover:border-[#1a1f5e] hover:bg-slate-50">
+                {uploadEnCours ? <Loader2 className="w-6 h-6 animate-spin text-slate-400" /> : <><ImagePlus className="w-6 h-6 text-slate-400 mb-1" /><span className="text-xs text-slate-400">Upload</span></>}
                 <input type="file" accept="image/*" className="hidden" onChange={uploadImage} disabled={uploadEnCours} />
               </label>
             </div>
             <div className="border border-dashed border-slate-300 rounded-lg p-3">
-              <p className="text-xs font-medium text-slate-500 mb-2">Ou ajouter via URL</p>
+              <p className="text-xs font-medium text-slate-500 mb-2">Ou via URL</p>
               <div className="flex gap-2">
-                <Input placeholder="https://exemple.com/image.jpg" value={urlImageAjout} onChange={(e) => setUrlImageAjout(e.target.value)} onKeyDown={(e) => e.key === "Enter" && ajouterImageUrl()} />
+                <Input placeholder="https://..." value={urlImageAjout} onChange={(e) => setUrlImageAjout(e.target.value)} onKeyDown={(e) => e.key === "Enter" && ajouterImageUrl()} />
                 <Button type="button" variant="outline" size="sm" onClick={ajouterImageUrl}><Plus className="w-3 h-3" /></Button>
               </div>
             </div>
           </TabsContent>
 
           <TabsContent value="variations" className="space-y-4">
-            <p className="text-sm text-slate-500">Définissez les variations du produit (couleur, taille, modèle, etc.) avec leur stock dédié.</p>
             {(form.variations || []).length > 0 && (
               <div className="space-y-2">
                 {form.variations.map((v, idx) => (
                   <div key={idx} className="grid grid-cols-5 gap-2 bg-slate-50 rounded-lg p-3 items-center">
-                    <Input className="col-span-2" placeholder="ex: Rouge / M" value={v.attributs} onChange={(e) => modifierVariation(idx, "attributs", e.target.value)} />
-                    <Input type="number" min="0" placeholder="Prix spécif." value={v.prix_vente_specifique} onFocus={(e) => { if (e.target.value === "0") e.target.value = ""; }} onChange={(e) => modifierVariation(idx, "prix_vente_specifique", parseFloat(e.target.value) || "")} />
+                    <Input className="col-span-2" placeholder="Rouge / M" value={v.attributs} onChange={(e) => modifierVariation(idx, "attributs", e.target.value)} />
+                    <Input type="number" min="0" placeholder="Prix" value={v.prix_vente_specifique} onFocus={(e) => { if (e.target.value === "0") e.target.value = ""; }} onChange={(e) => modifierVariation(idx, "prix_vente_specifique", parseFloat(e.target.value) || "")} />
                     <Input type="number" min="0" placeholder="Stock" value={v.stock} onFocus={(e) => { if (e.target.value === "0") e.target.value = ""; }} onChange={(e) => modifierVariation(idx, "stock", parseInt(e.target.value) || 0)} />
                     <div className="flex gap-1 items-center">
                       <Input type="number" min="0" placeholder="Alerte" value={v.seuil_alerte} onFocus={(e) => { if (e.target.value === "0") e.target.value = ""; }} onChange={(e) => modifierVariation(idx, "seuil_alerte", parseInt(e.target.value) || 0)} />
@@ -215,38 +210,22 @@ export default function DialogProduit({ open, onOpenChange, produit, form, setFo
                     </div>
                   </div>
                 ))}
-                <div className="grid grid-cols-5 gap-2 px-3 text-xs text-slate-400">
-                  <span className="col-span-2">Attributs</span>
-                  <span>Prix spéc. (FCFA)</span>
-                  <span>Stock</span>
-                  <span>Alerte</span>
-                </div>
               </div>
             )}
             <div className="border border-dashed border-slate-300 rounded-lg p-3">
-              <p className="text-xs font-medium text-slate-500 mb-2">Ajouter une variation</p>
+              <p className="text-xs font-medium text-slate-500 mb-2">Ajouter</p>
               <div className="grid grid-cols-2 md:grid-cols-5 gap-2 items-end">
-                <Input className="md:col-span-2" placeholder="ex: Rouge / M *" value={varAjout.attributs} onChange={(e) => setVarAjout(v => ({ ...v, attributs: e.target.value }))} />
-                <Input type="number" min="0" placeholder="Prix spécif." value={varAjout.prix_vente_specifique} onFocus={(e) => { if (e.target.value === "0") e.target.value = ""; }} onChange={(e) => setVarAjout(v => ({ ...v, prix_vente_specifique: parseFloat(e.target.value) || "" }))} />
+                <Input className="md:col-span-2" placeholder="Rouge / M *" value={varAjout.attributs} onChange={(e) => setVarAjout(v => ({ ...v, attributs: e.target.value }))} />
+                <Input type="number" min="0" placeholder="Prix" value={varAjout.prix_vente_specifique} onFocus={(e) => { if (e.target.value === "0") e.target.value = ""; }} onChange={(e) => setVarAjout(v => ({ ...v, prix_vente_specifique: parseFloat(e.target.value) || "" }))} />
                 <Input type="number" min="0" placeholder="Stock" value={varAjout.stock} onFocus={(e) => { if (e.target.value === "0") e.target.value = ""; }} onChange={(e) => setVarAjout(v => ({ ...v, stock: parseInt(e.target.value) || 0 }))} />
                 <Input type="number" min="0" placeholder="Seuil" value={varAjout.seuil_alerte} onFocus={(e) => { if (e.target.value === "0") e.target.value = ""; }} onChange={(e) => setVarAjout(v => ({ ...v, seuil_alerte: parseInt(e.target.value) || 0 }))} />
               </div>
-              <Button type="button" variant="outline" size="sm" className="mt-2" onClick={ajouterVariation}><Layers className="w-3 h-3 mr-1" /> Ajouter cette variation</Button>
+              <Button type="button" variant="outline" size="sm" className="mt-2" onClick={ajouterVariation}><Layers className="w-3 h-3 mr-1" /> Ajouter</Button>
             </div>
-            {(form.variations || []).length > 0 && (
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm">
-                <p className="text-blue-700 font-medium">Stock total des variations : <span className="font-bold">{(form.variations || []).reduce((s, v) => s + (parseInt(v.stock) || 0), 0)} unités</span></p>
-              </div>
-            )}
           </TabsContent>
 
           <TabsContent value="stock" className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Seuil d'Alerte Global</Label>
-                <Input type="number" min="0" value={form.seuil_alerte_global} onFocus={(e) => { if (e.target.value === "0") e.target.value = ""; }} onChange={(e) => modifier("seuil_alerte_global", parseInt(e.target.value) || 0)} />
-              </div>
-            </div>
+            <div className="space-y-2"><Label>Seuil d'Alerte Global</Label><Input type="number" min="0" value={form.seuil_alerte_global} onFocus={(e) => { if (e.target.value === "0") e.target.value = ""; }} onChange={(e) => modifier("seuil_alerte_global", parseInt(e.target.value) || 0)} /></div>
             {(form.stocks_par_localisation || []).length > 0 && (
               <div className="space-y-2">
                 {form.stocks_par_localisation.map((loc, idx) => (
@@ -254,16 +233,15 @@ export default function DialogProduit({ open, onOpenChange, produit, form, setFo
                     <MapPin className="w-4 h-4 text-slate-400 flex-shrink-0" />
                     <span className="font-medium">{loc.ville}</span>
                     {loc.zone && <span className="text-slate-500">/ {loc.zone}</span>}
-                    <span className="ml-auto font-bold text-slate-700">{loc.quantite} unités</span>
-                    <span className="text-xs text-slate-400">alerte: {loc.seuil_alerte}</span>
+                    <span className="ml-auto font-bold text-slate-700">{loc.quantite}</span>
                     <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => supprimerLocalisation(idx)}><Trash2 className="w-3 h-3 text-red-400" /></Button>
                   </div>
                 ))}
-                <p className="text-xs text-slate-500 font-medium">Stock global calculé : {recalculerStockGlobal(form.stocks_par_localisation, form.variations)} unités</p>
+                <p className="text-xs text-slate-500">Stock calculé : {recalculerStockGlobal(form.stocks_par_localisation, form.variations)}</p>
               </div>
             )}
             <div className="border border-dashed border-slate-300 rounded-lg p-3">
-              <p className="text-xs font-medium text-slate-500 mb-2">Ajouter une localisation</p>
+              <p className="text-xs font-medium text-slate-500 mb-2">Ajouter localisation</p>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                 <Input placeholder="Ville *" value={locAjout.ville} onChange={(e) => setLocAjout(l => ({ ...l, ville: e.target.value }))} />
                 <Input placeholder="Zone" value={locAjout.zone} onChange={(e) => setLocAjout(l => ({ ...l, zone: e.target.value }))} />
@@ -277,7 +255,7 @@ export default function DialogProduit({ open, onOpenChange, produit, form, setFo
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Annuler</Button>
-          <Button onClick={onSauvegarder} disabled={enCours} className="bg-[#1a1f5e] hover:bg-[#141952]">
+          <Button onClick={onSave} disabled={enCours} className="bg-[#1a1f5e] hover:bg-[#141952]">
             {enCours ? <Loader2 className="w-4 h-4 animate-spin" /> : produit ? "Enregistrer" : "Créer"}
           </Button>
         </DialogFooter>

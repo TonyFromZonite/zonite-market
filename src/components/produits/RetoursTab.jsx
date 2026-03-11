@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
-import { showSuccess, showError } from "@/components/NotificationSystem";
 import { adminApi } from "@/components/adminApi";
+import { showSuccess, showError } from "@/components/NotificationSystem";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -64,21 +64,15 @@ export default function RetoursTab() {
     setEnCours(true);
     try {
       const montant = parseFloat(montantAjustement) || 0;
+      
       if (stockReintegre) {
         const [produit] = await base44.entities.Produit.filter({ id: retourSelectionne.produit_id });
         if (produit) {
           await adminApi.updateProduit(produit.id, { stock_global: (produit.stock_global || 0) + retourSelectionne.quantite_retournee });
-          await adminApi.createMouvementStock({
-            produit_id: produit.id,
-            produit_nom: produit.nom,
-            type_mouvement: "entree",
-            quantite: retourSelectionne.quantite_retournee,
-            stock_avant: produit.stock_global || 0,
-            stock_apres: (produit.stock_global || 0) + retourSelectionne.quantite_retournee,
-            raison: `Retour produit — ${RAISONS[retourSelectionne.raison]}`
-          });
+          await adminApi.createMouvementStock({ produit_id: produit.id, produit_nom: produit.nom, type_mouvement: "entree", quantite: retourSelectionne.quantite_retournee, stock_avant: produit.stock_global || 0, stock_apres: (produit.stock_global || 0) + retourSelectionne.quantite_retournee, raison: `Retour produit — ${RAISONS[retourSelectionne.raison]}` });
         }
       }
+      
       if (actionVendeur !== "aucune" && montant > 0) {
         const [compte] = await base44.entities.CompteVendeur.filter({ id: retourSelectionne.vendeur_id });
         if (compte) {
@@ -86,33 +80,20 @@ export default function RetoursTab() {
           await adminApi.updateCompteVendeur(compte.id, { solde_commission: Math.max(0, (compte.solde_commission || 0) + delta) });
         }
       }
-      await adminApi.updateRetourProduit(retourSelectionne.id, {
-        statut: "traite",
-        stock_reintegre: stockReintegre,
-        action_vendeur: actionVendeur,
-        montant_ajustement: montant,
-        notes_admin: notesAdmin
-      });
+      
+      await adminApi.updateRetourProduit(retourSelectionne.id, { statut: "traite", stock_reintegre: stockReintegre, action_vendeur: actionVendeur, montant_ajustement: montant, notes_admin: notesAdmin });
+      
       let msgAction = "";
       if (actionVendeur === "deduire_commission" && montant > 0) msgAction = ` Déduction de ${fmt(montant)} sur votre solde.`;
       if (actionVendeur === "crediter_bonus" && montant > 0) msgAction = ` Crédit de ${fmt(montant)} sur votre solde.`;
-      await adminApi.createNotificationVendeur({
-        vendeur_email: retourSelectionne.vendeur_email,
-        titre: "Retour produit traité",
-        message: `Le retour de ${retourSelectionne.quantite_retournee}x ${retourSelectionne.produit_nom} a été traité.${msgAction}`,
-        type: "info"
-      });
-      await adminApi.createJournalAudit({
-        action: "Retour produit traité",
-        module: "commande",
-        details: `Retour ${retourSelectionne.id} — ${retourSelectionne.produit_nom} × ${retourSelectionne.quantite_retournee}`,
-        entite_id: retourSelectionne.id
-      });
+      
+      await adminApi.createNotificationVendeur({ vendeur_email: retourSelectionne.vendeur_email, titre: "Retour produit traité", message: `Le retour de ${retourSelectionne.quantite_retournee}x ${retourSelectionne.produit_nom} a été traité.${msgAction}`, type: "info" });
+      await adminApi.createJournalAudit({ action: "Retour produit traité", module: "commande", details: `Retour ${retourSelectionne.id} — ${retourSelectionne.produit_nom} × ${retourSelectionne.quantite_retournee}`, entite_id: retourSelectionne.id });
+      
       queryClient.invalidateQueries({ queryKey: ["retours_admin"] });
       setRetourSelectionne(null);
-      showSuccess("Retour traité", "Le retour a été traité avec succès");
     } catch (err) {
-      showError("Erreur", err.message || "Échec du traitement");
+      showError("Erreur", err.message);
     } finally {
       setEnCours(false);
     }
@@ -122,17 +103,11 @@ export default function RetoursTab() {
     setEnCours(true);
     try {
       await adminApi.updateRetourProduit(retourSelectionne.id, { statut: "rejete", notes_admin: notesAdmin });
-      await adminApi.createNotificationVendeur({
-        vendeur_email: retourSelectionne.vendeur_email,
-        titre: "Retour produit rejeté",
-        message: `Le retour de ${retourSelectionne.produit_nom} a été rejeté.${notesAdmin ? ` Raison : ${notesAdmin}` : ""}`,
-        type: "alerte"
-      });
+      await adminApi.createNotificationVendeur({ vendeur_email: retourSelectionne.vendeur_email, titre: "Retour produit rejeté", message: `Le retour de ${retourSelectionne.produit_nom} a été rejeté.${notesAdmin ? ` Raison : ${notesAdmin}` : ""}`, type: "alerte" });
       queryClient.invalidateQueries({ queryKey: ["retours_admin"] });
       setRetourSelectionne(null);
-      showSuccess("Retour rejeté", "Le retour a été rejeté");
     } catch (err) {
-      showError("Erreur", err.message || "Échec du rejet");
+      showError("Erreur", err.message);
     } finally {
       setEnCours(false);
     }
@@ -150,7 +125,7 @@ export default function RetoursTab() {
       {nbEnAttente > 0 && (
         <div className="bg-orange-50 border border-orange-200 rounded-xl p-3 flex items-center gap-2">
           <span className="w-6 h-6 bg-orange-500 text-white text-xs font-bold rounded-full flex items-center justify-center flex-shrink-0">{nbEnAttente}</span>
-          <p className="text-sm text-orange-800 font-medium">{nbEnAttente} retour{nbEnAttente > 1 ? "s" : ""} en attente de traitement</p>
+          <p className="text-sm text-orange-800 font-medium">{nbEnAttente} retour{nbEnAttente > 1 ? "s" : ""} en attente</p>
         </div>
       )}
       <div className="flex flex-col sm:flex-row gap-3">
@@ -168,7 +143,7 @@ export default function RetoursTab() {
       </div>
       <div className="bg-white rounded-xl border border-slate-200 divide-y divide-slate-100">
         {retoursFiltres.length === 0 ? (
-          <div className="p-10 text-center text-slate-400"><RotateCcw className="w-8 h-8 mx-auto mb-2 opacity-40" /><p>Aucun retour enregistré</p></div>
+          <div className="p-10 text-center text-slate-400"><RotateCcw className="w-8 h-8 mx-auto mb-2 opacity-40" /><p>Aucun retour</p></div>
         ) : retoursFiltres.map(r => (
           <div key={r.id} className="p-4 flex items-center justify-between hover:bg-slate-50 cursor-pointer" onClick={() => ouvrirRetour(r)}>
             <div className="flex-1 min-w-0 mr-3">
@@ -180,7 +155,6 @@ export default function RetoursTab() {
           </div>
         ))}
       </div>
-      
       <Dialog open={!!retourSelectionne} onOpenChange={() => setRetourSelectionne(null)}>
         <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader><DialogTitle className="flex items-center gap-2"><RotateCcw className="w-4 h-4 text-orange-500" /> Retour : {retourSelectionne?.produit_nom}</DialogTitle></DialogHeader>
@@ -189,7 +163,7 @@ export default function RetoursTab() {
               <Badge className={`${STATUTS_RETOUR[retourSelectionne.statut]?.couleur} border`}>{STATUTS_RETOUR[retourSelectionne.statut]?.label}</Badge>
               <div className="grid grid-cols-2 gap-3 bg-slate-50 rounded-xl p-3">
                 <div><p className="text-slate-400 text-xs">Vendeur</p><p className="font-medium">{retourSelectionne.vendeur_nom}</p></div>
-                <div><p className="text-slate-400 text-xs">Quantité retournée</p><p className="font-bold text-orange-600">{retourSelectionne.quantite_retournee}</p></div>
+                <div><p className="text-slate-400 text-xs">Quantité</p><p className="font-bold text-orange-600">{retourSelectionne.quantite_retournee}</p></div>
                 <div className="col-span-2"><p className="text-slate-400 text-xs">Raison</p><p className="font-medium">{RAISONS[retourSelectionne.raison]}</p></div>
                 {retourSelectionne.raison_detail && <div className="col-span-2"><p className="text-slate-400 text-xs">Détail</p><p>{retourSelectionne.raison_detail}</p></div>}
               </div>
@@ -199,11 +173,11 @@ export default function RetoursTab() {
                     <p className="font-medium text-slate-700">Gestion du stock</p>
                     <label className="flex items-center gap-3 cursor-pointer">
                       <input type="checkbox" checked={stockReintegre} onChange={e => setStockReintegre(e.target.checked)} className="w-4 h-4 accent-emerald-600" />
-                      <span className="text-slate-700">Réintégrer {retourSelectionne.quantite_retournee} unité(s) en stock</span>
+                      <span className="text-slate-700">Réintégrer {retourSelectionne.quantite_retournee} unité(s)</span>
                     </label>
                   </div>
                   <div className="border border-slate-200 rounded-xl p-3 space-y-3">
-                    <p className="font-medium text-slate-700">Action sur le solde du vendeur</p>
+                    <p className="font-medium text-slate-700">Action sur le vendeur</p>
                     <Select value={actionVendeur} onValueChange={setActionVendeur}>
                       <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>{Object.entries(ACTIONS_VENDEUR).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}</SelectContent>
@@ -214,14 +188,12 @@ export default function RetoursTab() {
                         <Input type="number" value={montantAjustement} 
                           onFocus={(e) => { if (e.target.value === "0") e.target.value = ""; }}
                           onChange={e => setMontantAjustement(e.target.value)} placeholder="0" min="0" />
-                        {actionVendeur === "deduire_commission" && montantAjustement && <p className="text-xs text-red-600">⚠ {fmt(montantAjustement)} seront déduits du solde du vendeur</p>}
-                        {actionVendeur === "crediter_bonus" && montantAjustement && <p className="text-xs text-emerald-600">✓ {fmt(montantAjustement)} seront crédités sur le solde du vendeur</p>}
                       </div>
                     )}
                   </div>
                   <div className="space-y-1">
-                    <label className="text-slate-500 text-xs font-medium">Note pour le vendeur</label>
-                    <Textarea value={notesAdmin} onChange={e => setNotesAdmin(e.target.value)} placeholder="Explication du traitement..." rows={2} />
+                    <label className="text-slate-500 text-xs font-medium">Note</label>
+                    <Textarea value={notesAdmin} onChange={e => setNotesAdmin(e.target.value)} placeholder="Explication..." rows={2} />
                   </div>
                   <div className="flex gap-2">
                     <Button onClick={traiterRetour} disabled={enCours} className="flex-1 bg-emerald-600 hover:bg-emerald-700 gap-2">

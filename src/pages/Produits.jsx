@@ -49,7 +49,6 @@ export default function Produits() {
   const [stockAjout, setStockAjout] = useState(0);
   const [enCours, setEnCours] = useState(false);
   const queryClient = useQueryClient();
-  const [confirmSuppressionProduit, setConfirmSuppressionProduit] = useState(null);
 
   const { data: produits = [], isLoading } = useQuery({
     queryKey: ["produits"],
@@ -68,6 +67,8 @@ export default function Produits() {
     const stockVar = (vars || []).reduce((s, v) => s + (parseInt(v.stock) || 0), 0);
     return stockLoc + stockVar;
   };
+
+  // ── CRUD ──────────────────────────────────────────────────────────────────────
   const ouvrir = (produit) => {
     if (produit) {
       setProduitEdite(produit);
@@ -85,9 +86,9 @@ export default function Produits() {
   };
 
   const sauvegarder = async () => {
-    if (!form.nom?.trim()) { showError("Champ obligatoire", "Le nom du produit est requis"); return; }
-    if (!form.reference?.trim()) { showError("Champ obligatoire", "La référence est requise"); return; }
-    if (!form.prix_achat || form.prix_achat <= 0) { showError("Tarification invalide", "Le prix d'achat doit être > 0"); return; }
+    if (!form.nom?.trim()) { showError("Nom requis"); return; }
+    if (!form.reference?.trim()) { showError("Référence requise"); return; }
+    if (!form.prix_achat || form.prix_achat <= 0) { showError("Prix d'achat invalide"); return; }
 
     setEnCours(true);
     try {
@@ -96,10 +97,10 @@ export default function Produits() {
 
       if (produitEdite) {
         await adminApi.updateProduit(produitEdite.id, data);
-        showSuccess("Produit modifié", `${form.nom} a été mis à jour`);
+        showSuccess("Produit modifié");
       } else {
         await adminApi.createProduit(data);
-        showSuccess("Produit créé", `${form.nom} a été créé`);
+        showSuccess("Produit créé");
       }
 
       queryClient.invalidateQueries({ queryKey: ["produits"] });
@@ -107,21 +108,23 @@ export default function Produits() {
       setProduitEdite(null);
       setDialogOuvert(false);
     } catch (err) {
-      showError("Erreur", err.message || "Échec de la sauvegarde");
+      showError("Erreur", err.message);
     } finally {
       setEnCours(false);
     }
   };
 
+  const [confirmSuppressionProduit, setConfirmSuppressionProduit] = useState(null);
+
   const supprimer = async (produit) => {
     setEnCours(true);
     try {
       await adminApi.updateProduit(produit.id, { statut: "supprime" });
-      showSuccess("Produit supprimé", `${produit.nom} a été supprimé`);
+      showSuccess("Produit supprimé");
       queryClient.invalidateQueries({ queryKey: ["produits"] });
       setConfirmSuppressionProduit(null);
     } catch (err) {
-      showError("Erreur", err.message || "Échec");
+      showError("Erreur", err.message);
     } finally {
       setEnCours(false);
     }
@@ -134,12 +137,12 @@ export default function Produits() {
       const ancien = produitEdite.stock_global || 0;
       const nouveau = ancien + stockAjout;
       await adminApi.updateProduit(produitEdite.id, { stock_global: nouveau, statut: nouveau > 0 ? "actif" : produitEdite.statut });
-      showSuccess("Stock ajouté", `+${stockAjout} unité(s)`);
+      showSuccess(`+${stockAjout} unité(s)`);
       queryClient.invalidateQueries({ queryKey: ["produits"] });
       setDialogStock(false);
       setStockAjout(0);
     } catch (err) {
-      showError("Erreur", err.message || "Échec");
+      showError("Erreur", err.message);
     } finally {
       setEnCours(false);
     }
@@ -302,8 +305,8 @@ export default function Produits() {
         form={form}
         setForm={setForm}
         categories={categories}
+        onSave={sauvegarder}
         enCours={enCours}
-        onSauvegarder={sauvegarder}
       />
 
       {/* Dialog confirmation suppression produit */}
