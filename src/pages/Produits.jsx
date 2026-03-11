@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { requireAdminOrSousAdmin } from "@/components/useSessionGuard";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
-import { useCachedQuery, invalidateQuery } from "@/components/CacheManager";
 import { showSuccess, showError } from "@/components/NotificationSystem";
 import { adminApi } from "@/components/adminApi";
 import { Button } from "@/components/ui/button";
@@ -360,19 +359,17 @@ export default function Produits() {
   const [uploadEnCours, setUploadEnCours] = useState(false);
   const queryClient = useQueryClient();
 
-  const { data: produitsRaw, isLoading } = useCachedQuery(
-    'PRODUITS',
-    () => base44.entities.Produit.list("-created_date"),
-    { ttl: 30 * 60 * 1000 }
-  );
-  const produits = produitsRaw || [];
+  const { data: produits = [], isLoading } = useQuery({
+    queryKey: ["produits"],
+    queryFn: () => base44.entities.Produit.list("-created_date"),
+    staleTime: 30 * 60 * 1000,
+  });
 
-  const { data: categoriesRaw } = useCachedQuery(
-    'CATEGORIES',
-    () => base44.entities.Categorie.list("nom"),
-    { ttl: 60 * 60 * 1000 }
-  );
-  const categories = categoriesRaw || [];
+  const { data: categories = [] } = useQuery({
+    queryKey: ["categories"],
+    queryFn: () => base44.entities.Categorie.list("nom"),
+    staleTime: 60 * 60 * 1000,
+  });
 
   const modifier = (champ, valeur) => setForm((p) => ({ ...p, [champ]: valeur }));
 
@@ -474,9 +471,8 @@ export default function Produits() {
         showSuccess("Produit créé", `${form.nom} a été créé avec succès`);
       }
 
-      invalidateQuery('PRODUITS');
-      invalidateQuery('CATEGORIES');
       queryClient.invalidateQueries({ queryKey: ["produits"] });
+      queryClient.invalidateQueries({ queryKey: ["categories"] });
 
       // Réinitialiser le formulaire ET fermer le dialog
       setForm(initProduit);
@@ -497,7 +493,6 @@ export default function Produits() {
       await adminApi.updateProduit(produit.id, { statut: "supprime" });
       await adminApi.createJournalAudit({ action: "Produit supprimé", module: "produit", details: `Produit ${produit.nom} supprimé`, entite_id: produit.id });
       showSuccess("Produit supprimé", `${produit.nom} a été supprimé avec succès`);
-      invalidateQuery('PRODUITS');
       queryClient.invalidateQueries({ queryKey: ["produits"] });
       setConfirmSuppressionProduit(null);
     } catch (err) {
@@ -517,7 +512,6 @@ export default function Produits() {
       await adminApi.createMouvementStock({ produit_id: produitEdite.id, produit_nom: produitEdite.nom, type_mouvement: "entree", quantite: stockAjout, stock_avant: ancien, stock_apres: nouveau, raison: "Approvisionnement" });
       await adminApi.createJournalAudit({ action: "Stock ajouté", module: "produit", details: `+${stockAjout} unités pour ${produitEdite.nom} (${ancien} → ${nouveau})`, entite_id: produitEdite.id });
       showSuccess("Stock ajouté", `+${stockAjout} unité(s) pour ${produitEdite.nom}`);
-      invalidateQuery('PRODUITS');
       queryClient.invalidateQueries({ queryKey: ["produits"] });
       setDialogStock(false);
       setStockAjout(0);
@@ -541,12 +535,11 @@ export default function Produits() {
   const commissionVendeur = (p) => (p.prix_vente || 0) - (p.prix_gros || 0);
   const beneficeZonite = (p) => (p.prix_gros || 0) - (p.prix_achat || 0);
 
-  const { data: retoursEnAttenteRaw } = useCachedQuery(
-    'RETOURS',
-    () => base44.entities.RetourProduit.filter({ statut: "en_attente" }),
-    { ttl: 10 * 60 * 1000 }
-  );
-  const retoursEnAttente = retoursEnAttenteRaw || [];
+  const { data: retoursEnAttente = [] } = useQuery({
+    queryKey: ["retours_badge"],
+    queryFn: () => base44.entities.RetourProduit.filter({ statut: "en_attente" }),
+    staleTime: 10 * 60 * 1000,
+  });
 
   if (isLoading) {
     return <div className="space-y-3">{Array(6).fill(0).map((_, i) => <Skeleton key={i} className="h-12 rounded-lg" />)}</div>;
