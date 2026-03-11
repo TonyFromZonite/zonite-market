@@ -306,7 +306,9 @@ function RetoursTab() {
                     {actionVendeur !== "aucune" && (
                       <div className="space-y-1">
                         <label className="text-slate-500 text-xs font-medium">Montant (FCFA)</label>
-                        <Input type="number" value={montantAjustement} onChange={e => setMontantAjustement(e.target.value)} placeholder="0" min="0" />
+                        <Input type="number" value={montantAjustement} 
+                          onFocus={(e) => { if (e.target.value === "0") e.target.value = ""; }}
+                          onChange={e => setMontantAjustement(e.target.value)} placeholder="0" min="0" />
                         {actionVendeur === "deduire_commission" && montantAjustement && <p className="text-xs text-red-600">⚠ {fmt(montantAjustement)} seront déduits du solde du vendeur</p>}
                         {actionVendeur === "crediter_bonus" && montantAjustement && <p className="text-xs text-emerald-600">✓ {fmt(montantAjustement)} seront crédités sur le solde du vendeur</p>}
                       </div>
@@ -725,14 +727,16 @@ export default function Produits() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Prix d'Achat (FCFA) *</Label>
-                    <Input type="number" min="0" value={form.prix_achat} onFocus={(e) => e.target.select()}
+                    <Input type="number" min="0" value={form.prix_achat} 
+                      onFocus={(e) => { if (e.target.value === "0") e.target.value = ""; e.target.select(); }}
                       onChange={(e) => modifier("prix_achat", e.target.value === "" ? "" : parseFloat(e.target.value))}
                       onBlur={(e) => modifier("prix_achat", parseFloat(e.target.value) || 0)} />
                     <p className="text-xs text-slate-400">Coût fournisseur</p>
                   </div>
                   <div className="space-y-2">
                     <Label>Prix de Gros (FCFA)</Label>
-                    <Input type="number" min="0" value={form.prix_gros} onFocus={(e) => e.target.select()}
+                    <Input type="number" min="0" value={form.prix_gros} 
+                      onFocus={(e) => { if (e.target.value === "0") e.target.value = ""; e.target.select(); }}
                       onChange={(e) => modifier("prix_gros", e.target.value === "" ? "" : parseFloat(e.target.value))}
                       onBlur={(e) => modifier("prix_gros", parseFloat(e.target.value) || 0)} />
                     <p className="text-xs text-slate-400">Prix cédé au vendeur</p>
@@ -840,12 +844,14 @@ export default function Produits() {
                         type="number" min="0"
                         placeholder="Prix spécif."
                         value={v.prix_vente_specifique}
+                        onFocus={(e) => { if (e.target.value === "0") e.target.value = ""; }}
                         onChange={(e) => modifierVariation(idx, "prix_vente_specifique", parseFloat(e.target.value) || "")}
                       />
                       <Input
                         type="number" min="0"
                         placeholder="Stock"
                         value={v.stock}
+                        onFocus={(e) => { if (e.target.value === "0") e.target.value = ""; }}
                         onChange={(e) => modifierVariation(idx, "stock", parseInt(e.target.value) || 0)}
                       />
                       <div className="flex gap-1 items-center">
@@ -853,6 +859,7 @@ export default function Produits() {
                           type="number" min="0"
                           placeholder="Alerte"
                           value={v.seuil_alerte}
+                          onFocus={(e) => { if (e.target.value === "0") e.target.value = ""; }}
                           onChange={(e) => modifierVariation(idx, "seuil_alerte", parseInt(e.target.value) || 0)}
                         />
                         <Button variant="ghost" size="icon" className="flex-shrink-0" onClick={() => supprimerVariation(idx)}>
@@ -916,7 +923,9 @@ export default function Produits() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Seuil d'Alerte Global</Label>
-                  <Input type="number" min="0" value={form.seuil_alerte_global} onChange={(e) => modifier("seuil_alerte_global", parseInt(e.target.value) || 0)} />
+                  <Input type="number" min="0" value={form.seuil_alerte_global} 
+                    onFocus={(e) => { if (e.target.value === "0") e.target.value = ""; }}
+                    onChange={(e) => modifier("seuil_alerte_global", parseInt(e.target.value) || 0)} />
                 </div>
               </div>
 
@@ -947,8 +956,12 @@ export default function Produits() {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                   <Input placeholder="Ville *" value={locAjout.ville} onChange={(e) => setLocAjout(l => ({ ...l, ville: e.target.value }))} />
                   <Input placeholder="Zone" value={locAjout.zone} onChange={(e) => setLocAjout(l => ({ ...l, zone: e.target.value }))} />
-                  <Input type="number" min="0" placeholder="Qté" value={locAjout.quantite} onChange={(e) => setLocAjout(l => ({ ...l, quantite: parseInt(e.target.value) || 0 }))} />
-                  <Input type="number" min="0" placeholder="Seuil" value={locAjout.seuil_alerte} onChange={(e) => setLocAjout(l => ({ ...l, seuil_alerte: parseInt(e.target.value) || 0 }))} />
+                  <Input type="number" min="0" placeholder="Qté" value={locAjout.quantite} 
+                    onFocus={(e) => { if (e.target.value === "0") e.target.value = ""; }}
+                    onChange={(e) => setLocAjout(l => ({ ...l, quantite: parseInt(e.target.value) || 0 }))} />
+                  <Input type="number" min="0" placeholder="Seuil" value={locAjout.seuil_alerte} 
+                    onFocus={(e) => { if (e.target.value === "0") e.target.value = ""; }}
+                    onChange={(e) => setLocAjout(l => ({ ...l, seuil_alerte: parseInt(e.target.value) || 0 }))} />
                 </div>
                 <Button type="button" variant="outline" size="sm" className="mt-2" onClick={ajouterLocalisation}>
                   <Plus className="w-3 h-3 mr-1" /> Ajouter
@@ -990,7 +1003,9 @@ export default function Produits() {
             <p className="text-sm text-slate-500">Stock global actuel : <span className="font-bold text-slate-900">{produitEdite?.stock_global || 0}</span></p>
             <div className="space-y-2">
               <Label>Quantité à ajouter</Label>
-              <Input type="number" min="1" value={stockAjout} onChange={(e) => setStockAjout(parseInt(e.target.value) || 0)} />
+              <Input type="number" min="1" value={stockAjout} 
+                onFocus={(e) => { if (e.target.value === "0") e.target.value = ""; }}
+                onChange={(e) => setStockAjout(parseInt(e.target.value) || 0)} />
             </div>
           </div>
           <DialogFooter>
