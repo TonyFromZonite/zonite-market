@@ -891,18 +891,21 @@ export default function Produits() {
                     type="number" min="0"
                     placeholder="Prix spécif."
                     value={varAjout.prix_vente_specifique}
+                    onFocus={(e) => { if (e.target.value === "0") e.target.value = ""; }}
                     onChange={(e) => setVarAjout(v => ({ ...v, prix_vente_specifique: parseFloat(e.target.value) || "" }))}
                   />
                   <Input
                     type="number" min="0"
                     placeholder="Stock"
                     value={varAjout.stock}
+                    onFocus={(e) => { if (e.target.value === "0") e.target.value = ""; }}
                     onChange={(e) => setVarAjout(v => ({ ...v, stock: parseInt(e.target.value) || 0 }))}
                   />
                   <Input
                     type="number" min="0"
                     placeholder="Seuil"
                     value={varAjout.seuil_alerte}
+                    onFocus={(e) => { if (e.target.value === "0") e.target.value = ""; }}
                     onChange={(e) => setVarAjout(v => ({ ...v, seuil_alerte: parseInt(e.target.value) || 0 }))}
                   />
                 </div>
