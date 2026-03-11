@@ -431,7 +431,11 @@ export default function Produits() {
     setForm(p => ({ ...p, stocks_par_localisation: p.stocks_par_localisation.filter((_, i) => i !== idx) }));
   };
 
-  const recalculerStockGlobal = (locs) => locs.reduce((s, l) => s + (parseInt(l.quantite) || 0), 0);
+  const recalculerStockGlobal = (locs, vars) => {
+    const stockLoc = (locs || []).reduce((s, l) => s + (parseInt(l.quantite) || 0), 0);
+    const stockVar = (vars || []).reduce((s, v) => s + (parseInt(v.stock) || 0), 0);
+    return stockLoc + stockVar;
+  };
 
   // ── CRUD ──────────────────────────────────────────────────────────────────────
   const ouvrir = (produit) => {
@@ -458,7 +462,7 @@ export default function Produits() {
 
     setEnCours(true);
     try {
-      const stockGlobal = recalculerStockGlobal(form.stocks_par_localisation || []);
+      const stockGlobal = recalculerStockGlobal(form.stocks_par_localisation || [], form.variations || []);
       const data = { ...form, stock_global: stockGlobal };
 
       if (produitEdite) {
@@ -932,7 +936,7 @@ export default function Produits() {
                     </div>
                   ))}
                   <p className="text-xs text-slate-500 font-medium">
-                    Stock global calculé : {recalculerStockGlobal(form.stocks_par_localisation)} unités
+                    Stock global calculé : {recalculerStockGlobal(form.stocks_par_localisation, form.variations)} unités
                   </p>
                 </div>
               )}
