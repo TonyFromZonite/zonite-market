@@ -47,7 +47,11 @@ export default function DialogProduit({ open, onOpenChange, produit, form, setFo
   // ── Variations Definition ────────────────────────────────────────────────────
   const ajouterVariationDef = () => {
     if (!varDefAjout.attributs.trim()) return;
-    setForm(p => ({ ...p, variations_definition: [...(p.variations_definition || []), { ...varDefAjout }] }));
+    const variation = { 
+      attributs: varDefAjout.attributs.trim(),
+      ...(varDefAjout.prix_vente_specifique > 0 ? { prix_vente_specifique: varDefAjout.prix_vente_specifique } : {})
+    };
+    setForm(p => ({ ...p, variations_definition: [...(p.variations_definition || []), variation] }));
     setVarDefAjout(initVariationDef);
   };
 
@@ -68,7 +72,16 @@ export default function DialogProduit({ open, onOpenChange, produit, form, setFo
   const modifierVariationDef = (idx, champ, valeur) => {
     setForm(p => {
       const vars = [...(p.variations_definition || [])];
-      vars[idx] = { ...vars[idx], [champ]: valeur };
+      if (champ === 'prix_vente_specifique') {
+        if (valeur === null || valeur === '' || valeur <= 0) {
+          const { prix_vente_specifique, ...rest } = vars[idx];
+          vars[idx] = rest;
+        } else {
+          vars[idx] = { ...vars[idx], prix_vente_specifique: valeur };
+        }
+      } else {
+        vars[idx] = { ...vars[idx], [champ]: valeur };
+      }
       return { ...p, variations_definition: vars };
     });
   };
