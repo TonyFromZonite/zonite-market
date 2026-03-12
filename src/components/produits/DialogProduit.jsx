@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, ImagePlus, X, Plus, MapPin, Trash2, Layers } from "lucide-react";
 
-const initVariationDef = { attributs: "", prix_vente_specifique: "" };
+const initVariationDef = { attributs: "", prix_vente_specifique: null };
 
 export default function DialogProduit({ open, onOpenChange, produit, form, setForm, categories, onSave, enCours }) {
   const [varDefAjout, setVarDefAjout] = useState(initVariationDef);
@@ -245,7 +245,7 @@ export default function DialogProduit({ open, onOpenChange, produit, form, setFo
                   <div key={idx} className="grid grid-cols-3 gap-2 bg-slate-50 rounded-lg p-3 items-center border border-slate-200">
                     <Input className="col-span-2" placeholder="Rouge / M" value={v.attributs} onChange={(e) => modifierVariationDef(idx, "attributs", e.target.value)} />
                     <div className="flex gap-1 items-center">
-                      <Input type="number" min="0" placeholder="Prix spécifique" value={v.prix_vente_specifique} onFocus={(e) => { if (e.target.value === "0") e.target.value = ""; }} onChange={(e) => modifierVariationDef(idx, "prix_vente_specifique", parseFloat(e.target.value) || "")} />
+                      <Input type="number" min="0" placeholder="Prix spécifique" value={v.prix_vente_specifique || ""} onFocus={(e) => { if (e.target.value === "0") e.target.value = ""; }} onChange={(e) => modifierVariationDef(idx, "prix_vente_specifique", e.target.value === "" ? null : parseFloat(e.target.value))} />
                       <Button variant="ghost" size="icon" className="flex-shrink-0" onClick={() => supprimerVariationDef(idx)}><Trash2 className="w-4 h-4 text-red-400" /></Button>
                     </div>
                   </div>
@@ -257,7 +257,7 @@ export default function DialogProduit({ open, onOpenChange, produit, form, setFo
               <p className="text-xs font-medium text-slate-500 mb-2">➕ Ajouter une variation</p>
               <div className="grid grid-cols-2 gap-2 items-end">
                 <Input placeholder="Attributs (ex: Rouge / M) *" value={varDefAjout.attributs} onChange={(e) => setVarDefAjout(v => ({ ...v, attributs: e.target.value }))} />
-                <Input type="number" min="0" placeholder="Prix spécifique (opt.)" value={varDefAjout.prix_vente_specifique} onFocus={(e) => { if (e.target.value === "0") e.target.value = ""; }} onChange={(e) => setVarDefAjout(v => ({ ...v, prix_vente_specifique: parseFloat(e.target.value) || "" }))} />
+                <Input type="number" min="0" placeholder="Prix spécifique (opt.)" value={varDefAjout.prix_vente_specifique || ""} onFocus={(e) => { if (e.target.value === "0") e.target.value = ""; }} onChange={(e) => setVarDefAjout(v => ({ ...v, prix_vente_specifique: e.target.value === "" ? null : parseFloat(e.target.value) }))} />
               </div>
               <Button type="button" variant="outline" size="sm" className="mt-2" onClick={ajouterVariationDef}><Layers className="w-3 h-3 mr-1" /> Ajouter</Button>
             </div>
