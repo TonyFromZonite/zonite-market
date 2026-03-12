@@ -227,7 +227,6 @@ export default function Produits() {
                 <TableHead>Catégorie</TableHead>
                 <TableHead className="text-right">Prix Achat</TableHead>
                 <TableHead className="text-right">Prix de Gros</TableHead>
-                <TableHead className="text-right">Comm. Vendeur</TableHead>
                 <TableHead className="text-right">Bénéfice Zonite</TableHead>
                 <TableHead className="text-center">Stock</TableHead>
                 <TableHead className="text-center">Variations</TableHead>
@@ -237,10 +236,9 @@ export default function Produits() {
             </TableHeader>
             <TableBody>
               {produitsFiltres.length === 0 && (
-                <TableRow><TableCell colSpan={11} className="text-center py-8 text-slate-400">Aucun produit</TableCell></TableRow>
+                <TableRow><TableCell colSpan={10} className="text-center py-8 text-slate-400">Aucun produit</TableCell></TableRow>
               )}
               {produitsFiltres.map((p) => {
-                const cv = commissionVendeur(p);
                 const bz = beneficeZonite(p);
                 const stockGlobal = p.stock_global || 0;
                 const enAlerte = stockGlobal <= (p.seuil_alerte_global || 5);
@@ -263,7 +261,6 @@ export default function Produits() {
                     <TableCell className="text-sm">{p.categorie_nom || "—"}</TableCell>
                     <TableCell className="text-right text-sm">{formater(p.prix_achat)}</TableCell>
                     <TableCell className="text-right text-sm">{formater(p.prix_gros)}</TableCell>
-                    <TableCell className="text-right text-sm text-yellow-600 font-medium">{formater(cv)}</TableCell>
                     <TableCell className="text-right text-sm text-emerald-600 font-medium">{formater(bz)}</TableCell>
                     <TableCell className="text-center">
                       <button
