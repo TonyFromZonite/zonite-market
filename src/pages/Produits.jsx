@@ -24,10 +24,10 @@ const initProduit = {
   fournisseur_nom: "", fournisseur_pays: "", delai_acquisition: "",
   stock_global: 0, seuil_alerte_global: 5,
   stocks_par_localisation: [],
+  variations_definition: [],
   statut: "actif",
   image_url: "",
   images_urls: [],
-  variations: [],
   lien_telegram: "",
 };
 
@@ -62,10 +62,11 @@ export default function Produits() {
     staleTime: 60 * 60 * 1000,
   });
 
-  const recalculerStockGlobal = (locs, vars) => {
-    const stockLoc = (locs || []).reduce((s, l) => s + (parseInt(l.quantite) || 0), 0);
-    const stockVar = (vars || []).reduce((s, v) => s + (parseInt(v.stock) || 0), 0);
-    return stockLoc + stockVar;
+  const recalculerStockGlobal = (locs) => {
+    return (locs || []).reduce((total, loc) => {
+      const stockZone = (loc.variations_stock || []).reduce((s, v) => s + (parseInt(v.quantite) || 0), 0);
+      return total + stockZone;
+    }, 0);
   };
 
   // ── CRUD ──────────────────────────────────────────────────────────────────────
@@ -76,7 +77,7 @@ export default function Produits() {
         ...initProduit, ...produit,
         stocks_par_localisation: produit.stocks_par_localisation || [],
         images_urls: produit.images_urls || (produit.image_url ? [produit.image_url] : []),
-        variations: produit.variations || [],
+        variations_definition: produit.variations_definition || [],
       });
     } else {
       setProduitEdite(null);
@@ -92,7 +93,7 @@ export default function Produits() {
 
     setEnCours(true);
     try {
-      const stockGlobal = recalculerStockGlobal(form.stocks_par_localisation || [], form.variations || []);
+      const stockGlobal = recalculerStockGlobal(form.stocks_par_localisation || []);
       const data = { ...form, stock_global: stockGlobal };
 
       if (produitEdite) {
@@ -243,7 +244,7 @@ export default function Produits() {
                 const bz = beneficeZonite(p);
                 const stockGlobal = p.stock_global || 0;
                 const enAlerte = stockGlobal <= (p.seuil_alerte_global || 5);
-                const nbVariations = (p.variations || []).length;
+                const nbVariations = (p.variations_definition || []).length;
                 return (
                   <TableRow key={p.id} className="hover:bg-slate-50">
                     <TableCell>
