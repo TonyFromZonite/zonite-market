@@ -197,10 +197,12 @@ export default function DialogProduit({ open, onOpenChange, produit, form, setFo
           </TabsContent>
 
           <TabsContent value="variations" className="space-y-4">
+            <p className="text-sm text-slate-500">Les variations permettent de gérer différentes versions du même produit (couleur, taille, etc.) avec leur propre stock.</p>
+            
             {(form.variations || []).length > 0 && (
               <div className="space-y-2">
                 {form.variations.map((v, idx) => (
-                  <div key={idx} className="grid grid-cols-5 gap-2 bg-slate-50 rounded-lg p-3 items-center">
+                  <div key={idx} className="grid grid-cols-5 gap-2 bg-slate-50 rounded-lg p-3 items-center border border-slate-200">
                     <Input className="col-span-2" placeholder="Rouge / M" value={v.attributs} onChange={(e) => modifierVariation(idx, "attributs", e.target.value)} />
                     <Input type="number" min="0" placeholder="Prix" value={v.prix_vente_specifique} onFocus={(e) => { if (e.target.value === "0") e.target.value = ""; }} onChange={(e) => modifierVariation(idx, "prix_vente_specifique", parseFloat(e.target.value) || "")} />
                     <Input type="number" min="0" placeholder="Stock" value={v.stock} onFocus={(e) => { if (e.target.value === "0") e.target.value = ""; }} onChange={(e) => modifierVariation(idx, "stock", parseInt(e.target.value) || 0)} />
@@ -210,6 +212,9 @@ export default function DialogProduit({ open, onOpenChange, produit, form, setFo
                     </div>
                   </div>
                 ))}
+                <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 text-sm">
+                  <p className="text-purple-700 font-medium">Stock total des variations : <span className="font-bold text-lg">{(form.variations || []).reduce((s, v) => s + (parseInt(v.stock) || 0), 0)} unités</span></p>
+                </div>
               </div>
             )}
             <div className="border border-dashed border-slate-300 rounded-lg p-3">
@@ -225,30 +230,75 @@ export default function DialogProduit({ open, onOpenChange, produit, form, setFo
           </TabsContent>
 
           <TabsContent value="stock" className="space-y-4">
-            <div className="space-y-2"><Label>Seuil d'Alerte Global</Label><Input type="number" min="0" value={form.seuil_alerte_global} onFocus={(e) => { if (e.target.value === "0") e.target.value = ""; }} onChange={(e) => modifier("seuil_alerte_global", parseInt(e.target.value) || 0)} /></div>
-            {(form.stocks_par_localisation || []).length > 0 && (
-              <div className="space-y-2">
-                {form.stocks_par_localisation.map((loc, idx) => (
-                  <div key={idx} className="flex items-center gap-2 bg-slate-50 rounded-lg p-2 text-sm">
-                    <MapPin className="w-4 h-4 text-slate-400 flex-shrink-0" />
-                    <span className="font-medium">{loc.ville}</span>
-                    {loc.zone && <span className="text-slate-500">/ {loc.zone}</span>}
-                    <span className="ml-auto font-bold text-slate-700">{loc.quantite}</span>
-                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => supprimerLocalisation(idx)}><Trash2 className="w-3 h-3 text-red-400" /></Button>
-                  </div>
-                ))}
-                <p className="text-xs text-slate-500">Stock calculé : {recalculerStockGlobal(form.stocks_par_localisation, form.variations)}</p>
+            {/* Stock Global Calculé - Affiché en haut */}
+            <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-4">
+              <p className="text-sm text-blue-700 font-medium mb-1">Stock Global Total</p>
+              <p className="text-3xl font-bold text-blue-900">
+                {recalculerStockGlobal(form.stocks_par_localisation || [], form.variations || [])} unités
+              </p>
+              <p className="text-xs text-blue-600 mt-2">
+                = Somme des stocks par localisation ({(form.stocks_par_localisation || []).reduce((s, l) => s + (parseInt(l.quantite) || 0), 0)}) 
+                + Somme des stocks par variation ({(form.variations || []).reduce((s, v) => s + (parseInt(v.stock) || 0), 0)})
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Seuil d'Alerte Global</Label>
+              <Input type="number" min="0" value={form.seuil_alerte_global} 
+                onFocus={(e) => { if (e.target.value === "0") e.target.value = ""; }} 
+                onChange={(e) => modifier("seuil_alerte_global", parseInt(e.target.value) || 0)} 
+              />
+              <p className="text-xs text-slate-400">Vous serez alerté quand le stock global descendra sous ce seuil</p>
+            </div>
+
+            {/* Stocks par Localisation */}
+            <div>
+              <p className="text-sm font-semibold text-slate-700 mb-3 border-b pb-1">Stocks par Localisation</p>
+              {(form.stocks_par_localisation || []).length > 0 ? (
+                <div className="space-y-2 mb-3">
+                  {form.stocks_par_localisation.map((loc, idx) => (
+                    <div key={idx} className="flex items-center gap-2 bg-slate-50 rounded-lg p-3 text-sm border border-slate-200">
+                      <MapPin className="w-4 h-4 text-[#1a1f5e] flex-shrink-0" />
+                      <div className="flex-1">
+                        <span className="font-medium text-slate-900">{loc.ville}</span>
+                        {loc.zone && <span className="text-slate-500"> / {loc.zone}</span>}
+                      </div>
+                      <span className="font-bold text-[#1a1f5e] text-base">{loc.quantite} unités</span>
+                      <span className="text-xs text-slate-400">seuil: {loc.seuil_alerte}</span>
+                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => supprimerLocalisation(idx)}>
+                        <Trash2 className="w-3.5 h-3.5 text-red-400" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-slate-400 mb-3">Aucune localisation définie</p>
+              )}
+              <div className="border-2 border-dashed border-[#1a1f5e]/30 rounded-lg p-3 bg-[#1a1f5e]/5">
+                <p className="text-xs font-medium text-slate-700 mb-3">➕ Ajouter une nouvelle localisation</p>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                  <Input placeholder="Ville *" value={locAjout.ville} onChange={(e) => setLocAjout(l => ({ ...l, ville: e.target.value }))} />
+                  <Input placeholder="Zone" value={locAjout.zone} onChange={(e) => setLocAjout(l => ({ ...l, zone: e.target.value }))} />
+                  <Input type="number" min="0" placeholder="Quantité *" value={locAjout.quantite} 
+                    onFocus={(e) => { if (e.target.value === "0") e.target.value = ""; }} 
+                    onChange={(e) => setLocAjout(l => ({ ...l, quantite: parseInt(e.target.value) || 0 }))} 
+                  />
+                  <Input type="number" min="0" placeholder="Seuil" value={locAjout.seuil_alerte} 
+                    onFocus={(e) => { if (e.target.value === "0") e.target.value = ""; }} 
+                    onChange={(e) => setLocAjout(l => ({ ...l, seuil_alerte: parseInt(e.target.value) || 0 }))} 
+                  />
+                </div>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  size="sm" 
+                  className="mt-3 border-[#1a1f5e] text-[#1a1f5e] hover:bg-[#1a1f5e] hover:text-white" 
+                  onClick={ajouterLocalisation}
+                  disabled={!locAjout.ville || locAjout.quantite <= 0}
+                >
+                  <Plus className="w-3 h-3 mr-1" /> Ajouter cette localisation
+                </Button>
               </div>
-            )}
-            <div className="border border-dashed border-slate-300 rounded-lg p-3">
-              <p className="text-xs font-medium text-slate-500 mb-2">Ajouter localisation</p>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                <Input placeholder="Ville *" value={locAjout.ville} onChange={(e) => setLocAjout(l => ({ ...l, ville: e.target.value }))} />
-                <Input placeholder="Zone" value={locAjout.zone} onChange={(e) => setLocAjout(l => ({ ...l, zone: e.target.value }))} />
-                <Input type="number" min="0" placeholder="Qté" value={locAjout.quantite} onFocus={(e) => { if (e.target.value === "0") e.target.value = ""; }} onChange={(e) => setLocAjout(l => ({ ...l, quantite: parseInt(e.target.value) || 0 }))} />
-                <Input type="number" min="0" placeholder="Seuil" value={locAjout.seuil_alerte} onFocus={(e) => { if (e.target.value === "0") e.target.value = ""; }} onChange={(e) => setLocAjout(l => ({ ...l, seuil_alerte: parseInt(e.target.value) || 0 }))} />
-              </div>
-              <Button type="button" variant="outline" size="sm" className="mt-2" onClick={ajouterLocalisation}><Plus className="w-3 h-3 mr-1" /> Ajouter</Button>
             </div>
           </TabsContent>
         </Tabs>
