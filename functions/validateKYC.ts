@@ -104,22 +104,33 @@ Deno.serve(async (req) => {
 
     } else {
       // Rejet
-      await base44.asServiceRole.entities.CompteVendeur.update(compte_id, {
-        statut_kyc: 'rejete',
-        statut: 'suspendu',
-        notes_admin: notes || '',
-      });
+      const isVendeur = vendeur[0].email !== undefined && vendeur[0].nom_complet !== undefined;
 
+      if (!isVendeur) {
+        // Ancien système CompteVendeur
+        await base44.asServiceRole.entities.CompteVendeur.update(compte_id, {
+          statut_kyc: 'rejete',
+          statut: 'suspendu',
+          notes_admin: notes || '',
+        });
+      } else {
+        // Nouveau système Vendeur
+        await base44.asServiceRole.entities.Vendeur.update(compte_id, {
+          statut: 'inactif',
+        });
+      }
+
+      const vendorEmail = compte.user_email || compte.email;
       await base44.asServiceRole.entities.JournalAudit.create({
         action: 'kyc_rejete',
         module: 'vendeur',
-        details: `KYC rejeté pour ${compte.nom_complet} (${compte.user_email}) par ${user.email}. Motif: ${notes || 'non spécifié'}`,
+        details: `KYC rejeté pour ${compte.nom_complet} (${vendorEmail}) par ${user.email}. Motif: ${notes || 'non spécifié'}`,
         utilisateur: user.email,
         entite_id: compte_id,
       }).catch(() => {});
 
       await base44.asServiceRole.entities.NotificationVendeur.create({
-        vendeur_email: compte.user_email,
+        vendeur_email: vendorEmail,
         titre: "Dossier rejeté",
         message: `Votre dossier a été rejeté. ${notes || "Contactez notre équipe pour plus d'informations."}`,
         type: 'alerte',
