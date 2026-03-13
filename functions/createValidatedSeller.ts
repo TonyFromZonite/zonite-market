@@ -67,7 +67,7 @@ Deno.serve(async (req) => {
       throw new Error('Échec de la création du CompteVendeur - aucun ID retourné');
     }
 
-    // Créer l'entité Vendeur
+    // Créer l'entité Vendeur (OBLIGATOIRE pour affichage dans la liste)
     console.log('📝 Création du vendeur dans l\'entité Vendeur...');
     
     const dataVendeur = {
@@ -83,18 +83,13 @@ Deno.serve(async (req) => {
       chiffre_affaires_genere: 0,
     };
     
-    let vendeurCree = null;
-    try {
-      vendeurCree = await base44.asServiceRole.entities.Vendeur.create(dataVendeur);
-      console.log('✅ Vendeur créé, ID:', vendeurCree?.id);
-    } catch (createError) {
-      console.error('❌ ERREUR création Vendeur:', createError.message);
-      // Vérifier si le vendeur existe déjà
-      const vendeursExistants = await base44.asServiceRole.entities.Vendeur.filter({ email });
-      if (vendeursExistants.length > 0) {
-        vendeurCree = vendeursExistants[0];
-        console.log('ℹ️ Vendeur existe déjà, ID:', vendeurCree.id);
-      }
+    const vendeurCree = await base44.asServiceRole.entities.Vendeur.create(dataVendeur);
+    console.log('✅ Vendeur créé, ID:', vendeurCree.id);
+    
+    if (!vendeurCree || !vendeurCree.id) {
+      // Si la création du Vendeur échoue, supprimer le CompteVendeur pour éviter les incohérences
+      await base44.asServiceRole.entities.CompteVendeur.delete(compteVendeur.id).catch(() => {});
+      throw new Error('Échec de la création de l\'entité Vendeur - opération annulée');
     }
 
     // Journal d'audit
@@ -129,7 +124,7 @@ Deno.serve(async (req) => {
       success: true, 
       message: 'Vendeur créé avec succès',
       compte_id: compteVendeur.id,
-      vendeur_id: vendeurCree?.id || null
+      vendeur_id: vendeurCree.id
     });
 
   } catch (error) {
