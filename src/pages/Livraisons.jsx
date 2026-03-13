@@ -69,7 +69,16 @@ export default function Livraisons() {
         vehicule: form.vehicule || "",
         notes: form.notes || "",
         statut: form.statut || "actif",
-        zones_couvertes: (form.zones_couvertes || []).filter(z => z.ville?.trim())
+        zones_couvertes: (form.zones_couvertes || [])
+          .filter(z => z.ville?.trim())
+          .map(z => ({
+            ville: z.ville.trim(),
+            quartiers: z.quartiers || "",
+            prix_standard: parseFloat(z.prix_standard) || 0,
+            prix_express: parseFloat(z.prix_express) || 0,
+            delai_standard: z.delai_standard || "24-48h",
+            delai_express: z.delai_express || "2-4h"
+          }))
       };
       if (livreurEdite) {
         await adminApi.updateLivraison(livreurEdite.id, data);
