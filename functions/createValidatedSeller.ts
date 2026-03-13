@@ -68,8 +68,16 @@ Deno.serve(async (req) => {
     let vendeurCree = null;
     if (vendeurs.length === 0) {
       console.log('📝 Création du vendeur dans l\'entité Vendeur...');
+      console.log('📋 Données à créer:', {
+        nom_complet,
+        email,
+        telephone: telephone || '',
+        statut: 'actif',
+        date_embauche: new Date().toISOString().split('T')[0],
+      });
+      
       try {
-        vendeurCree = await base44.asServiceRole.entities.Vendeur.create({
+        const dataVendeur = {
           nom_complet,
           email,
           telephone: telephone || '',
@@ -80,12 +88,29 @@ Deno.serve(async (req) => {
           total_commissions_payees: 0,
           nombre_ventes: 0,
           chiffre_affaires_genere: 0,
-        });
-        console.log('✅ Vendeur créé avec succès, ID:', vendeurCree.id);
+        };
+        
+        console.log('🚀 Appel de base44.asServiceRole.entities.Vendeur.create...');
+        vendeurCree = await base44.asServiceRole.entities.Vendeur.create(dataVendeur);
+        console.log('✅ Vendeur créé avec succès !');
+        console.log('✅ ID du vendeur:', vendeurCree?.id);
+        console.log('✅ Objet vendeur complet:', JSON.stringify(vendeurCree, null, 2));
+        
+        // Vérification immédiate après création
+        const verif = await base44.asServiceRole.entities.Vendeur.filter({ email });
+        console.log('🔎 Vérification immédiate après création - nombre de vendeurs trouvés:', verif.length);
+        if (verif.length > 0) {
+          console.log('✅ CONFIRMATION: Le vendeur est bien dans la base !', verif[0]);
+        } else {
+          console.error('❌ PROBLÈME: Le vendeur n\'apparaît PAS dans la base malgré la création !');
+        }
+        
       } catch (vendeurError) {
         console.error('❌ ERREUR lors de la création du Vendeur:', vendeurError);
+        console.error('❌ Type d\'erreur:', vendeurError.constructor.name);
         console.error('❌ Message:', vendeurError.message);
         console.error('❌ Stack:', vendeurError.stack);
+        console.error('❌ Erreur complète:', JSON.stringify(vendeurError, null, 2));
         throw vendeurError;
       }
     } else {
