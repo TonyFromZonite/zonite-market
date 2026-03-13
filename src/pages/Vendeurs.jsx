@@ -185,8 +185,17 @@ function ListeVendeurs() {
                 <div className="space-y-2"><Label>Quartier</Label><Input value={form.quartier} onChange={(e) => modifier("quartier", e.target.value)} /></div>
                 <div className="space-y-2">
                   <Label>Mot de passe *</Label>
-                  <Input type="text" value={form.mot_de_passe} onChange={(e) => modifier("mot_de_passe", e.target.value)} placeholder="Mot de passe initial pour le vendeur" />
+                  <Input 
+                    type="text" 
+                    value={form.mot_de_passe} 
+                    onChange={(e) => {
+                      console.log("🔵 Changement mot_de_passe:", e.target.value);
+                      modifier("mot_de_passe", e.target.value);
+                    }} 
+                    placeholder="Mot de passe initial pour le vendeur" 
+                  />
                   <p className="text-xs text-slate-500">Le vendeur recevra ce mot de passe par email</p>
+                  <p className="text-xs text-blue-600">DEBUG: "{form.mot_de_passe}" (longueur: {form.mot_de_passe?.length || 0})</p>
                 </div>
               </>
             )}
@@ -194,7 +203,20 @@ function ListeVendeurs() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOuvert(false)}>Annuler</Button>
-            <Button onClick={sauvegarder} disabled={enCours || !form.nom_complet || (!vendeurEdite && (!form.email || !form.mot_de_passe))} className="bg-[#1a1f5e] hover:bg-[#141952]">
+            <Button 
+              onClick={() => {
+                console.log("🔴 CLIC BOUTON - État actuel:", {
+                  nom_complet: form.nom_complet,
+                  email: form.email,
+                  mot_de_passe: form.mot_de_passe,
+                  mot_de_passe_length: form.mot_de_passe?.length,
+                  validation: !form.nom_complet || !form.email || !form.mot_de_passe
+                });
+                sauvegarder();
+              }}
+              disabled={enCours || !form.nom_complet || (!vendeurEdite && (!form.email || !form.mot_de_passe))} 
+              className="bg-[#1a1f5e] hover:bg-[#141952]"
+            >
               {enCours ? <Loader2 className="w-4 h-4 animate-spin" /> : vendeurEdite ? "Enregistrer" : "Créer"}
             </Button>
           </DialogFooter>
