@@ -51,6 +51,7 @@ Deno.serve(async (req) => {
       total_commissions_payees: 0,
       nombre_ventes: 0,
       chiffre_affaires_genere: 0,
+      statut_kyc: 'valide', // Admin-created sellers are directly validated
     };
     
     const vendeurCree = await base44.asServiceRole.entities.Vendeur.create(dataVendeur);
