@@ -84,17 +84,18 @@ Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     const body = await req.json();
-    const { email, password, username } = body;
+    const { email, password, username, userType } = body;
 
     // Seller login
-    if (email && password && validateEmail(email)) {
+    if (userType === 'vendeur' && email && password) {
       const result = await authenticateSeller(base44, email, password);
       return Response.json(result, { status: result.success ? 200 : 400 });
     }
 
-    // Admin/Sub-admin login
-    if (username && password) {
-      const result = await authenticateAdmin(base44, username, password);
+    // Admin/Sub-admin login (accept email as username if not provided)
+    if (userType === 'admin' && password) {
+      const adminUser = username || email;
+      const result = await authenticateAdmin(base44, adminUser, password);
       return Response.json(result, { status: result.success ? 200 : 400 });
     }
 
