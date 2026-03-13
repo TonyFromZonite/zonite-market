@@ -12,6 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Plus, Pencil, Trash2, Loader2, Search, Wallet, DollarSign, AlertCircle, CheckCircle2, XCircle, Eye, Clock } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/components/ui/use-toast";
 
 const ONGLETS = [
   { key: "liste", label: "Vendeurs" },
@@ -38,6 +39,7 @@ function ListeVendeurs() {
   const [form, setForm] = useState(initVendeur);
   const [enCours, setEnCours] = useState(false);
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   const { data: vendeurs = [], isLoading } = useQuery({
     queryKey: ["vendeurs"],
