@@ -62,56 +62,41 @@ Deno.serve(async (req) => {
 
     // Créer l'entité Vendeur (OBLIGATOIRE pour afficher dans la liste des vendeurs)
     console.log('🔍 Vérification si vendeur existe déjà avec email:', email);
-    const vendeurs = await base44.asServiceRole.entities.Vendeur.filter({ email });
+    let vendeurs = await base44.asServiceRole.entities.Vendeur.filter({ email });
     console.log('✅ Vendeurs trouvés:', vendeurs.length);
     
     let vendeurCree = null;
     if (vendeurs.length === 0) {
       console.log('📝 Création du vendeur dans l\'entité Vendeur...');
-      console.log('📋 Données à créer:', {
+      
+      const dataVendeur = {
         nom_complet,
         email,
         telephone: telephone || '',
         statut: 'actif',
         date_embauche: new Date().toISOString().split('T')[0],
-      });
+        solde_commission: 0,
+        total_commissions_gagnees: 0,
+        total_commissions_payees: 0,
+        nombre_ventes: 0,
+        chiffre_affaires_genere: 0,
+      };
       
-      try {
-        const dataVendeur = {
-          nom_complet,
-          email,
-          telephone: telephone || '',
-          statut: 'actif',
-          date_embauche: new Date().toISOString().split('T')[0],
-          solde_commission: 0,
-          total_commissions_gagnees: 0,
-          total_commissions_payees: 0,
-          nombre_ventes: 0,
-          chiffre_affaires_genere: 0,
-        };
-        
-        console.log('🚀 Appel de base44.asServiceRole.entities.Vendeur.create...');
-        vendeurCree = await base44.asServiceRole.entities.Vendeur.create(dataVendeur);
-        console.log('✅ Vendeur créé avec succès !');
-        console.log('✅ ID du vendeur:', vendeurCree?.id);
-        console.log('✅ Objet vendeur complet:', JSON.stringify(vendeurCree, null, 2));
-        
-        // Vérification immédiate après création
-        const verif = await base44.asServiceRole.entities.Vendeur.filter({ email });
-        console.log('🔎 Vérification immédiate après création - nombre de vendeurs trouvés:', verif.length);
-        if (verif.length > 0) {
-          console.log('✅ CONFIRMATION: Le vendeur est bien dans la base !', verif[0]);
-        } else {
-          console.error('❌ PROBLÈME: Le vendeur n\'apparaît PAS dans la base malgré la création !');
-        }
-        
-      } catch (vendeurError) {
-        console.error('❌ ERREUR lors de la création du Vendeur:', vendeurError);
-        console.error('❌ Type d\'erreur:', vendeurError.constructor.name);
-        console.error('❌ Message:', vendeurError.message);
-        console.error('❌ Stack:', vendeurError.stack);
-        console.error('❌ Erreur complète:', JSON.stringify(vendeurError, null, 2));
-        throw vendeurError;
+      console.log('📋 Données à créer:', dataVendeur);
+      
+      vendeurCree = await base44.asServiceRole.entities.Vendeur.create(dataVendeur);
+      console.log('✅ Vendeur créé, ID:', vendeurCree.id);
+      
+      // Attendre un peu pour la propagation
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Vérification
+      vendeurs = await base44.asServiceRole.entities.Vendeur.filter({ email });
+      console.log('🔎 Vérification - vendeurs trouvés:', vendeurs.length);
+      
+      if (vendeurs.length === 0) {
+        console.error('❌ Le vendeur n\'est pas dans la base après création');
+        throw new Error('Échec de création du vendeur dans la base de données');
       }
     } else {
       vendeurCree = vendeurs[0];
