@@ -243,32 +243,21 @@ function ValidationKYC() {
   const validerKYC = async (statut) => {
      setEnCours(true);
      try {
-       if (statut === "valide") {
-         // Valider le KYC et activer le vendeur, créer l'entité Vendeur et envoyer l'email
-         await adminApi.validateKycAndActivate({
-           compteVendeurId: compteSelectionne.id,
-           mot_de_passe: compteSelectionne.mot_de_passe,
+       const response = await base44.functions.invoke('validateKYC', {
+         seller_id: compteSelectionne.id,
+         statut,
+         notes: notes || '',
+       });
+       if (response.data.success) {
+         toast({ 
+           title: statut === "valide" ? "KYC Validé" : "KYC Rejeté", 
+           description: statut === "valide" ? `${compteSelectionne.nom_complet} a reçu ses identifiants.` : `${compteSelectionne.nom_complet} a été notifié du rejet.`,
+           duration: 5000 
          });
-         toast({ title: "KYC Validé et Vendeur Activé", description: `${compteSelectionne.nom_complet} a reçu son email de bienvenue.`, duration: 5000 });
-       } else if (statut === "rejete") {
-         // Mettre à jour le statut KYC à rejeté
-         await adminApi.updateCompteVendeur(compteSelectionne.id, { 
-           statut_kyc: statut, 
-           notes_admin: notes, 
-           statut: "en_attente_kyc"
-         });
-         // Notifier le vendeur
-         await adminApi.createNotificationVendeur({
-           vendeur_email: compteSelectionne.user_email,
-           titre: "Dossier KYC rejeté",
-           message: `Votre dossier KYC a été rejeté. ${notes || "Veuillez soumettre à nouveau vos documents en vous assurant qu'ils sont clairs et conformes."}`,
-           type: "alerte",
-         });
-         toast({ title: "Dossier rejeté", description: `${compteSelectionne.nom_complet} a été notifié du rejet.`, duration: 5000 });
+       } else {
+         throw new Error(response.data.error);
        }
-
-       queryClient.invalidateQueries({ queryKey: ["comptes_vendeurs"] });
-       queryClient.invalidateQueries({ queryKey: ["vendeurs"] });
+       queryClient.invalidateQueries({ queryKey: ["sellers"] });
        setCompteSelectionne(null);
      } catch (error) {
        toast({ title: "Erreur", description: error.message, variant: "destructive", duration: 5000 });
