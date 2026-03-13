@@ -60,13 +60,13 @@ const authenticateAdmin = async (base44, username, password) => {
   const adminPasswordConfig = await base44.asServiceRole.entities.ConfigApp.filter({ cle: 'admin_password_hash' });
   if (adminPasswordConfig.length > 0) {
     const passwordMatch = await bcrypt.compare(password, adminPasswordConfig[0].valeur);
-    if (passwordMatch && username === 'admin') {
+    if (passwordMatch && (username === 'admin' || username === 'tonykodjeu@gmail.com')) {
       // Audit log
       await base44.asServiceRole.entities.JournalAudit.create({
         action: 'Connexion admin',
         module: 'systeme',
         details: 'Administrateur principal connecté',
-        utilisateur: 'admin',
+        utilisateur: username,
       }).catch(() => {});
 
       return { success: true, type: 'admin', data: { username: 'admin' } };
