@@ -60,8 +60,8 @@ export default function VideoFormation() {
           return;
         }
 
-        const comptes = await base44.entities.CompteVendeur.filter({ user_email: u.email });
-        if (isMounted && comptes.length > 0) setCompteVendeur(comptes[0]);
+        const sellers = await base44.entities.Seller.filter({ email: u.email });
+        if (isMounted && sellers.length > 0) setCompteVendeur(sellers[0]);
 
         // Récupérer config vidéo (avec retry)
         let configs = await base44.entities.ConfigApp.filter({ cle: "lien_youtube_formation" });
@@ -209,7 +209,7 @@ export default function VideoFormation() {
                      setEnCours(true);
                      setErreur("");
                      try {
-                       await vendeurApi.debloquerCatalogue(compteVendeur.id, compteVendeur.user_email);
+                       await vendeurApi.debloquerCatalogue(compteVendeur.id);
                        await new Promise(r => setTimeout(r, 500));
                      } catch (err) {
                        console.error("Finalisation:", err);
