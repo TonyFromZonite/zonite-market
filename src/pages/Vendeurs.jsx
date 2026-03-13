@@ -79,7 +79,7 @@ function ListeVendeurs() {
           operateur_mobile_money: form.operateur_mobile_money,
           mot_de_passe: form.mot_de_passe,
         });
-        toast({ title: "Compte créé - Vendeur Actif", description: `${form.nom_complet} peut dès à présent se connecter avec ses identifiants reçus par email.`, duration: 5000 });
+        toast({ title: "✅ Vendeur créé avec succès", description: `${form.nom_complet} a reçu ses identifiants par email et peut immédiatement commencer à vendre.`, duration: 5000 });
       }
       queryClient.invalidateQueries({ queryKey: ["vendeurs"] });
       queryClient.invalidateQueries({ queryKey: ["comptes_vendeurs"] });
