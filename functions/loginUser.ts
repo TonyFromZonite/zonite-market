@@ -22,25 +22,35 @@ Deno.serve(async (req) => {
         return Response.json({ error: 'Format email invalide.' }, { status: 400 });
       }
 
-      const comptes = await base44.asServiceRole.entities.CompteVendeur.filter({ user_email: email });
-
-      if (comptes.length === 0) {
-        return Response.json({ error: 'Identifiants incorrects.' }, { status: 401 });
+      // Vérifier en tant qu'utilisateur Base44 authentifié
+      try {
+        const user = await base44.auth.me();
+        if (!user || user.email !== email) {
+          return Response.json({ error: 'Identifiants incorrects.' }, { status: 401 });
+        }
+      } catch {
+        return Response.json({ error: 'Authentification échouée.' }, { status: 401 });
       }
 
-      const compte = comptes[0];
+      // Chercher le vendeur dans l'entité Vendeur (vendeurs créés par admin)
+      const vendeurs = await base44.asServiceRole.entities.Vendeur.filter({ email });
 
-      if (compte.statut === 'suspendu') {
-        return Response.json({ error: 'Compte suspendu. Contactez le support.' }, { status: 403 });
+      if (vendeurs.length === 0) {
+        return Response.json({ error: 'Compte vendeur introuvable.' }, { status: 401 });
       }
 
-      if (compte.statut === 'en_attente_kyc') {
+      const vendeur = vendeurs[0];
+
+      if (vendeur.statut_kyc === 'en_attente') {
         return Response.json({ success: false, pendingApproval: true });
       }
 
-      const passwordMatch = await bcrypt.compare(password, compte.mot_de_passe_hash || '');
-      if (!passwordMatch) {
-        return Response.json({ error: 'Identifiants incorrects.' }, { status: 401 });
+      if (vendeur.statut_kyc === 'rejete') {
+        return Response.json({ error: 'Votre dossier KYC a été rejeté.' }, { status: 403 });
+      }
+
+      if (vendeur.statut === 'inactif') {
+        return Response.json({ error: 'Compte inactif. Contactez le support.' }, { status: 403 });
       }
 
       return Response.json({
@@ -48,9 +58,9 @@ Deno.serve(async (req) => {
         session: {
           type: 'vendeur',
           role: 'vendeur',
-          email: compte.user_email,
-          nom_complet: compte.nom_complet,
-          compte_id: compte.id,
+          email: vendeur.email,
+          nom_complet: vendeur.nom_complet,
+          compte_id: vendeur.id,
         }
       });
 
