@@ -72,7 +72,10 @@ Deno.serve(async (req) => {
       }
       case 'createVendeurInitial': {
         const createResult = await base44.functions.invoke('createValidatedSeller', payload);
-        return Response.json(createResult.data);
+        if (createResult.data?.success) {
+          return Response.json({ success: true, result: createResult.data });
+        }
+        throw new Error(createResult.data?.error || 'Erreur lors de la création du vendeur');
       }
       case 'validateKycAndActivate': {
         const validateResult = await base44.functions.invoke('validateKycAndActivateSeller', payload);
