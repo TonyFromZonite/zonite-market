@@ -62,14 +62,28 @@ export default function Livraisons() {
   const sauvegarder = async () => {
     if (!form.nom.trim()) return;
     setEnCours(true);
-    if (livreurEdite) {
-      await adminApi.updateLivraison(livreurEdite.id, form);
-    } else {
-      await adminApi.createLivraison(form);
+    try {
+      const data = {
+        nom: form.nom,
+        telephone: form.telephone || "",
+        vehicule: form.vehicule || "",
+        notes: form.notes || "",
+        statut: form.statut || "actif",
+        zones_couvertes: (form.zones_couvertes || []).filter(z => z.ville?.trim())
+      };
+      if (livreurEdite) {
+        await adminApi.updateLivraison(livreurEdite.id, data);
+      } else {
+        await adminApi.createLivraison(data);
+      }
+      queryClient.invalidateQueries({ queryKey: ["livraisons"] });
+      setDialogOuvert(false);
+    } catch (error) {
+      console.error("Erreur lors de la sauvegarde:", error);
+      alert("Erreur lors de la sauvegarde. Vérifiez les données.");
+    } finally {
+      setEnCours(false);
     }
-    queryClient.invalidateQueries({ queryKey: ["livraisons"] });
-    setDialogOuvert(false);
-    setEnCours(false);
   };
 
   const supprimer = async (l) => {
