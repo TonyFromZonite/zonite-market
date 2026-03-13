@@ -40,8 +40,8 @@ export default function EspaceVendeur() {
       }
       const emailVendeur = session.email;
       setUtilisateur({ email: emailVendeur });
-      const comptes = await base44.entities.CompteVendeur.filter({ user_email: emailVendeur });
-      if (comptes.length > 0) setCompteVendeur(comptes[0]);
+      const sellers = await base44.entities.Seller.filter({ email: emailVendeur });
+      if (sellers.length > 0) setCompteVendeur(sellers[0]);
       setChargement(false);
     };
     charger();
@@ -55,7 +55,7 @@ export default function EspaceVendeur() {
 
   const { data: compteActualise } = useCachedQuery(
     'COMPTE_VENDEUR',
-    () => base44.entities.CompteVendeur.filter({ id: compteVendeur.id }),
+    () => base44.entities.Seller.filter({ id: compteVendeur.id }),
     { ttl: 3 * 60 * 1000, enabled: !!compteVendeur?.id }
   );
 

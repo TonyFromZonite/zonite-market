@@ -82,7 +82,7 @@ export default function GestionKYC() {
                   <div>
                     <p className="font-medium text-slate-900">{c.nom_complet}</p>
                     <p className="text-sm text-slate-500">{c.ville}{c.quartier ? `, ${c.quartier}` : ""}</p>
-                    <p className="text-xs text-slate-400">{c.user_email}</p>
+                    <p className="text-xs text-slate-400">{c.email}</p>
                   </div>
                 </div>
                 <Button size="sm" variant="outline" onClick={() => { setCompteSelectionne(c); setNotes(""); }}>
