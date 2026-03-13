@@ -51,7 +51,7 @@ const authenticateAdmin = async (base44, username, password) => {
         utilisateur: sousAdmin.email,
       }).catch(() => {});
 
-      return { success: true, type: 'sous_admin', data: sousAdmin };
+      return { success: true, session: { ...sousAdmin, role: 'sous_admin' } };
     }
     return { success: false, error: 'Identifiants invalides' };
   }
@@ -69,7 +69,7 @@ const authenticateAdmin = async (base44, username, password) => {
         utilisateur: username,
       }).catch(() => {});
 
-      return { success: true, type: 'admin', data: { username: 'admin' } };
+      return { success: true, session: { username: 'admin', role: 'admin' } };
     }
   }
 
@@ -89,7 +89,10 @@ Deno.serve(async (req) => {
     // Seller login
     if (userType === 'vendeur' && email && password) {
       const result = await authenticateSeller(base44, email, password);
-      return Response.json(result, { status: result.success ? 200 : 400 });
+      if (result.success) {
+        return Response.json({ success: true, session: result.seller }, { status: 200 });
+      }
+      return Response.json(result, { status: 400 });
     }
 
     // Admin/Sub-admin login (accept email as username if not provided)
