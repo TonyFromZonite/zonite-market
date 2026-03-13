@@ -10,7 +10,9 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Non autorisé' }, { status: 403 });
     }
 
-    const { nom_complet, email, telephone, ville, quartier, mot_de_passe } = await req.json();
+    const body = await req.json();
+    const { nom_complet, telephone, ville, quartier, mot_de_passe } = body;
+    const email = body.email || body.user_email;
 
     if (!nom_complet || !email || !mot_de_passe) {
       return Response.json({ error: 'Données manquantes' }, { status: 400 });
@@ -47,20 +49,24 @@ Deno.serve(async (req) => {
     });
 
     // Créer l'entité Vendeur
-    const vendeurs = await base44.asServiceRole.entities.Vendeur.filter({ email });
-    if (vendeurs.length === 0) {
-      await base44.asServiceRole.entities.Vendeur.create({
-        nom_complet,
-        email,
-        telephone: telephone || '',
-        statut: 'actif',
-        date_embauche: new Date().toISOString().split('T')[0],
-        solde_commission: 0,
-        total_commissions_gagnees: 0,
-        total_commissions_payees: 0,
-        nombre_ventes: 0,
-        chiffre_affaires_genere: 0,
-      });
+    try {
+      const vendeurs = await base44.asServiceRole.entities.Vendeur.filter({ email });
+      if (vendeurs.length === 0) {
+        await base44.asServiceRole.entities.Vendeur.create({
+          nom_complet,
+          email,
+          telephone: telephone || '',
+          statut: 'actif',
+          date_embauche: new Date().toISOString().split('T')[0],
+          solde_commission: 0,
+          total_commissions_gagnees: 0,
+          total_commissions_payees: 0,
+          nombre_ventes: 0,
+          chiffre_affaires_genere: 0,
+        });
+      }
+    } catch (vendeurError) {
+      console.error('Erreur création Vendeur (ignorée, CompteVendeur créé):', vendeurError.message);
     }
 
     // Journal d'audit
