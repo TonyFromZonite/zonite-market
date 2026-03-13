@@ -66,7 +66,7 @@ function ListeVendeurs() {
       if (vendeurEdite) {
         await adminApi.updateVendeur(vendeurEdite.id, { nom_complet: form.nom_complet, email: form.email, telephone: form.telephone, statut: form.statut, date_embauche: form.date_embauche });
         await adminApi.createJournalAudit({ action: "Vendeur modifié", module: "vendeur", details: `Vendeur ${form.nom_complet} modifié`, entite_id: vendeurEdite.id });
-        toast({ title: "Vendeur modifié avec succès" });
+        toast({ title: "Vendeur modifié avec succès", duration: 5000 });
       } else {
         // Créer un compte vendeur initial en attente de validation KYC
         const result = await adminApi.createVendeurInitial({
@@ -79,7 +79,7 @@ function ListeVendeurs() {
           operateur_mobile_money: form.operateur_mobile_money,
           mot_de_passe: form.mot_de_passe,
         });
-        toast({ title: "Compte créé - KYC en attente", description: `Allez à l'onglet "Validation KYC" pour valider le compte de ${form.nom_complet}.` });
+        toast({ title: "Compte créé - KYC en attente", description: `Allez à l'onglet "Validation KYC" pour valider le compte de ${form.nom_complet}.`, duration: 5000 });
       }
       queryClient.invalidateQueries({ queryKey: ["vendeurs"] });
       queryClient.invalidateQueries({ queryKey: ["comptes_vendeurs"] });
@@ -255,7 +255,7 @@ function ValidationKYC() {
            compteVendeurId: compteSelectionne.id,
            mot_de_passe: compteSelectionne.mot_de_passe,
          });
-         toast({ title: "KYC Validé et Vendeur Activé", description: `${compteSelectionne.nom_complet} a reçu son email de bienvenue.` });
+         toast({ title: "KYC Validé et Vendeur Activé", description: `${compteSelectionne.nom_complet} a reçu son email de bienvenue.`, duration: 5000 });
        } else if (statut === "rejete") {
          // Mettre à jour le statut KYC à rejeté
          await adminApi.updateCompteVendeur(compteSelectionne.id, { 
@@ -270,14 +270,14 @@ function ValidationKYC() {
            message: `Votre dossier KYC a été rejeté. ${notes || "Veuillez soumettre à nouveau vos documents en vous assurant qu'ils sont clairs et conformes."}`,
            type: "alerte",
          });
-         toast({ title: "Dossier rejeté", description: `${compteSelectionne.nom_complet} a été notifié du rejet.` });
+         toast({ title: "Dossier rejeté", description: `${compteSelectionne.nom_complet} a été notifié du rejet.`, duration: 5000 });
        }
 
        queryClient.invalidateQueries({ queryKey: ["comptes_vendeurs"] });
        queryClient.invalidateQueries({ queryKey: ["vendeurs"] });
        setCompteSelectionne(null);
      } catch (error) {
-       toast({ title: "Erreur", description: error.message, variant: "destructive" });
+       toast({ title: "Erreur", description: error.message, variant: "destructive", duration: 5000 });
      } finally {
        setEnCours(false);
      }
