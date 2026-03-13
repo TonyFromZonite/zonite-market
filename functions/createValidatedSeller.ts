@@ -24,20 +24,10 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Un compte vendeur existe déjà avec cet email' }, { status: 400 });
     }
 
-    // Inviter l'utilisateur dans l'app (requis pour l'envoi d'email)
-    try {
-      await base44.users.inviteUser(email, 'user');
-    } catch (inviteError) {
-      // Ignorer si l'utilisateur existe déjà
-      if (!inviteError.message.includes('already exists')) {
-        console.error('Invite error:', inviteError.message);
-      }
-    }
-
     // Hacher le mot de passe
     const hashedPassword = bcrypt.hashSync(mot_de_passe, 10);
 
-    // Créer l'entité Vendeur (PRINCIPAL pour affichage dans la liste)
+    // 1. Créer l'entité Vendeur (données commerciales)
     console.log('📝 Création du vendeur dans l\'entité Vendeur...');
     
     const dataVendeur = {
@@ -51,7 +41,7 @@ Deno.serve(async (req) => {
       total_commissions_payees: 0,
       nombre_ventes: 0,
       chiffre_affaires_genere: 0,
-      statut_kyc: 'valide', // Admin-created sellers are directly validated
+      statut_kyc: 'valide',
     };
     
     const vendeurCree = await base44.asServiceRole.entities.Vendeur.create(dataVendeur);
@@ -60,6 +50,28 @@ Deno.serve(async (req) => {
     if (!vendeurCree || !vendeurCree.id) {
       throw new Error('Échec de la création de l\'entité Vendeur');
     }
+
+    // 2. Créer l'entité CompteVendeur (pour authentification via loginUser)
+    console.log('📝 Création du compte vendeur dans l\'entité CompteVendeur...');
+    
+    const dataCompteVendeur = {
+      user_email: email,
+      nom_complet,
+      telephone: telephone || '',
+      ville: ville || '',
+      quartier: quartier || '',
+      numero_mobile_money: numero_mobile_money || '',
+      operateur_mobile_money: operateur_mobile_money || '',
+      mot_de_passe_hash: hashedPassword,
+      statut_kyc: 'valide',
+      statut: 'actif',
+      video_vue: true,
+      conditions_acceptees: true,
+      catalogue_debloque: true,
+    };
+    
+    const compteVendeurCree = await base44.asServiceRole.entities.CompteVendeur.create(dataCompteVendeur);
+    console.log('✅ CompteVendeur créé, ID:', compteVendeurCree.id);
 
     // Journal d'audit
     await base44.entities.JournalAudit.create({
