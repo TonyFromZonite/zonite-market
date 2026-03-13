@@ -61,23 +61,36 @@ Deno.serve(async (req) => {
     });
 
     // Créer l'entité Vendeur (OBLIGATOIRE pour afficher dans la liste des vendeurs)
+    console.log('🔍 Vérification si vendeur existe déjà avec email:', email);
     const vendeurs = await base44.asServiceRole.entities.Vendeur.filter({ email });
+    console.log('✅ Vendeurs trouvés:', vendeurs.length);
+    
     let vendeurCree = null;
     if (vendeurs.length === 0) {
-      vendeurCree = await base44.asServiceRole.entities.Vendeur.create({
-        nom_complet,
-        email,
-        telephone: telephone || '',
-        statut: 'actif',
-        date_embauche: new Date().toISOString().split('T')[0],
-        solde_commission: 0,
-        total_commissions_gagnees: 0,
-        total_commissions_payees: 0,
-        nombre_ventes: 0,
-        chiffre_affaires_genere: 0,
-      });
+      console.log('📝 Création du vendeur dans l\'entité Vendeur...');
+      try {
+        vendeurCree = await base44.asServiceRole.entities.Vendeur.create({
+          nom_complet,
+          email,
+          telephone: telephone || '',
+          statut: 'actif',
+          date_embauche: new Date().toISOString().split('T')[0],
+          solde_commission: 0,
+          total_commissions_gagnees: 0,
+          total_commissions_payees: 0,
+          nombre_ventes: 0,
+          chiffre_affaires_genere: 0,
+        });
+        console.log('✅ Vendeur créé avec succès, ID:', vendeurCree.id);
+      } catch (vendeurError) {
+        console.error('❌ ERREUR lors de la création du Vendeur:', vendeurError);
+        console.error('❌ Message:', vendeurError.message);
+        console.error('❌ Stack:', vendeurError.stack);
+        throw vendeurError;
+      }
     } else {
       vendeurCree = vendeurs[0];
+      console.log('ℹ️ Vendeur existe déjà, ID:', vendeurCree.id);
     }
 
     // Journal d'audit
