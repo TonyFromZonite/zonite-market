@@ -22,10 +22,16 @@ Deno.serve(async (req) => {
 
     // Récupérer le compte vendeur
     const tousLesComptes = await base44.asServiceRole.entities.CompteVendeur.list();
+    console.log('Tous les comptes:', tousLesComptes.length);
+    console.log('Recherche email:', vendeur_email);
     const comptes = tousLesComptes.filter(c => c.user_email === vendeur_email);
+    console.log('Comptes trouvés:', comptes.length);
     
     if (!comptes || comptes.length === 0) {
-      return Response.json({ error: 'Compte vendeur introuvable' }, { status: 404 });
+      return Response.json({ 
+        error: 'Compte vendeur introuvable',
+        debug: { totalComptes: tousLesComptes.length, emails: tousLesComptes.map(c => c.user_email) }
+      }, { status: 404 });
     }
 
     // Mettre à jour avec les permissions service role
