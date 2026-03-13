@@ -246,7 +246,7 @@ function Candidatures({ nbBadge, onBadgeChange }) {
 
   const { data: candidatures = [], isLoading } = useQuery({
     queryKey: ["candidatures"],
-    queryFn: () => base44.entities.CandidatureVendeur.list("-created_date"),
+    queryFn: () => base44.entities.CandidatureVendeur.list("-created_date", 100),
   });
 
   const traiter = async (statut) => {
@@ -362,7 +362,7 @@ function ValidationKYC() {
 
   const { data: comptes = [], isLoading } = useQuery({
     queryKey: ["comptes_vendeurs"],
-    queryFn: () => base44.entities.CompteVendeur.list("-created_date"),
+    queryFn: () => base44.entities.CompteVendeur.list("-created_date", 100),
   });
 
   const validerKYC = async (statut) => {
@@ -493,7 +493,7 @@ function CommissionsTab() {
   const queryClient = useQueryClient();
 
   const { data: vendeurs = [], isLoading: chargementVendeurs } = useQuery({ queryKey: ["vendeurs"], queryFn: () => base44.entities.Vendeur.list() });
-  const { data: paiements = [], isLoading: chargementPaiements } = useQuery({ queryKey: ["paiements_commissions"], queryFn: () => base44.entities.PaiementCommission.list("-created_date", 100) });
+  const { data: paiements = [], isLoading: chargementPaiements } = useQuery({ queryKey: ["paiements_commissions"], queryFn: () => base44.entities.PaiementCommission.list("-created_date", 50) });
 
   const ouvrirPaiement = (vendeur) => { setVendeurPaiement(vendeur); setMontantPaiement(vendeur.solde_commission || 0); setMethodePaiement("especes"); setNotesPaiement(""); setDialogPaiement(true); };
 
@@ -682,9 +682,10 @@ function PaiementsTab() {
 export default function Vendeurs() {
   const [ongletActif, setOngletActif] = useState("liste");
 
-  const { data: candidatures = [] } = useQuery({ queryKey: ["candidatures"], queryFn: () => base44.entities.CandidatureVendeur.filter({ statut: "en_attente" }), refetchInterval: 30000 });
-  const { data: kycs = [] } = useQuery({ queryKey: ["comptes_vendeurs_badge"], queryFn: () => base44.entities.CompteVendeur.filter({ statut_kyc: "en_attente" }), refetchInterval: 30000 });
-  const { data: paiements = [] } = useQuery({ queryKey: ["paiements_badge"], queryFn: () => base44.entities.DemandePaiementVendeur.filter({ statut: "en_attente" }), refetchInterval: 30000 });
+  // Badges seulement (en_attente)
+  const { data: candidatures = [] } = useQuery({ queryKey: ["candidatures"], queryFn: () => base44.entities.CandidatureVendeur.filter({ statut: "en_attente" }, "-created_date", 50), refetchInterval: 30000 });
+  const { data: kycs = [] } = useQuery({ queryKey: ["comptes_vendeurs_badge"], queryFn: () => base44.entities.CompteVendeur.filter({ statut_kyc: "en_attente" }, "-created_date", 50), refetchInterval: 30000 });
+  const { data: paiements = [] } = useQuery({ queryKey: ["paiements_badge"], queryFn: () => base44.entities.DemandePaiementVendeur.filter({ statut: "en_attente" }, "-created_date", 50), refetchInterval: 30000 });
 
   const badges = { candidatures: candidatures.length, kyc: kycs.length, paiements: paiements.length };
 
