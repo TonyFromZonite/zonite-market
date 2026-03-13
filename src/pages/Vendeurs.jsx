@@ -338,7 +338,7 @@ function ValidationKYC() {
           {compteSelectionne && (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-3 text-sm">
-                <div><p className="text-slate-400">Email</p><p className="font-medium">{compteSelectionne.user_email}</p></div>
+                <div><p className="text-slate-400">Email</p><p className="font-medium">{compteSelectionne.email}</p></div>
                 <div><p className="text-slate-400">Téléphone</p><p className="font-medium">{compteSelectionne.telephone}</p></div>
                 <div><p className="text-slate-400">Ville</p><p className="font-medium">{compteSelectionne.ville}</p></div>
                 <div><p className="text-slate-400">Quartier</p><p className="font-medium">{compteSelectionne.quartier || "—"}</p></div>
