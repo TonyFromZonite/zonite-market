@@ -372,10 +372,20 @@ function ValidationKYC() {
   const [enCours, setEnCours] = useState(false);
   const queryClient = useQueryClient();
 
+  const { data: candidaturesApprovees = [] } = useQuery({
+    queryKey: ["candidatures_approvees"],
+    queryFn: () => base44.entities.CandidatureVendeur.filter({ statut: "approuve" }),
+  });
+
   const { data: comptes = [], isLoading } = useQuery({
     queryKey: ["comptes_vendeurs"],
     queryFn: () => base44.entities.CompteVendeur.list("-created_date"),
   });
+
+  // Filtrer les comptes pour ne montrer que ceux avec une candidature approuvée
+  const comptesAvecCandidatureApprouvee = comptes.filter(c => 
+    candidaturesApprovees.some(cand => cand.email === c.user_email)
+  );
 
   const validerKYC = async (statut) => {
     setEnCours(true);
