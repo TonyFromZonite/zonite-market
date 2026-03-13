@@ -39,7 +39,7 @@ Deno.serve(async (req) => {
 
     // Créer le CompteVendeur avec statut validé
     console.log('📝 Création du CompteVendeur pour:', email);
-    const compteVendeur = await base44.asServiceRole.entities.CompteVendeur.create({
+    const compteVendeur = await base44.entities.CompteVendeur.create({
       user_email: email,
       nom_complet,
       telephone: telephone || '',
@@ -83,7 +83,7 @@ Deno.serve(async (req) => {
       chiffre_affaires_genere: 0,
     };
     
-    const vendeurCree = await base44.asServiceRole.entities.Vendeur.create(dataVendeur);
+    const vendeurCree = await base44.entities.Vendeur.create(dataVendeur);
     console.log('✅ Vendeur créé, ID:', vendeurCree.id);
     
     if (!vendeurCree || !vendeurCree.id) {
@@ -93,7 +93,7 @@ Deno.serve(async (req) => {
     }
 
     // Journal d'audit
-    await base44.asServiceRole.entities.JournalAudit.create({
+    await base44.entities.JournalAudit.create({
       action: 'Vendeur créé par admin',
       module: 'vendeur',
       details: `Vendeur ${nom_complet} (${email}) créé directement par ${user.email}`,
@@ -102,7 +102,7 @@ Deno.serve(async (req) => {
     }).catch(() => {});
 
     // Notification in-app
-    await base44.asServiceRole.entities.NotificationVendeur.create({
+    await base44.entities.NotificationVendeur.create({
       vendeur_email: email,
       titre: '🎉 Bienvenue chez ZONITE !',
       message: `Votre compte vendeur a été créé. Connectez-vous avec vos identifiants pour commencer.`,
@@ -111,7 +111,7 @@ Deno.serve(async (req) => {
 
     // Envoyer email avec identifiants
     try {
-      await base44.asServiceRole.integrations.Core.SendEmail({
+      await base44.integrations.Core.SendEmail({
         to: email,
         subject: '🎉 Bienvenue chez ZONITE – Vos identifiants de connexion',
         body: `Bonjour ${nom_complet},\n\nBienvenue chez ZONITE ! 🚀\n\nVotre compte vendeur a été créé par notre équipe.\n\nVoici vos identifiants de connexion :\n\n📧 Email : ${email}\n🔐 Mot de passe : ${mot_de_passe}\n\n⚠️ Pour votre sécurité, nous vous recommandons de changer ce mot de passe dès votre première connexion depuis votre profil.\n\nBon courage et bonne vente !\n\nL'équipe ZONITE`
