@@ -38,6 +38,7 @@ Deno.serve(async (req) => {
     const hashedPassword = bcrypt.hashSync(mot_de_passe, 10);
 
     // Créer le CompteVendeur avec statut validé
+    console.log('📝 Création du CompteVendeur pour:', email);
     const compteVendeur = await base44.asServiceRole.entities.CompteVendeur.create({
       user_email: email,
       nom_complet,
@@ -59,6 +60,19 @@ Deno.serve(async (req) => {
       ventes_reussies: 0,
       ventes_echouees: 0,
     });
+
+    console.log('✅ CompteVendeur créé:', compteVendeur?.id);
+    
+    if (!compteVendeur || !compteVendeur.id) {
+      throw new Error('Échec de la création du CompteVendeur - aucun ID retourné');
+    }
+
+    // Vérification immédiate de la persistance
+    const verification = await base44.asServiceRole.entities.CompteVendeur.filter({ user_email: email });
+    if (verification.length === 0) {
+      throw new Error('CompteVendeur non trouvé après création - échec de persistance');
+    }
+    console.log('✅ Vérification: CompteVendeur bien persisté');
 
     // Créer l'entité Vendeur (OBLIGATOIRE pour afficher dans la liste des vendeurs)
     console.log('🔍 Vérification si vendeur existe déjà avec email:', email);
