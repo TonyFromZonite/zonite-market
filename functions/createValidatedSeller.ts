@@ -19,43 +19,19 @@ Deno.serve(async (req) => {
     }
 
     // Vérifier si un vendeur existe déjà avec cet email
-    const vendeursExistants = await base44.asServiceRole.entities.Vendeur.filter({ email });
-    if (vendeursExistants.length > 0) {
+    const sellersExistants = await base44.asServiceRole.entities.Seller.filter({ email });
+    if (sellersExistants.length > 0) {
       return Response.json({ error: 'Un compte vendeur existe déjà avec cet email' }, { status: 400 });
     }
 
     // Hacher le mot de passe
     const hashedPassword = bcrypt.hashSync(mot_de_passe, 10);
 
-    // 1. Créer l'entité Vendeur (données commerciales)
-    console.log('📝 Création du vendeur dans l\'entité Vendeur...');
+    // Créer le vendeur directement validé dans Seller
+    console.log('📝 Création du vendeur validé...');
     
-    const dataVendeur = {
-      nom_complet,
+    const dataSeller = {
       email,
-      telephone: telephone || '',
-      statut: 'actif',
-      date_embauche: new Date().toISOString().split('T')[0],
-      solde_commission: 0,
-      total_commissions_gagnees: 0,
-      total_commissions_payees: 0,
-      nombre_ventes: 0,
-      chiffre_affaires_genere: 0,
-      statut_kyc: 'valide',
-    };
-    
-    const vendeurCree = await base44.asServiceRole.entities.Vendeur.create(dataVendeur);
-    console.log('✅ Vendeur créé, ID:', vendeurCree.id);
-    
-    if (!vendeurCree || !vendeurCree.id) {
-      throw new Error('Échec de la création de l\'entité Vendeur');
-    }
-
-    // 2. Créer l'entité CompteVendeur (pour authentification via loginUser)
-    console.log('📝 Création du compte vendeur dans l\'entité CompteVendeur...');
-    
-    const dataCompteVendeur = {
-      user_email: email,
       nom_complet,
       telephone: telephone || '',
       ville: ville || '',
@@ -68,22 +44,32 @@ Deno.serve(async (req) => {
       video_vue: true,
       conditions_acceptees: true,
       catalogue_debloque: true,
+      date_embauche: new Date().toISOString().split('T')[0],
+      solde_commission: 0,
+      total_commissions_gagnees: 0,
+      total_commissions_payees: 0,
+      nombre_ventes: 0,
+      chiffre_affaires_genere: 0,
     };
     
-    const compteVendeurCree = await base44.asServiceRole.entities.CompteVendeur.create(dataCompteVendeur);
-    console.log('✅ CompteVendeur créé, ID:', compteVendeurCree.id);
+    const sellerCree = await base44.asServiceRole.entities.Seller.create(dataSeller);
+    console.log('✅ Vendeur créé, ID:', sellerCree.id);
+
+    if (!sellerCree || !sellerCree.id) {
+      throw new Error('Échec de la création du vendeur');
+    }
 
     // Journal d'audit
-    await base44.entities.JournalAudit.create({
+    await base44.asServiceRole.entities.JournalAudit.create({
       action: 'Vendeur créé par admin',
       module: 'vendeur',
       details: `Vendeur ${nom_complet} (${email}) créé directement par ${user.email}`,
       utilisateur: user.email,
-      entite_id: vendeurCree.id,
+      entite_id: sellerCree.id,
     }).catch(() => {});
 
     // Notification in-app
-    await base44.entities.NotificationVendeur.create({
+    await base44.asServiceRole.entities.NotificationVendeur.create({
       vendeur_email: email,
       titre: '🎉 Bienvenue chez ZONITE !',
       message: `Votre compte vendeur a été créé. Connectez-vous avec vos identifiants pour commencer.`,
@@ -104,7 +90,7 @@ Deno.serve(async (req) => {
     return Response.json({ 
       success: true, 
       message: 'Vendeur créé avec succès',
-      vendeur_id: vendeurCree.id
+      seller_id: sellerCree.id
     });
 
   } catch (error) {
