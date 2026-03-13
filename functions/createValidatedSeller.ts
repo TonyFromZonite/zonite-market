@@ -91,7 +91,6 @@ Deno.serve(async (req) => {
     return Response.json({ 
       success: true, 
       message: 'Vendeur créé avec succès',
-      compte_id: compteVendeur.id,
       vendeur_id: vendeurCree.id
     });
 
