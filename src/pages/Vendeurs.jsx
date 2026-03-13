@@ -234,17 +234,11 @@ function ValidationKYC() {
    const queryClient = useQueryClient();
    const { toast } = useToast();
 
-   const { data: comptes = [], isLoading } = useQuery({
-     queryKey: ["comptes_vendeurs"],
-     queryFn: () => base44.entities.CompteVendeur.list("-created_date"),
-     refetchInterval: 30000,
-   });
-
-   const { data: vendeurs = [] } = useQuery({
-     queryKey: ["vendeurs"],
-     queryFn: () => base44.entities.Vendeur.list(),
-     refetchInterval: 30000,
-   });
+   const { data: sellers = [], isLoading } = useQuery({
+      queryKey: ["sellers"],
+      queryFn: () => base44.entities.Seller.list("-created_date"),
+      refetchInterval: 30000,
+    });
 
   const validerKYC = async (statut) => {
      setEnCours(true);
