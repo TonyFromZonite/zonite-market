@@ -24,8 +24,8 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Un compte vendeur existe déjà avec cet email' }, { status: 400 });
     }
 
-    // Hacher le mot de passe
-    const hashedPassword = bcrypt.hashSync(mot_de_passe, 10);
+    // Hacher le mot de passe (async pour éviter CPU timeout)
+    const hashedPassword = await bcrypt.hash(mot_de_passe, 10);
 
     // Créer le vendeur directement validé dans Seller
     console.log('📝 Création du vendeur validé...');
