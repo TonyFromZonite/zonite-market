@@ -120,8 +120,8 @@ export default function Produits() {
   const supprimer = async (produit) => {
     setEnCours(true);
     try {
-      await adminApi.updateProduit(produit.id, { statut: "supprime" });
-      showSuccess("Produit supprimé");
+      await adminApi.deleteProduit(produit.id);
+      showSuccess("Produit supprimé définitivement");
       queryClient.invalidateQueries({ queryKey: ["produits"] });
       setConfirmSuppressionProduit(null);
     } catch (err) {
