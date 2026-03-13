@@ -49,7 +49,7 @@ export default function EspaceVendeur() {
 
   const { data: commandes = [] } = useCachedQuery(
     'COMMANDES',
-    () => base44.entities.CommandeVendeur.filter({ vendeur_id: compteVendeur.id }, "-created_date", 50),
+    () => base44.entities.CommandeVendeur.filter({ vendeur_id: compteVendeur.id }, "-created_date", 20),
     { ttl: 5 * 60 * 1000, enabled: !!compteVendeur?.id }
   );
 
@@ -63,7 +63,7 @@ export default function EspaceVendeur() {
 
   const { data: notifications = [] } = useCachedQuery(
     'NOTIFICATIONS',
-    () => base44.entities.NotificationVendeur.filter({ vendeur_email: utilisateur.email }, "-created_date", 10),
+    () => base44.entities.NotificationVendeur.filter({ vendeur_email: utilisateur.email }, "-created_date", 5),
     { ttl: 2 * 60 * 1000, enabled: !!utilisateur?.email }
   );
 
