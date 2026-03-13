@@ -67,49 +67,34 @@ Deno.serve(async (req) => {
       throw new Error('Échec de la création du CompteVendeur - aucun ID retourné');
     }
 
-    // Créer l'entité Vendeur (OBLIGATOIRE pour afficher dans la liste des vendeurs)
-    console.log('🔍 Vérification si vendeur existe déjà avec email:', email);
-    let vendeurs = await base44.asServiceRole.entities.Vendeur.filter({ email });
-    console.log('✅ Vendeurs trouvés:', vendeurs.length);
+    // Créer l'entité Vendeur
+    console.log('📝 Création du vendeur dans l\'entité Vendeur...');
+    
+    const dataVendeur = {
+      nom_complet,
+      email,
+      telephone: telephone || '',
+      statut: 'actif',
+      date_embauche: new Date().toISOString().split('T')[0],
+      solde_commission: 0,
+      total_commissions_gagnees: 0,
+      total_commissions_payees: 0,
+      nombre_ventes: 0,
+      chiffre_affaires_genere: 0,
+    };
     
     let vendeurCree = null;
-    if (vendeurs.length === 0) {
-      console.log('📝 Création du vendeur dans l\'entité Vendeur...');
-      
-      const dataVendeur = {
-        nom_complet,
-        email,
-        telephone: telephone || '',
-        statut: 'actif',
-        date_embauche: new Date().toISOString().split('T')[0],
-        solde_commission: 0,
-        total_commissions_gagnees: 0,
-        total_commissions_payees: 0,
-        nombre_ventes: 0,
-        chiffre_affaires_genere: 0,
-      };
-      
-      console.log('📋 Données à créer:', dataVendeur);
-      
-      try {
-        vendeurCree = await base44.asServiceRole.entities.Vendeur.create(dataVendeur);
-        console.log('✅ Vendeur créé, ID:', vendeurCree.id);
-        console.log('✅ Détails complets:', JSON.stringify(vendeurCree));
-      } catch (createError) {
-        console.error('❌ ERREUR création Vendeur:', createError.message);
-        console.error('❌ Stack:', createError.stack);
-        // Ne pas bloquer - continuer quand même
-        console.warn('⚠️ Continuons malgré l\'erreur...');
+    try {
+      vendeurCree = await base44.asServiceRole.entities.Vendeur.create(dataVendeur);
+      console.log('✅ Vendeur créé, ID:', vendeurCree?.id);
+    } catch (createError) {
+      console.error('❌ ERREUR création Vendeur:', createError.message);
+      // Vérifier si le vendeur existe déjà
+      const vendeursExistants = await base44.asServiceRole.entities.Vendeur.filter({ email });
+      if (vendeursExistants.length > 0) {
+        vendeurCree = vendeursExistants[0];
+        console.log('ℹ️ Vendeur existe déjà, ID:', vendeurCree.id);
       }
-      
-      // Vérification asynchrone (non bloquante)
-      setTimeout(async () => {
-        const verif = await base44.asServiceRole.entities.Vendeur.filter({ email });
-        console.log('🔎 Vérification asynchrone - vendeurs trouvés:', verif.length);
-      }, 1000);
-    } else {
-      vendeurCree = vendeurs[0];
-      console.log('ℹ️ Vendeur existe déjà, ID:', vendeurCree.id);
     }
 
     // Journal d'audit
@@ -144,7 +129,7 @@ Deno.serve(async (req) => {
       success: true, 
       message: 'Vendeur créé avec succès',
       compte_id: compteVendeur.id,
-      vendeur_id: vendeurCree.id
+      vendeur_id: vendeurCree?.id || null
     });
 
   } catch (error) {
