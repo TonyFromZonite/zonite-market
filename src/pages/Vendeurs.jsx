@@ -78,7 +78,7 @@ function ListeVendeurs() {
         await adminApi.createJournalAudit({ action: "Vendeur modifié", module: "vendeur", details: `Vendeur ${form.nom_complet} modifié`, entite_id: vendeurEdite.id });
       } else {
         // Créer un vendeur validé avec mot de passe
-        const response = await base44.functions.invoke('createValidatedSeller', {
+        await adminApi.createVendeur({
           nom_complet: form.nom_complet,
           email: form.email,
           telephone: form.telephone,
@@ -88,11 +88,7 @@ function ListeVendeurs() {
           operateur_mobile_money: form.operateur_mobile_money,
           mot_de_passe: form.mot_de_passe,
         });
-        if (!response.data.success) {
-          alert(response.data.error || "Erreur lors de la création du vendeur");
-          setEnCours(false);
-          return;
-        }
+        toast.success("Vendeur créé avec succès");
       }
       queryClient.invalidateQueries({ queryKey: ["vendeurs"] });
       queryClient.invalidateQueries({ queryKey: ["comptes_vendeurs"] });
