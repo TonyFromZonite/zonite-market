@@ -76,16 +76,14 @@ Deno.serve(async (req) => {
       type: 'succes',
     }).catch(() => {});
 
-    // Envoyer email avec identifiants
-    try {
-      await base44.integrations.Core.SendEmail({
-        to: email,
-        subject: '🎉 Bienvenue chez ZONITE – Vos identifiants de connexion',
-        body: `Bonjour ${nom_complet},\n\nBienvenue chez ZONITE ! 🚀\n\nVotre compte vendeur a été créé par notre équipe.\n\nVoici vos identifiants de connexion :\n\n📧 Email : ${email}\n🔐 Mot de passe : ${mot_de_passe}\n\n⚠️ Pour votre sécurité, nous vous recommandons de changer ce mot de passe dès votre première connexion depuis votre profil.\n\nBon courage et bonne vente !\n\nL'équipe ZONITE`
-      });
-    } catch (e) {
-      console.error('Email send failed:', e.message);
-    }
+    // Envoyer email avec identifiants (optionnel, ne bloque pas la création)
+    base44.integrations.Core.SendEmail({
+      to: email,
+      subject: '🎉 Bienvenue chez ZONITE – Vos identifiants de connexion',
+      body: `Bonjour ${nom_complet},\n\nBienvenue chez ZONITE ! 🚀\n\nVotre compte vendeur a été créé par notre équipe.\n\nVoici vos identifiants de connexion :\n\n📧 Email : ${email}\n🔐 Mot de passe : ${mot_de_passe}\n\n⚠️ Pour votre sécurité, nous vous recommandons de changer ce mot de passe dès votre première connexion depuis votre profil.\n\nBon courage et bonne vente !\n\nL'équipe ZONITE`
+    }).catch(e => {
+      console.warn('Email notification failed (non-blocking):', e.message);
+    });
 
     return Response.json({ 
       success: true, 
