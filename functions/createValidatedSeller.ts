@@ -11,11 +11,11 @@ Deno.serve(async (req) => {
     }
 
     const body = await req.json();
-    const { nom_complet, telephone, ville, quartier, mot_de_passe } = body;
+    const { nom_complet, telephone, ville, quartier, mot_de_passe, numero_mobile_money, operateur_mobile_money } = body;
     const email = body.email || body.user_email;
 
-    if (!nom_complet || !email || !mot_de_passe) {
-      return Response.json({ error: 'Données manquantes' }, { status: 400 });
+    if (!nom_complet || !email || !mot_de_passe || !numero_mobile_money) {
+      return Response.json({ error: 'Données manquantes (nom, email, mot de passe, numéro mobile money requis)' }, { status: 400 });
     }
 
     // Vérifier si un compte vendeur existe déjà avec cet email
@@ -44,12 +44,14 @@ Deno.serve(async (req) => {
       telephone: telephone || '',
       ville: ville || '',
       quartier: quartier || '',
+      numero_mobile_money: numero_mobile_money || '',
+      operateur_mobile_money: operateur_mobile_money || 'orange_money',
       statut_kyc: 'valide',
       statut: 'actif',
       mot_de_passe_hash: hashedPassword,
-      video_vue: false,
-      conditions_acceptees: false,
-      catalogue_debloque: false,
+      video_vue: true,
+      conditions_acceptees: true,
+      catalogue_debloque: true,
       solde_commission: 0,
       total_commissions_gagnees: 0,
       total_commissions_payees: 0,

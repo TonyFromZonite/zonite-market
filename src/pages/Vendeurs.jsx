@@ -23,6 +23,7 @@ const ONGLETS = [
 
 const initVendeur = {
   nom_complet: "", email: "", telephone: "", ville: "", quartier: "", mot_de_passe: "",
+  numero_mobile_money: "", operateur_mobile_money: "orange_money",
   taux_commission: 0, statut: "actif", date_embauche: new Date().toISOString().split("T")[0],
 };
 
@@ -83,6 +84,8 @@ function ListeVendeurs() {
           telephone: form.telephone,
           ville: form.ville,
           quartier: form.quartier,
+          numero_mobile_money: form.numero_mobile_money,
+          operateur_mobile_money: form.operateur_mobile_money,
           mot_de_passe: form.mot_de_passe,
         });
         if (!response.data.success) {
@@ -184,18 +187,28 @@ function ListeVendeurs() {
                 <div className="space-y-2"><Label>Ville</Label><Input value={form.ville} onChange={(e) => modifier("ville", e.target.value)} /></div>
                 <div className="space-y-2"><Label>Quartier</Label><Input value={form.quartier} onChange={(e) => modifier("quartier", e.target.value)} /></div>
                 <div className="space-y-2">
+                  <Label>Numéro Mobile Money *</Label>
+                  <Input value={form.numero_mobile_money} onChange={(e) => modifier("numero_mobile_money", e.target.value)} placeholder="Ex: 699123456" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Opérateur Mobile Money *</Label>
+                  <Select value={form.operateur_mobile_money} onValueChange={(value) => modifier("operateur_mobile_money", value)}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="orange_money">Orange Money</SelectItem>
+                      <SelectItem value="mtn_momo">MTN MoMo</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
                   <Label>Mot de passe *</Label>
                   <Input 
                     type="text" 
                     value={form.mot_de_passe} 
-                    onChange={(e) => {
-                      console.log("🔵 Changement mot_de_passe:", e.target.value);
-                      modifier("mot_de_passe", e.target.value);
-                    }} 
+                    onChange={(e) => modifier("mot_de_passe", e.target.value)} 
                     placeholder="Mot de passe initial pour le vendeur" 
                   />
                   <p className="text-xs text-slate-500">Le vendeur recevra ce mot de passe par email</p>
-                  <p className="text-xs text-blue-600">DEBUG: "{form.mot_de_passe}" (longueur: {form.mot_de_passe?.length || 0})</p>
                 </div>
               </>
             )}
@@ -214,7 +227,7 @@ function ListeVendeurs() {
                 });
                 sauvegarder();
               }}
-              disabled={enCours || !form.nom_complet || (!vendeurEdite && (!form.email || (form.mot_de_passe || '').trim() === ''))} 
+              disabled={enCours || !form.nom_complet || (!vendeurEdite && (!form.email || (form.mot_de_passe || '').trim() === '' || !form.numero_mobile_money))} 
               className="bg-[#1a1f5e] hover:bg-[#141952]"
             >
               {enCours ? <Loader2 className="w-4 h-4 animate-spin" /> : vendeurEdite ? "Enregistrer" : "Créer"}
