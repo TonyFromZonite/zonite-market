@@ -563,7 +563,7 @@ function PaiementsTab() {
 export default function Vendeurs() {
   const [ongletActif, setOngletActif] = useState("liste");
 
-  const { data: kycs = [] } = useQuery({ queryKey: ["comptes_vendeurs_badge"], queryFn: () => base44.entities.CompteVendeur.filter({ statut_kyc: "en_attente" }), refetchInterval: 30000 });
+  const { data: kycs = [] } = useQuery({ queryKey: ["sellers_badge"], queryFn: () => base44.entities.Seller.filter({ statut_kyc: "en_attente" }), refetchInterval: 30000 });
   const { data: paiements = [] } = useQuery({ queryKey: ["paiements_badge"], queryFn: () => base44.entities.DemandePaiementVendeur.filter({ statut: "en_attente" }), refetchInterval: 30000 });
 
   const badges = { kyc: kycs.length, paiements: paiements.length };
