@@ -42,7 +42,7 @@ function ListeVendeurs() {
 
   const { data: vendeurs = [], isLoading } = useQuery({
     queryKey: ["vendeurs"],
-    queryFn: () => base44.entities.Vendeur.list("-created_date"),
+    queryFn: () => base44.entities.Seller.list("-created_date"),
   });
 
   const modifier = (champ, valeur) => {
