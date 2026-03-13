@@ -28,22 +28,22 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Le mot de passe doit contenir au moins un chiffre.' }, { status: 400 });
     }
 
-    const comptes = await base44.asServiceRole.entities.CompteVendeur.filter({ user_email: email });
-    if (comptes.length === 0) {
+    const sellers = await base44.asServiceRole.entities.Seller.filter({ email });
+    if (sellers.length === 0) {
       return Response.json({ error: 'Compte introuvable.' }, { status: 404 });
     }
 
-    const compte = comptes[0];
+    const seller = sellers[0];
 
     // Vérifier l'ancien mot de passe
-    const passwordMatch = await bcrypt.compare(oldPassword, compte.mot_de_passe_hash || '');
+    const passwordMatch = await bcrypt.compare(oldPassword, seller.mot_de_passe_hash || '');
     if (!passwordMatch) {
       return Response.json({ error: 'Ancien mot de passe incorrect.' }, { status: 401 });
     }
 
     // Hacher et sauvegarder le nouveau mot de passe
     const newHash = await bcrypt.hash(newPassword, 10);
-    await base44.asServiceRole.entities.CompteVendeur.update(compte.id, {
+    await base44.asServiceRole.entities.Seller.update(seller.id, {
       mot_de_passe_hash: newHash,
     });
 
@@ -51,9 +51,9 @@ Deno.serve(async (req) => {
     await base44.asServiceRole.entities.JournalAudit.create({
       action: 'password_change',
       module: 'vendeur',
-      details: `Vendeur ${compte.nom_complet} a changé son mot de passe`,
+      details: `Vendeur ${seller.nom_complet} a changé son mot de passe`,
       utilisateur: email,
-      entite_id: compte.id,
+      entite_id: seller.id,
     }).catch(() => {});
 
     return Response.json({ success: true });

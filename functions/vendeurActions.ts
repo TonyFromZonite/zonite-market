@@ -24,11 +24,11 @@ Deno.serve(async (req) => {
 
     const db = base44.asServiceRole.entities;
 
-    const comptes = await db.CompteVendeur.filter({ user_email: vendeur_email });
-    if (!comptes.length) {
+    const sellers = await db.Seller.filter({ email: vendeur_email });
+    if (!sellers.length) {
       return Response.json({ error: 'Session invalide: compte introuvable' }, { status: 401 });
     }
-    const compteAuth = comptes[0];
+    const compteAuth = sellers[0];
     if (compteAuth.statut === 'suspendu') {
       return Response.json({ error: 'Compte suspendu' }, { status: 403 });
     }
@@ -100,7 +100,7 @@ Deno.serve(async (req) => {
         if (compteAuth.id !== compteId) {
           return Response.json({ error: 'Compte non autorisé' }, { status: 403 });
         }
-        const result = await db.CompteVendeur.update(compteId, {
+        const result = await db.Seller.update(compteId, {
           video_vue: true,
           conditions_acceptees: true,
           catalogue_debloque: true,
