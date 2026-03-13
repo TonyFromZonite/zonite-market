@@ -61,18 +61,11 @@ Deno.serve(async (req) => {
       ventes_echouees: 0,
     });
 
-    console.log('✅ CompteVendeur créé:', compteVendeur?.id);
+    console.log('✅ CompteVendeur créé, ID:', compteVendeur?.id);
     
     if (!compteVendeur || !compteVendeur.id) {
       throw new Error('Échec de la création du CompteVendeur - aucun ID retourné');
     }
-
-    // Vérification immédiate de la persistance
-    const verification = await base44.asServiceRole.entities.CompteVendeur.filter({ user_email: email });
-    if (verification.length === 0) {
-      throw new Error('CompteVendeur non trouvé après création - échec de persistance');
-    }
-    console.log('✅ Vérification: CompteVendeur bien persisté');
 
     // Créer l'entité Vendeur (OBLIGATOIRE pour afficher dans la liste des vendeurs)
     console.log('🔍 Vérification si vendeur existe déjà avec email:', email);
