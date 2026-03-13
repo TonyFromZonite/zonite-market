@@ -141,19 +141,19 @@ function DashboardAdmin() {
     { ttl: 5 * 60 * 1000 }
   );
 
-  const { data: candidaturesEnAttente = [] } = useCachedQuery(
+  const { data: candidaturesEnAttente } = useCachedQuery(
     'CANDIDATURES',
     () => base44.entities.CandidatureVendeur.filter({ statut: "en_attente" }),
     { ttl: 15 * 60 * 1000 }
   );
 
-  const { data: kycEnAttente = [] } = useCachedQuery(
+  const { data: kycEnAttente } = useCachedQuery(
     'KYC',
     () => base44.entities.CompteVendeur.filter({ statut_kyc: "en_attente" }),
     { ttl: 15 * 60 * 1000 }
   );
 
-  const { data: paiementsEnAttente = [] } = useCachedQuery(
+  const { data: paiementsEnAttente } = useCachedQuery(
     'PAIEMENTS',
     () => base44.entities.DemandePaiementVendeur.filter({ statut: "en_attente" }),
     { ttl: 15 * 60 * 1000 }
@@ -165,9 +165,9 @@ function DashboardAdmin() {
   const produitsArray = Array.isArray(produitsActifs) ? produitsActifs : [];
   const vendeursArray = Array.isArray(vendeursActifs) ? vendeursActifs : [];
   const commandesArray = Array.isArray(commandesVendeurs) ? commandesVendeurs : [];
-  const candidaturesArray = Array.isArray(candidaturesEnAttente) ? candidaturesEnAttente : [];
-  const kycArray = Array.isArray(kycEnAttente) ? kycEnAttente : [];
-  const paiementsArray = Array.isArray(paiementsEnAttente) ? paiementsEnAttente : [];
+  const candidaturesArray = Array.isArray(candidaturesEnAttente) && candidaturesEnAttente !== null ? candidaturesEnAttente : [];
+  const kycArray = Array.isArray(kycEnAttente) && kycEnAttente !== null ? kycEnAttente : [];
+  const paiementsArray = Array.isArray(paiementsEnAttente) && paiementsEnAttente !== null ? paiementsEnAttente : [];
 
   const chiffreAffaires = ventesArray
     .filter(v => v.statut_commande !== "annulee" && v.statut_commande !== "retournee")
