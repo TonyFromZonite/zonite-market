@@ -437,8 +437,8 @@ function ValidationKYC() {
 
   if (isLoading) return <div className="space-y-3">{Array(5).fill(0).map((_, i) => <Skeleton key={i} className="h-16 rounded-xl" />)}</div>;
 
-  const enAttente = comptes.filter(c => c.statut_kyc === "en_attente");
-  const traites = comptes.filter(c => c.statut_kyc !== "en_attente");
+  const enAttente = comptesAvecCandidatureApprouvee.filter(c => c.statut_kyc === "en_attente");
+  const traites = comptesAvecCandidatureApprouvee.filter(c => c.statut_kyc !== "en_attente");
 
   return (
     <div className="space-y-5">
@@ -730,7 +730,9 @@ export default function Vendeurs() {
   const [ongletActif, setOngletActif] = useState("liste");
 
   const { data: candidatures = [] } = useQuery({ queryKey: ["candidatures"], queryFn: () => base44.entities.CandidatureVendeur.filter({ statut: "en_attente" }), refetchInterval: 30000 });
-  const { data: kycs = [] } = useQuery({ queryKey: ["comptes_vendeurs_badge"], queryFn: () => base44.entities.CompteVendeur.filter({ statut_kyc: "en_attente" }), refetchInterval: 30000 });
+  const { data: candidaturesApproveesBadge = [] } = useQuery({ queryKey: ["candidatures_approvees_badge"], queryFn: () => base44.entities.CandidatureVendeur.filter({ statut: "approuve" }), refetchInterval: 30000 });
+  const { data: kycsBrut = [] } = useQuery({ queryKey: ["comptes_vendeurs_badge"], queryFn: () => base44.entities.CompteVendeur.filter({ statut_kyc: "en_attente" }), refetchInterval: 30000 });
+  const kycs = kycsBrut.filter(c => candidaturesApproveesBadge.some(cand => cand.email === c.user_email));
   const { data: paiements = [] } = useQuery({ queryKey: ["paiements_badge"], queryFn: () => base44.entities.DemandePaiementVendeur.filter({ statut: "en_attente" }), refetchInterval: 30000 });
 
   const badges = { candidatures: candidatures.length, kyc: kycs.length, paiements: paiements.length };
