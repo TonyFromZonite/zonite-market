@@ -44,16 +44,16 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Too many reset attempts. Try again later.' }, { status: 429 });
     }
 
-    const comptes = await base44.asServiceRole.entities.CompteVendeur.filter({ user_email: email });
+    const sellers = await base44.asServiceRole.entities.Seller.filter({ email });
 
     // Ne pas divulguer si le compte existe
-    if (comptes.length === 0) {
+    if (sellers.length === 0) {
       return Response.json({ success: true, message: 'If the email exists, a reset link will be sent' });
     }
 
-    const compte = comptes[0];
+    const seller = sellers[0];
 
-    if (compte.statut === 'en_attente_kyc' || compte.statut_kyc === 'en_attente') {
+    if (seller.statut === 'en_attente_kyc' || seller.statut_kyc === 'en_attente') {
       return Response.json({
         error: 'Account validation pending. Contact support.'
       }, { status: 403 });
@@ -65,7 +65,7 @@ Deno.serve(async (req) => {
     const expiry = new Date(Date.now() + 30 * 60 * 1000).toISOString(); // expire dans 30 min
 
     // Stocker le token haché + expiration
-    await base44.asServiceRole.entities.CompteVendeur.update(compte.id, {
+    await base44.asServiceRole.entities.Seller.update(seller.id, {
       reset_token: tokenHash,
       reset_token_expiry: expiry,
     });
@@ -76,7 +76,7 @@ Deno.serve(async (req) => {
       module: 'systeme',
       details: `Password reset link generated for vendor account`,
       utilisateur: email,
-      entite_id: compte.id,
+      entite_id: seller.id,
     }).catch(() => {});
 
     // ✅ Envoyer un LIEN sécurisé, pas un mot de passe en clair
@@ -90,7 +90,7 @@ Deno.serve(async (req) => {
       await base44.asServiceRole.integrations.Core.SendEmail({
         to: email,
         subject: '🔐 Réinitialiser votre mot de passe ZONITE',
-        body: `Bonjour ${compte.nom_complet},\n\nVous avez demandé la réinitialisation de votre mot de passe ZONITE.\n\nCliquez sur ce lien pour choisir un nouveau mot de passe :\n\n${resetLink}\n\n⚠️ Ce lien expire dans 30 minutes et ne peut être utilisé qu'une seule fois.\n\nSi vous n'avez pas fait cette demande, ignorez cet email.\n\nCordialement,\nL'équipe ZONITE`
+        body: `Bonjour ${seller.nom_complet},\n\nVous avez demandé la réinitialisation de votre mot de passe ZONITE.\n\nCliquez sur ce lien pour choisir un nouveau mot de passe :\n\n${resetLink}\n\n⚠️ Ce lien expire dans 30 minutes et ne peut être utilisé qu'une seule fois.\n\nSi vous n'avez pas fait cette demande, ignorez cet email.\n\nCordialement,\nL'équipe ZONITE`
       });
     } catch (emailErr) {
       console.error('Reset email send failed:', emailErr.message);
