@@ -18,9 +18,9 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Données manquantes (nom, email, mot de passe, numéro mobile money requis)' }, { status: 400 });
     }
 
-    // Vérifier si un compte vendeur existe déjà avec cet email
-    const comptesExistants = await base44.asServiceRole.entities.CompteVendeur.filter({ user_email: email });
-    if (comptesExistants.length > 0) {
+    // Vérifier si un vendeur existe déjà avec cet email
+    const vendeursExistants = await base44.asServiceRole.entities.Vendeur.filter({ email });
+    if (vendeursExistants.length > 0) {
       return Response.json({ error: 'Un compte vendeur existe déjà avec cet email' }, { status: 400 });
     }
 
