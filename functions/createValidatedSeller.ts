@@ -24,6 +24,16 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Un compte vendeur existe déjà avec cet email' }, { status: 400 });
     }
 
+    // Inviter l'utilisateur dans l'app (requis pour l'envoi d'email)
+    try {
+      await base44.asServiceRole.users.inviteUser(email, 'vendeur');
+    } catch (inviteError) {
+      // Ignorer si l'utilisateur existe déjà
+      if (!inviteError.message.includes('already exists')) {
+        console.error('Invite error:', inviteError.message);
+      }
+    }
+
     // Hacher le mot de passe
     const hashedPassword = bcrypt.hashSync(mot_de_passe, 10);
 
