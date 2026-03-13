@@ -279,10 +279,8 @@ function ValidationKYC() {
 
   if (isLoading) return <div className="space-y-3">{Array(5).fill(0).map((_, i) => <Skeleton key={i} className="h-16 rounded-xl" />)}</div>;
 
-  // Filtrer les comptes non encore créés dans l'entité Vendeur
-  const comptesSansVendeur = comptes.filter(c => !vendeurs.some(v => v.email === c.user_email));
-  const enAttente = comptesSansVendeur.filter(c => c.statut_kyc === "en_attente");
-  const traites = comptes.filter(c => c.statut_kyc !== "en_attente");
+  const enAttente = sellers.filter(s => s.statut_kyc === "en_attente");
+  const traites = sellers.filter(s => s.statut_kyc !== "en_attente");
 
   return (
     <div className="space-y-5">
