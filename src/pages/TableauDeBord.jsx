@@ -124,7 +124,7 @@ function DashboardAdmin() {
   );
 
   // Filtrer les produits supprimés
-  const produitsActifs = produits.filter(p => p.statut !== 'supprime');
+  const produitsActifs = (Array.isArray(produits) ? produits : []).filter(p => p.statut !== 'supprime');
 
   const { data: vendeurs = [], isLoading: chargementVendeurs } = useCachedQuery(
     'VENDEURS',
@@ -133,7 +133,7 @@ function DashboardAdmin() {
   );
 
   // Filtrer les vendeurs inactifs
-  const vendeursActifs = vendeurs.filter(v => v.statut === 'actif');
+  const vendeursActifs = (Array.isArray(vendeurs) ? vendeurs : []).filter(v => v.statut === 'actif');
 
   const { data: commandesVendeurs = [] } = useCachedQuery(
     'COMMANDES',
