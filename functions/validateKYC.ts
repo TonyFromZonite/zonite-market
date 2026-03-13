@@ -41,10 +41,11 @@ Deno.serve(async (req) => {
       const isVendeur = vendeur[0].email !== undefined && vendeur[0].nom_complet !== undefined;
 
       if (isVendeur) {
-        // Mise à jour du Vendeur
-        await base44.asServiceRole.entities.Vendeur.update(compte_id, {
-          statut: 'actif',
-        });
+         // Mise à jour du Vendeur
+         await base44.asServiceRole.entities.Vendeur.update(compte_id, {
+           statut_kyc: 'valide',
+           statut: 'actif',
+         });
       } else {
         // Mise à jour du CompteVendeur (ancien système)
         await base44.asServiceRole.entities.CompteVendeur.update(compte_id, {
@@ -114,11 +115,12 @@ Deno.serve(async (req) => {
           notes_admin: notes || '',
         });
       } else {
-        // Nouveau système Vendeur
-        await base44.asServiceRole.entities.Vendeur.update(compte_id, {
-          statut: 'inactif',
-        });
-      }
+         // Nouveau système Vendeur
+         await base44.asServiceRole.entities.Vendeur.update(compte_id, {
+           statut_kyc: 'rejete',
+           statut: 'inactif',
+         });
+       }
 
       const vendorEmail = compte.user_email || compte.email;
       await base44.asServiceRole.entities.JournalAudit.create({

@@ -31,7 +31,7 @@ export default function GestionKYC() {
       return data.map(v => ({
         ...v,
         user_email: v.email,
-        statut_kyc: "en_attente", // En attente de validation KYC
+        statut_kyc: v.statut_kyc || "en_attente", // Utilise le statut réel du vendeur
         notes_admin: ""
       }));
     },
