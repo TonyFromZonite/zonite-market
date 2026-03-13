@@ -111,6 +111,7 @@ function DashboardSousAdmin({ sousAdmin }) {
 
 // Dashboard complet pour admin principal
 function DashboardAdmin() {
+  // Données critiques au démarrage
   const { data: ventes = [], isLoading: chargementVentes } = useCachedQuery(
     'VENTES',
     () => base44.entities.Vente.list("-created_date", 100),
@@ -123,41 +124,40 @@ function DashboardAdmin() {
     { ttl: 30 * 60 * 1000 }
   );
 
-  // Filtrer les produits supprimés
-  const produitsActifs = produits.filter(p => p.statut !== 'supprime');
-
   const { data: vendeurs = [], isLoading: chargementVendeurs } = useCachedQuery(
     'VENDEURS',
     () => base44.entities.Vendeur.list(),
     { ttl: 60 * 60 * 1000 }
   );
 
-  // Filtrer les vendeurs inactifs
-  const vendeursActifs = vendeurs.filter(v => v.statut === 'actif');
-
+  // Données secondaires (chargées après)
   const { data: commandesVendeurs = [] } = useCachedQuery(
     'COMMANDES',
     () => base44.entities.CommandeVendeur.list("-created_date", 100),
-    { ttl: 5 * 60 * 1000 }
+    { ttl: 5 * 60 * 1000, enabled: !chargementVentes }
   );
 
   const { data: candidaturesEnAttente = [] } = useCachedQuery(
     'CANDIDATURES',
     () => base44.entities.CandidatureVendeur.filter({ statut: "en_attente" }),
-    { ttl: 15 * 60 * 1000 }
+    { ttl: 15 * 60 * 1000, enabled: !chargementVendeurs }
   );
 
   const { data: kycEnAttente = [] } = useCachedQuery(
     'KYC',
     () => base44.entities.CompteVendeur.filter({ statut_kyc: "en_attente" }),
-    { ttl: 15 * 60 * 1000 }
+    { ttl: 15 * 60 * 1000, enabled: !chargementVendeurs }
   );
 
   const { data: paiementsEnAttente = [] } = useCachedQuery(
     'PAIEMENTS',
     () => base44.entities.DemandePaiementVendeur.filter({ statut: "en_attente" }),
-    { ttl: 15 * 60 * 1000 }
+    { ttl: 15 * 60 * 1000, enabled: !chargementVendeurs }
   );
+
+  // Filtrer les données
+  const produitsActifs = produits.filter(p => p.statut !== 'supprime');
+  const vendeursActifs = vendeurs.filter(v => v.statut === 'actif');
 
   const enChargement = chargementVentes || chargementProduits || chargementVendeurs;
 
