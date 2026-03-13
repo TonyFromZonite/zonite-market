@@ -228,12 +228,13 @@ function ListeVendeurs() {
 
 // ─── Sous-composant : Validation KYC ────────────────────────────────────────
 function ValidationKYC() {
-  const [compteSelectionne, setCompteSelectionne] = useState(null);
-  const [notes, setNotes] = useState("");
-  const [enCours, setEnCours] = useState(false);
-  const queryClient = useQueryClient();
+   const [compteSelectionne, setCompteSelectionne] = useState(null);
+   const [notes, setNotes] = useState("");
+   const [enCours, setEnCours] = useState(false);
+   const queryClient = useQueryClient();
+   const { toast } = useToast();
 
-  const { data: comptes = [], isLoading } = useQuery({
+   const { data: comptes = [], isLoading } = useQuery({
      queryKey: ["comptes_vendeurs"],
      queryFn: () => base44.entities.CompteVendeur.list("-created_date"),
      refetchInterval: 30000,
