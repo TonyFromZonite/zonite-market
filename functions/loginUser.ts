@@ -12,8 +12,8 @@ const authenticateSeller = async (base44, email, password) => {
 
   const seller = sellers[0];
   
-  // Vérifier le mot de passe
-  const passwordMatch = bcrypt.compareSync(password, seller.mot_de_passe_hash);
+  // Vérifier le mot de passe (async pour éviter CPU timeout)
+  const passwordMatch = await bcrypt.compare(password, seller.mot_de_passe_hash);
   if (!passwordMatch) {
     return { success: false, error: 'Email ou mot de passe incorrect' };
   }
@@ -41,7 +41,7 @@ const authenticateAdmin = async (base44, username, password) => {
   const sousAdmins = await base44.asServiceRole.entities.SousAdmin.filter({ username });
   if (sousAdmins.length > 0) {
     const sousAdmin = sousAdmins[0];
-    const passwordMatch = bcrypt.compareSync(password, sousAdmin.mot_de_passe_hash);
+    const passwordMatch = await bcrypt.compare(password, sousAdmin.mot_de_passe_hash);
     if (passwordMatch && sousAdmin.statut === 'actif') {
       // Audit log
       await base44.asServiceRole.entities.JournalAudit.create({
@@ -59,7 +59,7 @@ const authenticateAdmin = async (base44, username, password) => {
   // Vérifier l'admin principal via ConfigApp
   const adminPasswordConfig = await base44.asServiceRole.entities.ConfigApp.filter({ cle: 'admin_password_hash' });
   if (adminPasswordConfig.length > 0) {
-    const passwordMatch = bcrypt.compareSync(password, adminPasswordConfig[0].valeur);
+    const passwordMatch = await bcrypt.compare(password, adminPasswordConfig[0].valeur);
     if (passwordMatch && username === 'admin') {
       // Audit log
       await base44.asServiceRole.entities.JournalAudit.create({
