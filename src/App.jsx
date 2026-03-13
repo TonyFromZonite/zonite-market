@@ -6,6 +6,7 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import TableauDeBord from '@/pages/TableauDeBord';
+import Connexion from '@/pages/Connexion';
 import Layout from './layout';
 
 const LayoutWrapper = ({ children, currentPageName }) => Layout ?
@@ -38,7 +39,8 @@ const AuthenticatedApp = () => {
   // Render the main app
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/TableauDeBord" replace />} />
+      <Route path="/" element={<Navigate to="/Connexion" replace />} />
+      <Route path="/Connexion" element={<Connexion />} />
       <Route path="/TableauDeBord" element={
         <LayoutWrapper currentPageName="TableauDeBord">
           <TableauDeBord />
