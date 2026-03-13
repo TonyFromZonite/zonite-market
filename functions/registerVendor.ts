@@ -61,6 +61,19 @@ Deno.serve(async (req) => {
       ventes_echouees: 0,
     });
 
+    // Créer une candidature pour l'admin
+    await base44.asServiceRole.entities.CandidatureVendeur.create({
+      nom_complet,
+      numero_whatsapp: telephone,
+      email,
+      ville: ville || '',
+      experience_vente: '',
+      motivation: '',
+      statut: 'en_attente',
+      notes_admin: '',
+      lien_acces_envoye: false,
+    });
+
     // Créer le User Base44 avec rôle 'vendeur'
     try {
       await base44.functions.invoke('createUserOnInscription', {
