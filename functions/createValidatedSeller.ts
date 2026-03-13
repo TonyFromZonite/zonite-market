@@ -26,7 +26,7 @@ Deno.serve(async (req) => {
 
     // Inviter l'utilisateur dans l'app (requis pour l'envoi d'email)
     try {
-      await base44.asServiceRole.users.inviteUser(email, 'vendeur');
+      await base44.users.inviteUser(email, 'vendeur');
     } catch (inviteError) {
       // Ignorer si l'utilisateur existe déjà
       if (!inviteError.message.includes('already exists')) {
