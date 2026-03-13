@@ -81,8 +81,9 @@ Deno.serve(async (req) => {
       }).catch(() => {});
 
       // Notification in-app
+      const vendorEmail = compte.user_email || compte.email;
       await base44.asServiceRole.entities.NotificationVendeur.create({
-        vendeur_email: compte.user_email,
+        vendeur_email: vendorEmail,
         titre: "✅ Compte validé !",
         message: `Félicitations ${compte.nom_complet} ! Votre compte a été validé. Vous pouvez maintenant vous connecter avec vos identifiants.`,
         type: 'succes',
@@ -91,7 +92,7 @@ Deno.serve(async (req) => {
       // Email de confirmation
       try {
         await base44.asServiceRole.integrations.Core.SendEmail({
-          to: compte.user_email,
+          to: vendorEmail,
           subject: '🎉 Bienvenue chez ZONITE – Votre compte est validé',
           body: `Bonjour ${compte.nom_complet},\n\nFélicitations ! Votre compte vendeur ZONITE a été validé. 🚀\n\nVous pouvez maintenant vous connecter avec vos identifiants (email et mot de passe que vous avez créés lors de l'inscription).\n\nBon courage et bonne vente !\n\nL'équipe ZONITE`
         });
