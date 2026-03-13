@@ -2,7 +2,9 @@ import React from "react";
 import { AlertTriangle } from "lucide-react";
 
 export default function StockCritique({ produits }) {
-  const critique = produits.filter(p => (p.stock_actuel || 0) <= (p.seuil_alerte || 5));
+  const critique = produits
+    .filter(p => p.statut !== 'supprime')
+    .filter(p => (p.stock_actuel || 0) <= (p.seuil_alerte || 5));
 
   return (
     <div className="bg-white rounded-xl border border-slate-200 p-5">
