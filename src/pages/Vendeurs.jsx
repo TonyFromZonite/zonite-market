@@ -252,15 +252,27 @@ function Candidatures({ nbBadge, onBadgeChange }) {
   const traiter = async (statut) => {
     setEnCours(true);
     await adminApi.updateCandidature(candidatureSelectionnee.id, { statut, notes_admin: notes });
+    
     if (statut === "approuve") {
+      // Pré-approbation : le KYC reste en attente
       await adminApi.createNotificationVendeur({
         vendeur_email: candidatureSelectionnee.email,
-        titre: "Candidature approuvée !",
-        message: "Félicitations ! Votre candidature a été approuvée. Créez votre compte vendeur ZONITE pour commencer.",
+        titre: "Candidature pré-approuvée !",
+        message: "Félicitations ! Votre candidature a été pré-approuvée. Nous allons maintenant examiner vos documents KYC. Vous recevrez une nouvelle notification une fois la vérification terminée.",
         type: "succes",
       });
+    } else if (statut === "rejete") {
+      // Rejet de candidature : le vendeur peut soumettre à nouveau ses documents KYC
+      await adminApi.createNotificationVendeur({
+        vendeur_email: candidatureSelectionnee.email,
+        titre: "Candidature rejetée",
+        message: `Votre candidature a été rejetée. ${notes || "Vous pouvez soumettre à nouveau vos documents KYC après avoir corrigé les points signalés."}`,
+        type: "alerte",
+      });
     }
+    
     queryClient.invalidateQueries({ queryKey: ["candidatures"] });
+    queryClient.invalidateQueries({ queryKey: ["comptes_vendeurs"] });
     queryClient.invalidateQueries({ queryKey: ["comptes_vendeurs_badge"] });
     setCandidatureSelectionnee(null);
     setEnCours(false);
@@ -367,21 +379,56 @@ function ValidationKYC() {
 
   const validerKYC = async (statut) => {
     setEnCours(true);
-    await adminApi.updateCompteVendeur(compteSelectionne.id, { statut_kyc: statut, notes_admin: notes, statut: statut === "valide" ? "actif" : "suspendu" });
+    
+    // Mettre à jour le statut KYC et le statut général du CompteVendeur
+    await adminApi.updateCompteVendeur(compteSelectionne.id, { 
+      statut_kyc: statut, 
+      notes_admin: notes, 
+      statut: statut === "valide" ? "actif" : "en_attente_kyc" // Reste en attente si rejeté pour permettre une nouvelle soumission
+    });
+    
     if (statut === "valide") {
+      // Créer ou mettre à jour l'entité Vendeur si le KYC est validé
       const vendeurs = await base44.entities.Vendeur.list();
       const dejaExistant = vendeurs.find(v => v.email === compteSelectionne.user_email);
       if (!dejaExistant) {
-        await adminApi.createVendeur({ nom_complet: compteSelectionne.nom_complet, email: compteSelectionne.user_email, telephone: compteSelectionne.telephone, statut: "actif", date_embauche: new Date().toISOString().split("T")[0], solde_commission: 0, total_commissions_gagnees: 0, total_commissions_payees: 0, nombre_ventes: 0, chiffre_affaires_genere: 0 });
-        await adminApi.createJournalAudit({ action: "Nouveau vendeur créé automatiquement", module: "vendeur", details: `Vendeur ${compteSelectionne.nom_complet} (${compteSelectionne.user_email}) créé suite à la validation KYC`, entite_id: compteSelectionne.id });
+        await adminApi.createVendeur({ 
+          nom_complet: compteSelectionne.nom_complet, 
+          email: compteSelectionne.user_email, 
+          telephone: compteSelectionne.telephone, 
+          statut: "actif", 
+          date_embauche: new Date().toISOString().split("T")[0], 
+          solde_commission: 0, 
+          total_commissions_gagnees: 0, 
+          total_commissions_payees: 0, 
+          nombre_ventes: 0, 
+          chiffre_affaires_genere: 0 
+        });
+        await adminApi.createJournalAudit({ 
+          action: "Nouveau vendeur créé automatiquement", 
+          module: "vendeur", 
+          details: `Vendeur ${compteSelectionne.nom_complet} (${compteSelectionne.user_email}) créé suite à la validation KYC`, 
+          entite_id: compteSelectionne.id 
+        });
       }
+      
+      // Notifier le vendeur que son compte est validé
+      await adminApi.createNotificationVendeur({
+        vendeur_email: compteSelectionne.user_email,
+        titre: "Compte validé !",
+        message: "Votre compte a été validé. Regardez la vidéo de formation pour débloquer le catalogue et accéder à tous les services !",
+        type: "succes",
+      });
+    } else if (statut === "rejete") {
+      // Notifier le vendeur pour qu'il résoumette ses documents KYC
+      await adminApi.createNotificationVendeur({
+        vendeur_email: compteSelectionne.user_email,
+        titre: "Dossier KYC rejeté",
+        message: `Votre dossier KYC a été rejeté. ${notes || "Veuillez soumettre à nouveau vos documents en vous assurant qu'ils sont clairs et conformes."}`,
+        type: "alerte",
+      });
     }
-    await adminApi.createNotificationVendeur({
-      vendeur_email: compteSelectionne.user_email,
-      titre: statut === "valide" ? "Compte validé !" : "Dossier rejeté",
-      message: statut === "valide" ? "Votre compte a été validé. Regardez la vidéo de formation pour débloquer le catalogue !" : `Votre dossier a été rejeté. ${notes || "Contactez notre équipe pour plus d'informations."}`,
-      type: statut === "valide" ? "succes" : "alerte",
-    });
+    
     queryClient.invalidateQueries({ queryKey: ["comptes_vendeurs"] });
     queryClient.invalidateQueries({ queryKey: ["vendeurs"] });
     setCompteSelectionne(null);
