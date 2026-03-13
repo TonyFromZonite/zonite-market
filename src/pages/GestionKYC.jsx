@@ -24,13 +24,13 @@ export default function GestionKYC() {
     queryKey: ["vendeurs"],
     queryFn: async () => {
       const vendeurs = await base44.entities.Vendeur.list("-created_date");
-      // Mapper les champs Vendeur vers le format attendu
-      return vendeurs.map(v => ({
-        ...v,
-        user_email: v.email,
-        statut_kyc: "valide", // Par défaut validé puisque créé via admin
-        notes_admin: ""
-      }));
+       // Mapper les champs Vendeur vers le format attendu
+       return vendeurs.map(v => ({
+         ...v,
+         user_email: v.email,
+         statut_kyc: "en_attente", // En attente de validation KYC
+         notes_admin: ""
+       }));
     },
   });
 
