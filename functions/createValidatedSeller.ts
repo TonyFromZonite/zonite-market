@@ -60,25 +60,24 @@ Deno.serve(async (req) => {
       ventes_echouees: 0,
     });
 
-    // Créer l'entité Vendeur
-    try {
-      const vendeurs = await base44.asServiceRole.entities.Vendeur.filter({ email });
-      if (vendeurs.length === 0) {
-        await base44.asServiceRole.entities.Vendeur.create({
-          nom_complet,
-          email,
-          telephone: telephone || '',
-          statut: 'actif',
-          date_embauche: new Date().toISOString().split('T')[0],
-          solde_commission: 0,
-          total_commissions_gagnees: 0,
-          total_commissions_payees: 0,
-          nombre_ventes: 0,
-          chiffre_affaires_genere: 0,
-        });
-      }
-    } catch (vendeurError) {
-      console.error('Erreur création Vendeur (ignorée, CompteVendeur créé):', vendeurError.message);
+    // Créer l'entité Vendeur (OBLIGATOIRE pour afficher dans la liste des vendeurs)
+    const vendeurs = await base44.asServiceRole.entities.Vendeur.filter({ email });
+    let vendeurCree = null;
+    if (vendeurs.length === 0) {
+      vendeurCree = await base44.asServiceRole.entities.Vendeur.create({
+        nom_complet,
+        email,
+        telephone: telephone || '',
+        statut: 'actif',
+        date_embauche: new Date().toISOString().split('T')[0],
+        solde_commission: 0,
+        total_commissions_gagnees: 0,
+        total_commissions_payees: 0,
+        nombre_ventes: 0,
+        chiffre_affaires_genere: 0,
+      });
+    } else {
+      vendeurCree = vendeurs[0];
     }
 
     // Journal d'audit
@@ -112,7 +111,8 @@ Deno.serve(async (req) => {
     return Response.json({ 
       success: true, 
       message: 'Vendeur créé avec succès',
-      compte_id: compteVendeur.id 
+      compte_id: compteVendeur.id,
+      vendeur_id: vendeurCree.id
     });
 
   } catch (error) {
