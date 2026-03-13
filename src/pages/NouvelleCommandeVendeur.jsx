@@ -32,8 +32,8 @@ export default function NouvelleCommandeVendeur() {
         window.location.href = createPageUrl("Connexion");
         return;
       }
-      const comptes = await base44.entities.CompteVendeur.filter({ user_email: session.email });
-      if (comptes.length > 0) setCompteVendeur(comptes[0]);
+      const sellers = await base44.entities.Seller.filter({ email: session.email });
+      if (sellers.length > 0) setCompteVendeur(sellers[0]);
       else setErreur("Compte vendeur introuvable");
 
       const params = new URLSearchParams(window.location.search);
@@ -75,10 +75,10 @@ export default function NouvelleCommandeVendeur() {
 
     try {
       // Appeler fonction backend ATOMIQUE (transaction stock + commande)
-      const { data } = await base44.functions.invoke('createOrderAtomically', {
-        vendeur_id: compteVendeur.id,
-        vendeur_nom: compteVendeur.nom_complet,
-        vendeur_email: compteVendeur.user_email,
+       const { data } = await base44.functions.invoke('createOrderAtomically', {
+         vendeur_id: compteVendeur.id,
+         vendeur_nom: compteVendeur.nom_complet,
+         vendeur_email: compteVendeur.email,
         produit_id: form.produit_id,
         produit_nom: produitSelectionne.nom,
         quantite: qte,
