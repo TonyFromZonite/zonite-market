@@ -29,18 +29,11 @@ Deno.serve(async (req) => {
     const compte = comptes[0];
 
     if (statut === 'valide') {
-      // Générer un mot de passe temporaire aléatoire
-      const chars = "ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
-      const mdpDefaut = Array.from({ length: 10 }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
-
-      // ✅ Hachage bcrypt côté serveur
-      const hashedPassword = await bcrypt.hash(mdpDefaut, 10);
-
+      // Le vendeur conserve son mot de passe initial
       await base44.asServiceRole.entities.CompteVendeur.update(compte_id, {
         statut_kyc: 'valide',
         statut: 'actif',
         notes_admin: notes || '',
-        mot_de_passe_hash: hashedPassword,
       });
 
       // Créer dans Vendeur si pas encore existant
@@ -72,17 +65,17 @@ Deno.serve(async (req) => {
       // Notification in-app
       await base44.asServiceRole.entities.NotificationVendeur.create({
         vendeur_email: compte.user_email,
-        titre: "✅ Compte validé ! Vos identifiants ont été envoyés",
-        message: `Félicitations ${compte.nom_complet} ! Votre compte a été validé. Consultez votre email pour récupérer vos identifiants temporaires, puis changez votre mot de passe depuis votre profil.`,
+        titre: "✅ Compte validé !",
+        message: `Félicitations ${compte.nom_complet} ! Votre compte a été validé. Vous pouvez maintenant vous connecter avec vos identifiants.`,
         type: 'succes',
       }).catch(() => {});
 
-      // Email avec identifiants temporaires
+      // Email de confirmation
       try {
         await base44.asServiceRole.integrations.Core.SendEmail({
           to: compte.user_email,
-          subject: '🎉 Bienvenue chez ZONITE – Vos identifiants de connexion',
-          body: `Bonjour ${compte.nom_complet},\n\nFélicitations ! Votre compte vendeur ZONITE a été validé. 🚀\n\nVoici vos identifiants temporaires :\n\n📧 Email : ${compte.user_email}\n🔐 Mot de passe temporaire : ${mdpDefaut}\n\n⚠️ Pour votre sécurité, connectez-vous et changez ce mot de passe depuis votre profil dès que possible.\n\nBon courage et bonne vente !\n\nL'équipe ZONITE`
+          subject: '🎉 Bienvenue chez ZONITE – Votre compte est validé',
+          body: `Bonjour ${compte.nom_complet},\n\nFélicitations ! Votre compte vendeur ZONITE a été validé. 🚀\n\nVous pouvez maintenant vous connecter avec vos identifiants (email et mot de passe que vous avez créés lors de l'inscription).\n\nBon courage et bonne vente !\n\nL'équipe ZONITE`
         });
       } catch (e) {
         console.error('Email send failed:', e.message);
