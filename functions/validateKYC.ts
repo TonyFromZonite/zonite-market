@@ -37,28 +37,38 @@ Deno.serve(async (req) => {
      const compte = vendeur[0];
 
     if (statut === 'valide') {
-      // Le vendeur conserve son mot de passe initial
-      await base44.asServiceRole.entities.CompteVendeur.update(compte_id, {
-        statut_kyc: 'valide',
-        statut: 'actif',
-        notes_admin: notes || '',
-      });
+      // Vérifier si c'est un Vendeur ou CompteVendeur
+      const isVendeur = vendeur[0].email !== undefined && vendeur[0].nom_complet !== undefined;
 
-      // Créer dans Vendeur si pas encore existant
-      const vendeurs = await base44.asServiceRole.entities.Vendeur.filter({ email: compte.user_email });
-      if (vendeurs.length === 0) {
-        await base44.asServiceRole.entities.Vendeur.create({
-          nom_complet: compte.nom_complet,
-          email: compte.user_email,
-          telephone: compte.telephone,
+      if (isVendeur) {
+        // Mise à jour du Vendeur
+        await base44.asServiceRole.entities.Vendeur.update(compte_id, {
           statut: 'actif',
-          date_embauche: new Date().toISOString().split("T")[0],
-          solde_commission: 0,
-          total_commissions_gagnees: 0,
-          total_commissions_payees: 0,
-          nombre_ventes: 0,
-          chiffre_affaires_genere: 0,
         });
+      } else {
+        // Mise à jour du CompteVendeur (ancien système)
+        await base44.asServiceRole.entities.CompteVendeur.update(compte_id, {
+          statut_kyc: 'valide',
+          statut: 'actif',
+          notes_admin: notes || '',
+        });
+
+        // Créer dans Vendeur si pas encore existant
+        const vendeurs = await base44.asServiceRole.entities.Vendeur.filter({ email: compte.user_email });
+        if (vendeurs.length === 0) {
+          await base44.asServiceRole.entities.Vendeur.create({
+            nom_complet: compte.nom_complet,
+            email: compte.user_email,
+            telephone: compte.telephone,
+            statut: 'actif',
+            date_embauche: new Date().toISOString().split("T")[0],
+            solde_commission: 0,
+            total_commissions_gagnees: 0,
+            total_commissions_payees: 0,
+            nombre_ventes: 0,
+            chiffre_affaires_genere: 0,
+          });
+        }
       }
 
       // Log audit
