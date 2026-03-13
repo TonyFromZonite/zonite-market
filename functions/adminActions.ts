@@ -201,6 +201,12 @@ Deno.serve(async (req) => {
         return Response.json({ success: true, result });
       }
 
+      // ─── PRODUIT (delete) ─────────────────────────────────────────────────────
+      case 'deleteProduit': {
+        await db.Produit.delete(payload.produitId);
+        return Response.json({ success: true });
+      }
+
       // ─── CATEGORIE ────────────────────────────────────────────────────────────
       case 'createCategorie': {
         const result = await db.Categorie.create(payload.data);
