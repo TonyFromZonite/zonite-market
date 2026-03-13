@@ -214,7 +214,7 @@ function ListeVendeurs() {
                 });
                 sauvegarder();
               }}
-              disabled={enCours || !form.nom_complet || (!vendeurEdite && (!form.email || !form.mot_de_passe))} 
+              disabled={enCours || !form.nom_complet || (!vendeurEdite && (!form.email || (form.mot_de_passe || '').trim() === ''))} 
               className="bg-[#1a1f5e] hover:bg-[#141952]"
             >
               {enCours ? <Loader2 className="w-4 h-4 animate-spin" /> : vendeurEdite ? "Enregistrer" : "Créer"}
