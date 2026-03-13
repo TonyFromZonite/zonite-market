@@ -44,21 +44,11 @@ export default function Connexion() {
   const [chargementOublie, setChargementOublie] = useState(false);
 
   useEffect(() => {
-    // Charger configs en arrière-plan (pas bloquant)
     const chargerConfigs = async () => {
       try {
-        const cached = localStorage.getItem('app_configs');
-        if (cached) {
-          const data = JSON.parse(cached);
-          if (Date.now() - data.ts < 60 * 60 * 1000) {
-            setConfigs(data.configs);
-            return;
-          }
-        }
         const items = await base44.entities.ConfigApp.filter({});
         const map = {};
         items.forEach((i) => { map[i.cle] = i.valeur; });
-        localStorage.setItem('app_configs', JSON.stringify({ configs: map, ts: Date.now() }));
         setConfigs(map);
       } catch (_) {}
     };

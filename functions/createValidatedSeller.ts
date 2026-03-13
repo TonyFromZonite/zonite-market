@@ -25,19 +25,12 @@ Deno.serve(async (req) => {
     }
 
     // Inviter l'utilisateur dans l'app (requis pour l'envoi d'email)
-    console.log('👤 Invitation de l\'utilisateur:', email);
     try {
-      const inviteResult = await base44.users.inviteUser(email, 'user');
-      console.log('✅ Utilisateur invité avec succès');
+      await base44.users.inviteUser(email, 'user');
     } catch (inviteError) {
-      const msg = inviteError.message || inviteError.toString();
-      if (!msg.includes('already exists')) {
-        console.error('❌ Erreur lors de l\'invitation:', msg);
-        return Response.json({ 
-          error: `Impossible d\'inviter l\'utilisateur : ${msg}. Vérifiez que l\'adresse email est valide.` 
-        }, { status: 400 });
-      } else {
-        console.log('ℹ️ Utilisateur existant, on continue');
+      // Ignorer si l'utilisateur existe déjà
+      if (!inviteError.message.includes('already exists')) {
+        console.error('Invite error:', inviteError.message);
       }
     }
 
