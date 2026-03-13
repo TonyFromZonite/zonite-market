@@ -18,20 +18,20 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Le mot de passe doit contenir au moins 6 caractères.' }, { status: 400 });
     }
 
-    const comptes = await base44.asServiceRole.entities.CompteVendeur.filter({ user_email: email });
-    if (comptes.length === 0) {
+    const sellers = await base44.asServiceRole.entities.Seller.filter({ email });
+    if (sellers.length === 0) {
       return Response.json({ error: 'Token invalide ou expiré.' }, { status: 400 });
     }
 
-    const compte = comptes[0];
+    const seller = sellers[0];
 
     // Vérifier expiration du token
-    if (!compte.reset_token_expiry || new Date(compte.reset_token_expiry) < new Date()) {
+    if (!seller.reset_token_expiry || new Date(seller.reset_token_expiry) < new Date()) {
       return Response.json({ error: 'Ce lien a expiré. Refaites une demande de réinitialisation.' }, { status: 400 });
     }
 
     // Vérifier le token (compare token brut avec le hash stocké)
-    const tokenValid = await bcrypt.compare(token, compte.reset_token || '');
+    const tokenValid = await bcrypt.compare(token, seller.reset_token || '');
     if (!tokenValid) {
       return Response.json({ error: 'Token invalide ou expiré.' }, { status: 400 });
     }
@@ -40,7 +40,7 @@ Deno.serve(async (req) => {
     const nouveauHash = await bcrypt.hash(nouveau_mot_de_passe, 10);
 
     // ✅ Mettre à jour + invalider le token (usage unique)
-    await base44.asServiceRole.entities.CompteVendeur.update(compte.id, {
+    await base44.asServiceRole.entities.Seller.update(seller.id, {
       mot_de_passe_hash: nouveauHash,
       reset_token: null,
       reset_token_expiry: null,
@@ -52,7 +52,7 @@ Deno.serve(async (req) => {
       module: 'systeme',
       details: `Mot de passe réinitialisé via lien pour: ${email}`,
       utilisateur: email,
-      entite_id: compte.id,
+      entite_id: seller.id,
     }).catch(() => {});
 
     return Response.json({ success: true });
