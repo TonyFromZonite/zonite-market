@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { base44 } from "@/api/base44Client";
 import { useCachedQuery } from "@/components/CacheManager";
 import {
@@ -262,8 +262,8 @@ function DashboardAdmin() {
 }
 
 export default function TableauDeBord() {
-  const [sousAdmin] = useState(() => getSousAdminSession());
-  const [adminSession] = useState(() => getAdminSession());
+  const sousAdmin = getSousAdminSession();
+  const adminSession = getAdminSession();
 
   if (sousAdmin) {
     return <DashboardSousAdmin sousAdmin={sousAdmin} />;
