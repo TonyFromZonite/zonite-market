@@ -70,10 +70,13 @@ Deno.serve(async (req) => {
         const result = await db.Vendeur.update(payload.vendeurId, payload.data);
         return Response.json({ success: true, result });
       }
-      case 'createVendeur': {
-        // Appel de la fonction createValidatedSeller pour création complète (CompteVendeur + Vendeur)
-        const createResult = await base44.functions.invoke('createValidatedSeller', payload.data);
+      case 'createVendeurInitial': {
+        const createResult = await base44.functions.invoke('adminCreateSellerInitial', payload.data);
         return Response.json(createResult.data);
+      }
+      case 'validateKycAndActivate': {
+        const validateResult = await base44.functions.invoke('validateKycAndActivateSeller', payload);
+        return Response.json(validateResult.data);
       }
       case 'deleteVendeur': {
         try {
