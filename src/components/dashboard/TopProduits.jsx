@@ -3,6 +3,7 @@ import { Package } from "lucide-react";
 
 export default function TopProduits({ produits }) {
   const top5 = [...produits]
+    .filter(p => p.statut !== 'supprime')
     .sort((a, b) => (b.total_vendu || 0) - (a.total_vendu || 0))
     .slice(0, 5);
 

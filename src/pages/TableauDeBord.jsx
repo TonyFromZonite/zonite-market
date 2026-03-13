@@ -123,11 +123,17 @@ function DashboardAdmin() {
     { ttl: 30 * 60 * 1000 }
   );
 
+  // Filtrer les produits supprimés
+  const produitsActifs = produits.filter(p => p.statut !== 'supprime');
+
   const { data: vendeurs = [], isLoading: chargementVendeurs } = useCachedQuery(
     'VENDEURS',
     () => base44.entities.Vendeur.list(),
     { ttl: 60 * 60 * 1000 }
   );
+
+  // Filtrer les vendeurs inactifs
+  const vendeursActifs = vendeurs.filter(v => v.statut === 'actif');
 
   const { data: commandesVendeurs = [] } = useCachedQuery(
     'COMMANDES',
@@ -156,8 +162,8 @@ function DashboardAdmin() {
   const enChargement = chargementVentes || chargementProduits || chargementVendeurs;
 
   const ventesArray = Array.isArray(ventes) ? ventes : [];
-  const produitsArray = Array.isArray(produits) ? produits : [];
-  const vendeursArray = Array.isArray(vendeurs) ? vendeurs : [];
+  const produitsArray = Array.isArray(produitsActifs) ? produitsActifs : [];
+  const vendeursArray = Array.isArray(vendeursActifs) ? vendeursActifs : [];
   const commandesArray = Array.isArray(commandesVendeurs) ? commandesVendeurs : [];
   const candidaturesArray = Array.isArray(candidaturesEnAttente) ? candidaturesEnAttente : [];
   const kycArray = Array.isArray(kycEnAttente) ? kycEnAttente : [];

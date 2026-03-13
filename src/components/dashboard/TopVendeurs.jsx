@@ -3,6 +3,7 @@ import { Users } from "lucide-react";
 
 export default function TopVendeurs({ vendeurs }) {
   const top5 = [...vendeurs]
+    .filter(v => v.statut === 'actif')
     .sort((a, b) => (b.chiffre_affaires_genere || 0) - (a.chiffre_affaires_genere || 0))
     .slice(0, 5);
 
