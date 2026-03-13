@@ -10,10 +10,10 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Non autorisé' }, { status: 403 });
     }
 
-    // Récupérer TOUS les vendeurs via service role (pas de RLS)
-    const vendeurs = await base44.asServiceRole.entities.Vendeur.list('-created_date');
+    // Récupérer les comptes vendeurs via service role (avec infos KYC complètes)
+    const comptesVendeurs = await base44.asServiceRole.entities.CompteVendeur.list('-created_date');
 
-    return Response.json(vendeurs);
+    return Response.json(comptesVendeurs);
   } catch (error) {
     console.error('Error:', error);
     return Response.json({ error: error.message }, { status: 500 });
