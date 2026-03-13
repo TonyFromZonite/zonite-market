@@ -15,6 +15,7 @@ export const adminApi = {
   // Produit
   createProduit: (data) => invoke('createProduit', { data }),
   updateProduit: (produitId, data) => invoke('updateProduit', { produitId, data }),
+  deleteProduit: (produitId) => invoke('deleteProduit', { produitId }),
 
   // Commande Vendeur
   updateCommandeVendeur: (commandeId, data) => invoke('updateCommandeVendeur', { commandeId, data }),
