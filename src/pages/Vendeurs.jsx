@@ -176,7 +176,7 @@ function ListeVendeurs() {
       </div>
 
       <Dialog open={dialogOuvert} onOpenChange={setDialogOuvert}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="w-[95vw] max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader><DialogTitle>{vendeurEdite ? "Modifier le Vendeur" : "Nouveau Vendeur"}</DialogTitle></DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2"><Label>Nom Complet *</Label><Input value={form.nom_complet} onChange={(e) => modifier("nom_complet", e.target.value)} /></div>
