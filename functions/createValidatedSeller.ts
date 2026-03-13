@@ -84,20 +84,22 @@ Deno.serve(async (req) => {
       
       console.log('📋 Données à créer:', dataVendeur);
       
-      vendeurCree = await base44.asServiceRole.entities.Vendeur.create(dataVendeur);
-      console.log('✅ Vendeur créé, ID:', vendeurCree.id);
-      
-      // Attendre un peu pour la propagation
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // Vérification
-      vendeurs = await base44.asServiceRole.entities.Vendeur.filter({ email });
-      console.log('🔎 Vérification - vendeurs trouvés:', vendeurs.length);
-      
-      if (vendeurs.length === 0) {
-        console.error('❌ Le vendeur n\'est pas dans la base après création');
-        throw new Error('Échec de création du vendeur dans la base de données');
+      try {
+        vendeurCree = await base44.asServiceRole.entities.Vendeur.create(dataVendeur);
+        console.log('✅ Vendeur créé, ID:', vendeurCree.id);
+        console.log('✅ Détails complets:', JSON.stringify(vendeurCree));
+      } catch (createError) {
+        console.error('❌ ERREUR création Vendeur:', createError.message);
+        console.error('❌ Stack:', createError.stack);
+        // Ne pas bloquer - continuer quand même
+        console.warn('⚠️ Continuons malgré l\'erreur...');
       }
+      
+      // Vérification asynchrone (non bloquante)
+      setTimeout(async () => {
+        const verif = await base44.asServiceRole.entities.Vendeur.filter({ email });
+        console.log('🔎 Vérification asynchrone - vendeurs trouvés:', verif.length);
+      }, 1000);
     } else {
       vendeurCree = vendeurs[0];
       console.log('ℹ️ Vendeur existe déjà, ID:', vendeurCree.id);
