@@ -90,7 +90,7 @@ function ListeVendeurs() {
           operateur_mobile_money: form.operateur_mobile_money,
           mot_de_passe: form.mot_de_passe,
         });
-        toast.success("Vendeur créé avec succès");
+        toast({ title: "Vendeur créé avec succès" });
       }
       queryClient.invalidateQueries({ queryKey: ["vendeurs"] });
       queryClient.invalidateQueries({ queryKey: ["comptes_vendeurs"] });
