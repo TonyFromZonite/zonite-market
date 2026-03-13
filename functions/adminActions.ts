@@ -221,6 +221,20 @@ Deno.serve(async (req) => {
         return Response.json({ success: true });
       }
 
+      // ─── LIVRAISON ────────────────────────────────────────────────────────────
+      case 'createLivraison': {
+        const result = await db.Livraison.create(payload.data);
+        return Response.json({ success: true, result });
+      }
+      case 'updateLivraison': {
+        const result = await db.Livraison.update(payload.livraisonId, payload.data);
+        return Response.json({ success: true, result });
+      }
+      case 'deleteLivraison': {
+        await db.Livraison.delete(payload.livraisonId);
+        return Response.json({ success: true });
+      }
+
       default:
         return Response.json({ error: `Action inconnue: ${action}` }, { status: 400 });
     }

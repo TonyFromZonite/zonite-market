@@ -242,7 +242,7 @@ export default function Livraisons() {
                       </div>
                       <div className="space-y-1">
                         <Label className="text-xs">Prix Standard (FCFA)</Label>
-                        <Input type="number" min="0" value={z.prix_standard} onChange={(e) => modifierZone(i, "prix_standard", parseFloat(e.target.value) || 0)} className="bg-white" />
+                        <Input type="number" min="0" value={z.prix_standard || ''} onFocus={(e) => { if (e.target.value === '0') e.target.value = ''; }} onChange={(e) => modifierZone(i, "prix_standard", parseFloat(e.target.value) || 0)} className="bg-white" />
                       </div>
                       <div className="space-y-1">
                         <Label className="text-xs">Délai Standard</Label>
@@ -250,7 +250,7 @@ export default function Livraisons() {
                       </div>
                       <div className="space-y-1">
                         <Label className="text-xs">Prix Express (FCFA)</Label>
-                        <Input type="number" min="0" value={z.prix_express} onChange={(e) => modifierZone(i, "prix_express", parseFloat(e.target.value) || 0)} className="bg-yellow-50" />
+                        <Input type="number" min="0" value={z.prix_express || ''} onFocus={(e) => { if (e.target.value === '0') e.target.value = ''; }} onChange={(e) => modifierZone(i, "prix_express", parseFloat(e.target.value) || 0)} className="bg-yellow-50" />
                       </div>
                       <div className="space-y-1">
                         <Label className="text-xs">Délai Express</Label>
