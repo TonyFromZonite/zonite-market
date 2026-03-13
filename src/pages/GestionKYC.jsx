@@ -21,8 +21,17 @@ export default function GestionKYC() {
   const queryClient = useQueryClient();
 
   const { data: comptes = [], isLoading } = useQuery({
-    queryKey: ["comptes_vendeurs"],
-    queryFn: () => base44.entities.CompteVendeur.list("-created_date"),
+    queryKey: ["vendeurs"],
+    queryFn: async () => {
+      const vendeurs = await base44.entities.Vendeur.list("-created_date");
+      // Mapper les champs Vendeur vers le format attendu
+      return vendeurs.map(v => ({
+        ...v,
+        user_email: v.email,
+        statut_kyc: "valide", // Par défaut validé puisque créé via admin
+        notes_admin: ""
+      }));
+    },
   });
 
   // ✅ Tout le traitement KYC est délégué au backend sécurisé (hachage bcrypt serveur)
