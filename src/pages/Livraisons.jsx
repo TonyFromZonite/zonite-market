@@ -62,11 +62,9 @@ export default function Livraisons() {
     if (!form.nom.trim()) return;
     setEnCours(true);
     if (livreurEdite) {
-      await base44.functions.invoke('updateLivraison', { livraisonId: livreurEdite.id, data: form });
-      await base44.functions.invoke('createAudit', { action: "Livreur modifié", module: "livraison", details: `Livreur ${form.nom} modifié`, entite_id: livreurEdite.id });
+      await base44.entities.Livraison.update(livreurEdite.id, form);
     } else {
-      await base44.functions.invoke('createLivraison', form);
-      await base44.functions.invoke('createAudit', { action: "Livreur créé", module: "livraison", details: `Nouveau livreur: ${form.nom}` });
+      await base44.entities.Livraison.create(form);
     }
     queryClient.invalidateQueries({ queryKey: ["livraisons"] });
     setDialogOuvert(false);
@@ -74,8 +72,7 @@ export default function Livraisons() {
   };
 
   const supprimer = async (l) => {
-    await base44.functions.invoke('deleteLivraison', { livraisonId: l.id });
-    await base44.functions.invoke('createAudit', { action: "Livreur supprimé", module: "livraison", details: `Livreur ${l.nom} supprimé`, entite_id: l.id });
+    await base44.entities.Livraison.delete(l.id);
     queryClient.invalidateQueries({ queryKey: ["livraisons"] });
     setConfirmSuppression(null);
   };
