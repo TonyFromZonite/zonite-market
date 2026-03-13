@@ -494,12 +494,12 @@ function PaiementsTab() {
   const { data: demandes = [], isLoading } = useQuery({ queryKey: ["demandes_paiement_admin"], queryFn: () => base44.entities.DemandePaiementVendeur.list("-created_date") });
 
   const marquerPaye = async (demande) => {
-    await adminApi.updateDemandePaiement(demande.id, { statut: "paye" });
-    const comptes = await base44.entities.CompteVendeur.filter({ id: demande.vendeur_id });
-    if (comptes.length > 0) {
-      const compte = comptes[0];
-      await adminApi.updateCompteVendeur(compte.id, { solde_commission: Math.max(0, (compte.solde_commission || 0) - demande.montant), total_commissions_payees: (compte.total_commissions_payees || 0) + demande.montant });
-    }
+     await adminApi.updateDemandePaiement(demande.id, { statut: "paye" });
+     const sellers = await base44.entities.Seller.filter({ id: demande.vendeur_id });
+     if (sellers.length > 0) {
+       const seller = sellers[0];
+       await base44.asServiceRole.entities.Seller.update(seller.id, { solde_commission: Math.max(0, (seller.solde_commission || 0) - demande.montant), total_commissions_payees: (seller.total_commissions_payees || 0) + demande.montant });
+     }
     await adminApi.createNotificationVendeur({ vendeur_email: demande.vendeur_email, titre: "Paiement effectué !", message: `Votre paiement de ${demande.montant.toLocaleString("fr-FR")} FCFA a été envoyé sur votre numéro ${demande.numero_mobile_money} (${demande.operateur}).`, type: "paiement" });
     queryClient.invalidateQueries({ queryKey: ["demandes_paiement_admin"] });
     queryClient.invalidateQueries({ queryKey: ["paiements_badge"] });
