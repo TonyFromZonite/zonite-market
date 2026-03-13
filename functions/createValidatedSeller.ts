@@ -53,7 +53,7 @@ Deno.serve(async (req) => {
       chiffre_affaires_genere: 0,
     };
     
-    const vendeurCree = await base44.entities.Vendeur.create(dataVendeur);
+    const vendeurCree = await base44.asServiceRole.entities.Vendeur.create(dataVendeur);
     console.log('✅ Vendeur créé, ID:', vendeurCree.id);
     
     if (!vendeurCree || !vendeurCree.id) {
