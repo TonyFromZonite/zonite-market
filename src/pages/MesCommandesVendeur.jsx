@@ -34,8 +34,8 @@ export default function MesCommandesVendeur() {
         window.location.href = createPageUrl("Connexion");
         return;
       }
-      const comptes = await base44.entities.CompteVendeur.filter({ user_email: session.email });
-      if (comptes.length > 0) setCompteVendeur(comptes[0]);
+      const sellers = await base44.entities.Seller.filter({ email: session.email });
+      if (sellers.length > 0) setCompteVendeur(sellers[0]);
     };
     charger();
   }, []);

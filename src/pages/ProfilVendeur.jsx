@@ -32,8 +32,8 @@ export default function ProfilVendeur() {
         window.location.href = createPageUrl("Connexion");
         return;
       }
-      const comptes = await base44.entities.CompteVendeur.filter({ user_email: session.email });
-      if (comptes.length > 0) setCompteVendeur(comptes[0]);
+      const sellers = await base44.entities.Seller.filter({ email: session.email });
+      if (sellers.length > 0) setCompteVendeur(sellers[0]);
       setChargement(false);
     };
     charger();
@@ -52,7 +52,7 @@ export default function ProfilVendeur() {
     setSaveMdpEnCours(true);
     try {
       // ✅ Utilise le nouveau endpoint dédié sans session Base44 requise
-      const emailVendeur = compteVendeur?.user_email;
+      const emailVendeur = compteVendeur?.email;
       const response = await base44.functions.invoke('changePasswordVendeur', {
         email: emailVendeur,
         oldPassword: ancienMdp,

@@ -33,13 +33,13 @@ export default function DemandePaiement() {
         window.location.href = createPageUrl("Connexion");
         return;
       }
-      const comptes = await base44.entities.CompteVendeur.filter({ user_email: session.email });
-      if (comptes.length > 0) {
-        setCompteVendeur(comptes[0]);
+      const sellers = await base44.entities.Seller.filter({ email: session.email });
+      if (sellers.length > 0) {
+        setCompteVendeur(sellers[0]);
         setForm(f => ({
           ...f,
-          numero_mobile_money: comptes[0].numero_mobile_money || "",
-          operateur: comptes[0].operateur_mobile_money || "orange_money",
+          numero_mobile_money: sellers[0].numero_mobile_money || "",
+          operateur: sellers[0].operateur_mobile_money || "orange_money",
         }));
       }
     };
@@ -67,7 +67,7 @@ export default function DemandePaiement() {
     await vendeurApi.createDemandePaiement({
       vendeur_id: compteVendeur.id,
       vendeur_nom: compteVendeur.nom_complet,
-      vendeur_email: compteVendeur.user_email,
+      vendeur_email: compteVendeur.email,
       montant,
       numero_mobile_money: form.numero_mobile_money,
       operateur: form.operateur === "orange_money" ? "Orange Money" : "MTN MoMo",
