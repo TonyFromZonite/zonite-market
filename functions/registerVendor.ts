@@ -3,48 +3,45 @@ import bcrypt from 'npm:bcryptjs@2.4.3';
 
 Deno.serve(async (req) => {
   try {
-    if (req.method !== 'POST') {
-      return Response.json({ error: 'Method not allowed' }, { status: 405 });
-    }
-
     const base44 = createClientFromRequest(req);
+    const body = await req.json();
     const {
-      email, nom_complet, telephone, mot_de_passe,
-      ville, quartier, numero_mobile_money, operateur_mobile_money,
-      photo_identite_url, photo_identite_verso_url, selfie_url
-    } = await req.json();
-
-    // Validation des champs obligatoires
-    if (!email || !nom_complet || !telephone || !mot_de_passe) {
-      return Response.json({ error: 'Champs obligatoires manquants.' }, { status: 400 });
-    }
-
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      return Response.json({ error: 'Format email invalide.' }, { status: 400 });
-    }
-
-    if (mot_de_passe.length < 6) {
-      return Response.json({ error: 'Le mot de passe doit contenir au moins 6 caractères.' }, { status: 400 });
-    }
-
-    // Vérifier si un compte existe déjà
-    const existants = await base44.asServiceRole.entities.CompteVendeur.filter({ user_email: email });
-    if (existants.length > 0) {
-      return Response.json({ error: 'Un compte existe déjà avec cet email. Connectez-vous.' }, { status: 409 });
-    }
-
-    // ✅ Hachage du mot de passe côté serveur uniquement
-    const hashedPassword = await bcrypt.hash(mot_de_passe, 10);
-
-    // ✅ Création via asServiceRole (contourne la RLS create)
-    await base44.asServiceRole.entities.CompteVendeur.create({
-      user_email: email,
+      email,
       nom_complet,
       telephone,
+      ville,
+      quartier,
+      mot_de_passe,
+      numero_mobile_money,
+      operateur_mobile_money,
+      photo_identite_url,
+      photo_identite_verso_url,
+      selfie_url,
+    } = body;
+
+    // Validation des champs requis
+    if (!email || !nom_complet || !mot_de_passe || !numero_mobile_money) {
+      return Response.json({ error: 'Données manquantes (email, nom, mot de passe, mobile money requis)' }, { status: 400 });
+    }
+
+    // Vérifier si un vendeur existe déjà avec cet email
+    const sellersExistants = await base44.asServiceRole.entities.Seller.filter({ email });
+    if (sellersExistants.length > 0) {
+      return Response.json({ error: 'Un compte vendeur existe déjà avec cet email' }, { status: 400 });
+    }
+
+    // Hacher le mot de passe
+    const hashedPassword = bcrypt.hashSync(mot_de_passe, 10);
+
+    // Créer le vendeur dans Seller
+    const dataSeller = {
+      email,
+      nom_complet,
+      telephone: telephone || '',
       ville: ville || '',
       quartier: quartier || '',
       numero_mobile_money: numero_mobile_money || '',
-      operateur_mobile_money: operateur_mobile_money || 'orange_money',
+      operateur_mobile_money: operateur_mobile_money || '',
       photo_identite_url: photo_identite_url || '',
       photo_identite_verso_url: photo_identite_verso_url || '',
       selfie_url: selfie_url || '',
@@ -52,60 +49,58 @@ Deno.serve(async (req) => {
       statut_kyc: 'en_attente',
       statut: 'en_attente_kyc',
       video_vue: false,
+      conditions_acceptees: true,
       catalogue_debloque: false,
+      date_embauche: new Date().toISOString().split('T')[0],
       solde_commission: 0,
       total_commissions_gagnees: 0,
       total_commissions_payees: 0,
       nombre_ventes: 0,
-      ventes_reussies: 0,
-      ventes_echouees: 0,
-    });
+      chiffre_affaires_genere: 0,
+    };
 
-    // Créer une candidature pour l'admin
-    await base44.asServiceRole.entities.CandidatureVendeur.create({
-      nom_complet,
-      numero_whatsapp: telephone,
-      email,
-      ville: ville || '',
-      experience_vente: '',
-      motivation: '',
-      statut: 'en_attente',
-      notes_admin: '',
-      lien_acces_envoye: false,
-    });
+    const sellerCree = await base44.asServiceRole.entities.Seller.create(dataSeller);
 
-    // Créer le User Base44 avec rôle 'vendeur'
-    try {
-      await base44.functions.invoke('createUserOnInscription', {
-        email,
-        full_name: nom_complet
-      });
-    } catch (e) {
-      // Silencieusement ignoré
+    if (!sellerCree || !sellerCree.id) {
+      throw new Error('Échec de la création du vendeur');
     }
 
-    // Email de confirmation
-    try {
-      await base44.asServiceRole.integrations.Core.SendEmail({
-        to: email,
-        subject: "📩 Votre demande d'inscription ZONITE a bien été reçue",
-        body: `Bonjour ${nom_complet},\n\nMerci pour votre inscription sur ZONITE !\n\nVotre dossier KYC est en cours de vérification par notre équipe. Vous recevrez un email sous 24-48h avec votre décision et vos identifiants de connexion définitifs si votre dossier est validé.\n\nCordialement,\nL'équipe ZONITE`,
-      });
-    } catch (e) {
-      // Silencieusement ignoré
-    }
-
-    // Log audit
+    // Journal d'audit
     await base44.asServiceRole.entities.JournalAudit.create({
-      action: 'vendor_registration',
-      module: 'systeme',
-      details: `Nouvelle inscription vendeur: ${nom_complet} (${email})`,
+      action: 'Vendeur auto-inscrit',
+      module: 'vendeur',
+      details: `Vendeur ${nom_complet} (${email}) auto-inscrit`,
       utilisateur: email,
+      entite_id: sellerCree.id,
     }).catch(() => {});
 
-    return Response.json({ success: true });
+    // Notification in-app
+    await base44.asServiceRole.entities.NotificationVendeur.create({
+      vendeur_email: email,
+      titre: '🎉 Bienvenue chez ZONITE !',
+      message: 'Votre inscription est en attente de validation KYC. Nous vous contacterons dès que possible.',
+      type: 'info',
+    }).catch(() => {});
+
+    // Envoyer email de confirmation
+    try {
+      await base44.integrations.Core.SendEmail({
+        to: email,
+        subject: '🎉 Bienvenue chez ZONITE – Inscription en attente de validation',
+        body: `Bonjour ${nom_complet},\n\nMerci de vous être inscrit chez ZONITE ! 🚀\n\nVotre dossier KYC est maintenant en cours de vérification. Notre équipe examinera vos documents et vous contactera sous peu.\n\nBon courage !\n\nL'équipe ZONITE`
+      });
+    } catch (e) {
+      console.error('Email send failed:', e.message);
+    }
+
+    return Response.json({ 
+      success: true, 
+      message: 'Inscription réussie. Votre dossier KYC est en attente de validation.',
+      seller_id: sellerCree.id
+    });
 
   } catch (error) {
+    console.error('Error:', error);
     return Response.json({ error: error.message }, { status: 500 });
   }
 });
