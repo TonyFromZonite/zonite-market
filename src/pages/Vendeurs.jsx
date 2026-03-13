@@ -22,8 +22,8 @@ const ONGLETS = [
 ];
 
 const initVendeur = {
-  nom_complet: "", email: "", telephone: "", taux_commission: 0,
-  statut: "actif", date_embauche: new Date().toISOString().split("T")[0],
+  nom_complet: "", email: "", telephone: "", ville: "", quartier: "", mot_de_passe: "",
+  taux_commission: 0, statut: "actif", date_embauche: new Date().toISOString().split("T")[0],
 };
 
 const formater = (n) => `${Math.round(n || 0).toLocaleString("fr-FR")} FCFA`;
@@ -53,16 +53,34 @@ function ListeVendeurs() {
 
   const sauvegarder = async () => {
     setEnCours(true);
-    if (vendeurEdite) {
-      await adminApi.updateVendeur(vendeurEdite.id, { nom_complet: form.nom_complet, email: form.email, telephone: form.telephone, statut: form.statut, date_embauche: form.date_embauche });
-      await adminApi.createJournalAudit({ action: "Vendeur modifié", module: "vendeur", details: `Vendeur ${form.nom_complet} modifié`, entite_id: vendeurEdite.id });
-    } else {
-      await adminApi.createVendeur(form);
-      await adminApi.createJournalAudit({ action: "Vendeur créé", module: "vendeur", details: `Nouveau vendeur: ${form.nom_complet}` });
+    try {
+      if (vendeurEdite) {
+        await adminApi.updateVendeur(vendeurEdite.id, { nom_complet: form.nom_complet, email: form.email, telephone: form.telephone, statut: form.statut, date_embauche: form.date_embauche });
+        await adminApi.createJournalAudit({ action: "Vendeur modifié", module: "vendeur", details: `Vendeur ${form.nom_complet} modifié`, entite_id: vendeurEdite.id });
+      } else {
+        // Créer un vendeur validé avec mot de passe
+        const response = await base44.functions.invoke('createValidatedSeller', {
+          nom_complet: form.nom_complet,
+          email: form.email,
+          telephone: form.telephone,
+          ville: form.ville,
+          quartier: form.quartier,
+          mot_de_passe: form.mot_de_passe,
+        });
+        if (!response.data.success) {
+          alert(response.data.error || "Erreur lors de la création du vendeur");
+          setEnCours(false);
+          return;
+        }
+      }
+      queryClient.invalidateQueries({ queryKey: ["vendeurs"] });
+      queryClient.invalidateQueries({ queryKey: ["comptes_vendeurs"] });
+      setDialogOuvert(false);
+      setEnCours(false);
+    } catch (error) {
+      alert("Erreur: " + error.message);
+      setEnCours(false);
     }
-    queryClient.invalidateQueries({ queryKey: ["vendeurs"] });
-    setDialogOuvert(false);
-    setEnCours(false);
   };
 
   const supprimer = async (vendeur) => {
@@ -141,13 +159,24 @@ function ListeVendeurs() {
           <DialogHeader><DialogTitle>{vendeurEdite ? "Modifier le Vendeur" : "Nouveau Vendeur"}</DialogTitle></DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2"><Label>Nom Complet *</Label><Input value={form.nom_complet} onChange={(e) => modifier("nom_complet", e.target.value)} /></div>
-            <div className="space-y-2"><Label>Email</Label><Input type="email" value={form.email} onChange={(e) => modifier("email", e.target.value)} /></div>
+            <div className="space-y-2"><Label>Email *</Label><Input type="email" value={form.email} onChange={(e) => modifier("email", e.target.value)} disabled={!!vendeurEdite} /></div>
             <div className="space-y-2"><Label>Téléphone</Label><Input value={form.telephone} onChange={(e) => modifier("telephone", e.target.value)} /></div>
-            <div className="space-y-2"><Label>Date d'Embauche</Label><Input type="date" value={form.date_embauche} onChange={(e) => modifier("date_embauche", e.target.value)} /></div>
+            {!vendeurEdite && (
+              <>
+                <div className="space-y-2"><Label>Ville</Label><Input value={form.ville} onChange={(e) => modifier("ville", e.target.value)} /></div>
+                <div className="space-y-2"><Label>Quartier</Label><Input value={form.quartier} onChange={(e) => modifier("quartier", e.target.value)} /></div>
+                <div className="space-y-2">
+                  <Label>Mot de passe *</Label>
+                  <Input type="text" value={form.mot_de_passe} onChange={(e) => modifier("mot_de_passe", e.target.value)} placeholder="Mot de passe initial pour le vendeur" />
+                  <p className="text-xs text-slate-500">Le vendeur recevra ce mot de passe par email</p>
+                </div>
+              </>
+            )}
+            {vendeurEdite && <div className="space-y-2"><Label>Date d'Embauche</Label><Input type="date" value={form.date_embauche} onChange={(e) => modifier("date_embauche", e.target.value)} /></div>}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOuvert(false)}>Annuler</Button>
-            <Button onClick={sauvegarder} disabled={enCours || !form.nom_complet} className="bg-[#1a1f5e] hover:bg-[#141952]">
+            <Button onClick={sauvegarder} disabled={enCours || !form.nom_complet || (!vendeurEdite && (!form.email || !form.mot_de_passe))} className="bg-[#1a1f5e] hover:bg-[#141952]">
               {enCours ? <Loader2 className="w-4 h-4 animate-spin" /> : vendeurEdite ? "Enregistrer" : "Créer"}
             </Button>
           </DialogFooter>
