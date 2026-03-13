@@ -17,16 +17,24 @@ Deno.serve(async (req) => {
 
     const { compte_id, statut, notes } = await req.json();
 
-    if (!compte_id || !statut || !['valide', 'rejete'].includes(statut)) {
-      return Response.json({ error: 'Paramètres invalides.' }, { status: 400 });
-    }
+     if (!compte_id || !statut || !['valide', 'rejete'].includes(statut)) {
+       return Response.json({ error: 'Paramètres invalides.' }, { status: 400 });
+     }
 
-    const comptes = await base44.asServiceRole.entities.CompteVendeur.filter({ id: compte_id });
-    if (comptes.length === 0) {
-      return Response.json({ error: 'Compte introuvable.' }, { status: 404 });
-    }
+     // Chercher dans Vendeur (nouveau système)
+     let vendeur = null;
+     vendeur = await base44.asServiceRole.entities.Vendeur.filter({ id: compte_id });
 
-    const compte = comptes[0];
+     if (vendeur.length === 0) {
+       // Fallback sur CompteVendeur (ancien système)
+       const comptes = await base44.asServiceRole.entities.CompteVendeur.filter({ id: compte_id });
+       if (comptes.length === 0) {
+         return Response.json({ error: 'Compte introuvable.' }, { status: 404 });
+       }
+       vendeur = comptes; // Pour compatibilité
+     }
+
+     const compte = vendeur[0];
 
     if (statut === 'valide') {
       // Le vendeur conserve son mot de passe initial
