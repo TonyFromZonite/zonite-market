@@ -76,8 +76,15 @@ Deno.serve(async (req) => {
         return Response.json(createResult.data);
       }
       case 'deleteVendeur': {
-        await db.Vendeur.delete(payload.vendeurId);
-        return Response.json({ success: true });
+        try {
+          await db.Vendeur.delete(payload.vendeurId);
+          return Response.json({ success: true });
+        } catch (error) {
+          if (error.message.includes('not found')) {
+            return Response.json({ success: true, message: 'Vendeur déjà supprimé' });
+          }
+          throw error;
+        }
       }
 
       // ─── CANDIDATURE ─────────────────────────────────────────────────────────
