@@ -57,9 +57,7 @@ Deno.serve(async (req) => {
     console.log('✅ Vendeur créé, ID:', vendeurCree.id);
     
     if (!vendeurCree || !vendeurCree.id) {
-      // Si la création du Vendeur échoue, supprimer le CompteVendeur pour éviter les incohérences
-      await base44.asServiceRole.entities.CompteVendeur.delete(compteVendeur.id).catch(() => {});
-      throw new Error('Échec de la création de l\'entité Vendeur - opération annulée');
+      throw new Error('Échec de la création de l\'entité Vendeur');
     }
 
     // Journal d'audit
@@ -68,7 +66,7 @@ Deno.serve(async (req) => {
       module: 'vendeur',
       details: `Vendeur ${nom_complet} (${email}) créé directement par ${user.email}`,
       utilisateur: user.email,
-      entite_id: compteVendeur.id,
+      entite_id: vendeurCree.id,
     }).catch(() => {});
 
     // Notification in-app
