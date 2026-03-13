@@ -43,7 +43,14 @@ function ListeVendeurs() {
     queryFn: () => base44.entities.Vendeur.list("-created_date"),
   });
 
-  const modifier = (champ, valeur) => setForm((p) => ({ ...p, [champ]: valeur }));
+  const modifier = (champ, valeur) => {
+    console.log(`✏️ Modification: ${champ} =`, valeur);
+    setForm((p) => {
+      const nouveau = { ...p, [champ]: valeur };
+      console.log("📋 Nouvel état:", nouveau);
+      return nouveau;
+    });
+  };
 
   const ouvrir = (vendeur) => {
     if (vendeur) { setVendeurEdite(vendeur); setForm({ ...initVendeur, ...vendeur }); }
@@ -52,6 +59,17 @@ function ListeVendeurs() {
   };
 
   const sauvegarder = async () => {
+    console.log("🔍 DEBUG - État du formulaire:", form);
+    console.log("🔍 Nom:", form.nom_complet);
+    console.log("🔍 Email:", form.email);
+    console.log("🔍 Mot de passe:", form.mot_de_passe);
+    console.log("🔍 Validation:", {
+      nom_ok: !!form.nom_complet,
+      email_ok: !!form.email,
+      mdp_ok: !!form.mot_de_passe,
+      bouton_devrait_etre_actif: !(!form.nom_complet || !form.email || !form.mot_de_passe)
+    });
+    
     setEnCours(true);
     try {
       if (vendeurEdite) {
