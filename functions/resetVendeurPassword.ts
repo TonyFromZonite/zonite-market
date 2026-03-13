@@ -20,9 +20,16 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Email et hash requis' }, { status: 400 });
     }
 
+    // Récupérer le compte vendeur
+    const comptes = await base44.asServiceRole.entities.CompteVendeur.filter({ user_email: vendeur_email });
+    
+    if (!comptes || comptes.length === 0) {
+      return Response.json({ error: 'Compte vendeur introuvable' }, { status: 404 });
+    }
+
     // Mettre à jour avec les permissions service role
     const result = await base44.asServiceRole.entities.CompteVendeur.update(
-      { user_email: vendeur_email },
+      comptes[0].id,
       { mot_de_passe_hash: nouveau_hash }
     );
 
