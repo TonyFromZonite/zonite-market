@@ -34,13 +34,20 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Un CompteVendeur existe déjà pour cet email' }, { status: 400 });
     }
 
-    // Inviter l'utilisateur dans l'app
+    // Inviter l'utilisateur dans l'app avec gestion d'erreur améliorée
     console.log('👤 Invitation de l\'utilisateur:', email);
     try {
-      await base44.users.inviteUser(email, 'user');
+      const inviteResult = await base44.users.inviteUser(email, 'user');
+      console.log('✅ Utilisateur invité avec succès:', inviteResult);
     } catch (inviteError) {
-      if (!inviteError.message.includes('already exists')) {
-        console.error('Invite error:', inviteError.message);
+      const msg = inviteError.message || inviteError.toString();
+      if (!msg.includes('already exists')) {
+        console.error('❌ Erreur lors de l\'invitation:', msg);
+        return Response.json({ 
+          error: `Impossible d\'inviter l\'utilisateur : ${msg}. Vérifiez que l\'adresse email est valide.` 
+        }, { status: 400 });
+      } else {
+        console.log('ℹ️ Utilisateur existant, on continue');
       }
     }
 
