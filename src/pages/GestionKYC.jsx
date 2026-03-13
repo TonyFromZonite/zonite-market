@@ -29,22 +29,21 @@ export default function GestionKYC() {
     },
   });
 
-  // ✅ Tout le traitement KYC est délégué au backend sécurisé (hachage bcrypt serveur)
   const validerKYC = async (statut) => {
     setEnCours(true);
     try {
       const { data } = await base44.functions.invoke('validateKYC', {
-        compte_id: compteSelectionne.id,
+        seller_id: compteSelectionne.id,
         statut,
         notes: notes || '',
       });
       if (!data.success) throw new Error(data.error || 'Erreur lors de la validation');
+      queryClient.invalidateQueries({ queryKey: ["vendeurs"] });
+      setCompteSelectionne(null);
+      setNotes("");
     } catch (e) {
       console.error('KYC error:', e.message);
     }
-    queryClient.invalidateQueries({ queryKey: ["comptes_vendeurs"] });
-    queryClient.invalidateQueries({ queryKey: ["vendeurs"] });
-    setCompteSelectionne(null);
     setEnCours(false);
   };
 
