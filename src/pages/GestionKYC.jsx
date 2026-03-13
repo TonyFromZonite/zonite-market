@@ -23,14 +23,17 @@ export default function GestionKYC() {
   const { data: comptes = [], isLoading } = useQuery({
     queryKey: ["vendeurs"],
     queryFn: async () => {
-      const vendeurs = await base44.entities.Vendeur.list("-created_date");
-       // Mapper les champs Vendeur vers le format attendu
-       return vendeurs.map(v => ({
-         ...v,
-         user_email: v.email,
-         statut_kyc: "en_attente", // En attente de validation KYC
-         notes_admin: ""
-       }));
+      // Récupérer les vendeurs via le backend admin pour éviter les restrictions RLS
+      const { data } = await base44.functions.invoke('getAllVendeurs', {});
+      if (!data || !Array.isArray(data)) return [];
+      
+      // Mapper les champs Vendeur vers le format attendu
+      return data.map(v => ({
+        ...v,
+        user_email: v.email,
+        statut_kyc: "en_attente", // En attente de validation KYC
+        notes_admin: ""
+      }));
     },
   });
 
