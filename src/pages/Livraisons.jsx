@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import { adminApi } from "@/components/adminApi";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -62,9 +63,9 @@ export default function Livraisons() {
     if (!form.nom.trim()) return;
     setEnCours(true);
     if (livreurEdite) {
-      await base44.entities.Livraison.update(livreurEdite.id, form);
+      await adminApi.updateLivraison(livreurEdite.id, form);
     } else {
-      await base44.entities.Livraison.create(form);
+      await adminApi.createLivraison(form);
     }
     queryClient.invalidateQueries({ queryKey: ["livraisons"] });
     setDialogOuvert(false);
@@ -72,7 +73,7 @@ export default function Livraisons() {
   };
 
   const supprimer = async (l) => {
-    await base44.entities.Livraison.delete(l.id);
+    await adminApi.deleteLivraison(l.id);
     queryClient.invalidateQueries({ queryKey: ["livraisons"] });
     setConfirmSuppression(null);
   };

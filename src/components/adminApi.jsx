@@ -79,4 +79,9 @@ export const adminApi = {
   // Config App
   updateConfigApp: (configId, data) => invoke('updateConfigApp', { configId, data }),
   createConfigApp: (data) => invoke('createConfigApp', { data }),
+
+  // Livraison
+  createLivraison: (data) => invoke('createLivraison', { data }),
+  updateLivraison: (livraisonId, data) => invoke('updateLivraison', { livraisonId, data }),
+  deleteLivraison: (livraisonId) => invoke('deleteLivraison', { livraisonId }),
 };
