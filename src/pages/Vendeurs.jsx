@@ -79,7 +79,7 @@ function ListeVendeurs() {
           operateur_mobile_money: form.operateur_mobile_money,
           mot_de_passe: form.mot_de_passe,
         });
-        toast({ title: "Compte créé - KYC en attente", description: `Allez à l'onglet "Validation KYC" pour valider le compte de ${form.nom_complet}.`, duration: 5000 });
+        toast({ title: "Compte créé - Vendeur Actif", description: `${form.nom_complet} peut dès à présent se connecter avec ses identifiants reçus par email.`, duration: 5000 });
       }
       queryClient.invalidateQueries({ queryKey: ["vendeurs"] });
       queryClient.invalidateQueries({ queryKey: ["comptes_vendeurs"] });
