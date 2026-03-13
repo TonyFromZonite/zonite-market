@@ -23,17 +23,9 @@ export default function GestionKYC() {
   const { data: comptes = [], isLoading } = useQuery({
     queryKey: ["vendeurs"],
     queryFn: async () => {
-      // Récupérer les vendeurs via le backend admin pour éviter les restrictions RLS
+      // Récupérer les vendeurs via le backend admin
       const { data } = await base44.functions.invoke('getAllVendeurs', {});
-      if (!data || !Array.isArray(data)) return [];
-      
-      // Mapper les champs Vendeur vers le format attendu
-      return data.map(v => ({
-        ...v,
-        user_email: v.email,
-        statut_kyc: v.statut_kyc || "en_attente", // Utilise le statut réel du vendeur
-        notes_admin: ""
-      }));
+      return Array.isArray(data) ? data : [];
     },
   });
 
