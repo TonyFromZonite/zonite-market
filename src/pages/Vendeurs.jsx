@@ -43,7 +43,10 @@ function ListeVendeurs() {
 
   const { data: vendeurs = [], isLoading } = useQuery({
     queryKey: ["vendeurs"],
-    queryFn: () => base44.entities.Vendeur.list("-created_date"),
+    queryFn: async () => {
+      const response = await adminApi.listVendeurs();
+      return response.result || [];
+    },
   });
 
   const modifier = (champ, valeur) => {

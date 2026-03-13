@@ -24,6 +24,7 @@ export const adminApi = {
   updateCompteVendeur: (compteId, data) => invoke('updateCompteVendeur', { compteId, data }),
 
   // Vendeur
+  listVendeurs: () => invoke('listVendeurs'),
   updateVendeur: (vendeurId, data) => invoke('updateVendeur', { vendeurId, data }),
   createVendeur: (data) => invoke('createVendeur', { data }),
   deleteVendeur: (vendeurId) => invoke('deleteVendeur', { vendeurId }),

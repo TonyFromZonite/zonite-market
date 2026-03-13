@@ -62,6 +62,10 @@ Deno.serve(async (req) => {
       }
 
       // ─── VENDEUR ─────────────────────────────────────────────────────────────
+      case 'listVendeurs': {
+        const result = await db.Vendeur.list('-created_date');
+        return Response.json({ success: true, result });
+      }
       case 'updateVendeur': {
         const result = await db.Vendeur.update(payload.vendeurId, payload.data);
         return Response.json({ success: true, result });
