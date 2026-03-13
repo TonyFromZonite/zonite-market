@@ -27,6 +27,8 @@ export const adminApi = {
   listVendeurs: () => invoke('listVendeurs'),
   updateVendeur: (vendeurId, data) => invoke('updateVendeur', { vendeurId, data }),
   createVendeur: (data) => invoke('createVendeur', { data }),
+  createVendeurInitial: (data) => invoke('createVendeurInitial', { data }),
+  validateKycAndActivate: (payload) => invoke('validateKycAndActivate', payload),
   deleteVendeur: (vendeurId) => invoke('deleteVendeur', { vendeurId }),
 
   // Candidature
