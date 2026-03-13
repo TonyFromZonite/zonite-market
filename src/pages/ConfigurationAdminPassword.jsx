@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Eye, EyeOff, Check, X, ShieldAlert } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import bcrypt from "bcryptjs";
 
 export default function ConfigurationAdminPassword() {
   const [chargement, setChargement] = useState(true);
@@ -85,18 +84,24 @@ export default function ConfigurationAdminPassword() {
           setErreur(response.data.error || "Mot de passe actuel incorrect.");
         }
       } else {
-        // Création initiale — hash bcrypt côté client (bcryptjs disponible)
-        const hash = await bcrypt.hash(mdpNouveau, 10);
-        const configs = await base44.entities.ConfigApp.filter({ cle: "admin_password_hash" });
-        if (configs.length > 0) {
-          await base44.entities.ConfigApp.update(configs[0].id, { cle: "admin_password_hash", valeur: hash });
-        } else {
-          await base44.entities.ConfigApp.create({ cle: "admin_password_hash", valeur: hash, description: "Mot de passe chiffré de l'administrateur principal" });
-        }
-        setSucces("Mot de passe créé avec succès ! Vous pouvez maintenant vous connecter.");
-        setMdpNouveau("");
-        setMdpConfirm("");
-        setAdminMdpHash("set");
+       // Création initiale — hash via fonction backend
+       const hashResponse = await base44.functions.invoke('hashPassword', { password: mdpNouveau });
+       if (!hashResponse.data.success) {
+         setErreur("Erreur lors du hachage du mot de passe.");
+         setEntraitement(false);
+         return;
+       }
+       const hash = hashResponse.data.hash;
+       const configs = await base44.entities.ConfigApp.filter({ cle: "admin_password_hash" });
+       if (configs.length > 0) {
+         await base44.entities.ConfigApp.update(configs[0].id, { cle: "admin_password_hash", valeur: hash });
+       } else {
+         await base44.entities.ConfigApp.create({ cle: "admin_password_hash", valeur: hash, description: "Mot de passe chiffré de l'administrateur principal" });
+       }
+       setSucces("Mot de passe créé avec succès ! Vous pouvez maintenant vous connecter.");
+       setMdpNouveau("");
+       setMdpConfirm("");
+       setAdminMdpHash("set");
       }
     } catch (err) {
       const errorMsg = err.response?.data?.error || "Erreur lors de la mise à jour du mot de passe.";
