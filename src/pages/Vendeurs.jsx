@@ -300,19 +300,19 @@ function ValidationKYC() {
         <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
           <div className="p-4 border-b bg-yellow-50 border-yellow-100"><h3 className="font-semibold text-slate-900">Dossiers KYC à valider ({enAttente.length})</h3></div>
           <div className="divide-y divide-slate-100">
-            {enAttente.map(c => (
-              <div key={c.id} className="p-4 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 bg-blue-100 rounded-xl flex items-center justify-center"><span className="text-blue-700 font-bold text-sm">{c.nom_complet?.[0]?.toUpperCase()}</span></div>
-                  <div>
-                    <p className="font-medium text-slate-900">{c.nom_complet}</p>
-                    <p className="text-sm text-slate-500">{c.ville}{c.quartier ? `, ${c.quartier}` : ""}</p>
-                    <p className="text-xs text-slate-400">{c.user_email}</p>
+            {enAttente.map(s => (
+                <div key={s.id} className="p-4 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 bg-blue-100 rounded-xl flex items-center justify-center"><span className="text-blue-700 font-bold text-sm">{s.nom_complet?.[0]?.toUpperCase()}</span></div>
+                    <div>
+                      <p className="font-medium text-slate-900">{s.nom_complet}</p>
+                      <p className="text-sm text-slate-500">{s.ville}{s.quartier ? `, ${s.quartier}` : ""}</p>
+                      <p className="text-xs text-slate-400">{s.email}</p>
+                    </div>
                   </div>
+                  <Button size="sm" variant="outline" onClick={() => { setCompteSelectionne(s); setNotes(""); }}><Eye className="w-4 h-4 mr-1" /> Voir</Button>
                 </div>
-                <Button size="sm" variant="outline" onClick={() => { setCompteSelectionne(c); setNotes(""); }}><Eye className="w-4 h-4 mr-1" /> Voir</Button>
-              </div>
-            ))}
+              ))}
           </div>
         </div>
       )}
