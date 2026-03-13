@@ -55,28 +55,55 @@ export default function Connexion() {
     chargerConfigs();
   }, []);
 
-  // Connexion vendeur (email + mot de passe via fonction backend sécurisée)
+  // Connexion vendeur (utilise directement Base44 Auth)
   const connexionVendeur = async (e) => {
     e.preventDefault();
     if (!email || !motDePasse) { setErreur("Veuillez remplir tous les champs."); return; }
     setChargement(true);
     setErreur("");
     try {
-      const response = await base44.functions.invoke('loginUser', {
-        email,
-        password: motDePasse,
-        userType: 'vendeur'
-      });
-      if (response.data.success) {
-        sessionStorage.setItem("vendeur_session", JSON.stringify(response.data.session));
-        window.location.href = createPageUrl("EspaceVendeur");
-      } else if (response.data.pendingApproval) {
-        window.location.href = createPageUrl("EnAttenteValidation");
-      } else {
-        setErreur("Erreur lors de la connexion. Réessayez.");
+      // Connexion via Base44 Auth natif
+      await base44.auth.login(email, motDePasse);
+      const user = await base44.auth.me();
+
+      if (!user || user.role !== 'user') {
+        await base44.auth.logout();
+        setErreur("Accès refusé. Ce compte n'est pas un compte vendeur.");
+        setChargement(false);
+        return;
       }
+
+      // Récupérer les infos du vendeur
+      const vendeurs = await base44.entities.Vendeur.filter({ email: user.email });
+      if (vendeurs.length === 0) {
+        await base44.auth.logout();
+        setErreur("Compte vendeur introuvable. Veuillez contacter l'administrateur.");
+        setChargement(false);
+        return;
+      }
+
+      const vendeur = vendeurs[0];
+      if (vendeur.statut_kyc === 'en_attente') {
+        window.location.href = createPageUrl("EnAttenteValidation");
+        return;
+      } else if (vendeur.statut_kyc === 'rejete') {
+        await base44.auth.logout();
+        setErreur("Votre dossier KYC a été rejeté. Veuillez contacter l'administrateur.");
+        setChargement(false);
+        return;
+      }
+
+      sessionStorage.setItem("vendeur_session", JSON.stringify({
+        type: 'vendeur',
+        role: 'vendeur',
+        email: vendeur.email,
+        nom_complet: vendeur.nom_complet,
+        compte_id: vendeur.id,
+      }));
+      window.location.href = createPageUrl("EspaceVendeur");
+
     } catch (err) {
-      const errorMsg = err.response?.data?.error || "Erreur lors de la connexion. Réessayez.";
+      const errorMsg = err.message || "Identifiants incorrects. Veuillez vérifier votre email et mot de passe.";
       setErreur(errorMsg);
     }
     setChargement(false);
