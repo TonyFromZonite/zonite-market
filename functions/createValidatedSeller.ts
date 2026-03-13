@@ -14,8 +14,8 @@ Deno.serve(async (req) => {
     const { nom_complet, telephone, ville, quartier, mot_de_passe, numero_mobile_money, operateur_mobile_money } = body;
     const email = body.email || body.user_email;
 
-    if (!nom_complet || !email || !mot_de_passe || !numero_mobile_money) {
-      return Response.json({ error: 'Données manquantes (nom, email, mot de passe, numéro mobile money requis)' }, { status: 400 });
+    if (!nom_complet || !email || !mot_de_passe) {
+      return Response.json({ error: 'Données manquantes (nom, email, mot de passe requis)' }, { status: 400 });
     }
 
     // Vérifier si un vendeur existe déjà avec cet email
