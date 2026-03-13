@@ -61,25 +61,15 @@ function ListeVendeurs() {
   };
 
   const sauvegarder = async () => {
-    console.log("🔍 DEBUG - État du formulaire:", form);
-    console.log("🔍 Nom:", form.nom_complet);
-    console.log("🔍 Email:", form.email);
-    console.log("🔍 Mot de passe:", form.mot_de_passe);
-    console.log("🔍 Validation:", {
-      nom_ok: !!form.nom_complet,
-      email_ok: !!form.email,
-      mdp_ok: !!form.mot_de_passe,
-      bouton_devrait_etre_actif: !(!form.nom_complet || !form.email || !form.mot_de_passe)
-    });
-    
     setEnCours(true);
     try {
       if (vendeurEdite) {
         await adminApi.updateVendeur(vendeurEdite.id, { nom_complet: form.nom_complet, email: form.email, telephone: form.telephone, statut: form.statut, date_embauche: form.date_embauche });
         await adminApi.createJournalAudit({ action: "Vendeur modifié", module: "vendeur", details: `Vendeur ${form.nom_complet} modifié`, entite_id: vendeurEdite.id });
+        toast({ title: "Vendeur modifié avec succès" });
       } else {
-        // Créer un vendeur validé avec mot de passe
-        await adminApi.createVendeur({
+        // Créer un compte vendeur initial en attente de validation KYC
+        const result = await adminApi.createVendeurInitial({
           nom_complet: form.nom_complet,
           email: form.email,
           telephone: form.telephone,
@@ -89,7 +79,7 @@ function ListeVendeurs() {
           operateur_mobile_money: form.operateur_mobile_money,
           mot_de_passe: form.mot_de_passe,
         });
-        toast({ title: "Vendeur créé avec succès" });
+        toast({ title: "Compte créé - KYC en attente", description: `Allez à l'onglet "Validation KYC" pour valider le compte de ${form.nom_complet}.` });
       }
       queryClient.invalidateQueries({ queryKey: ["vendeurs"] });
       queryClient.invalidateQueries({ queryKey: ["comptes_vendeurs"] });
@@ -244,71 +234,59 @@ function ValidationKYC() {
   const queryClient = useQueryClient();
 
   const { data: comptes = [], isLoading } = useQuery({
-    queryKey: ["comptes_vendeurs"],
-    queryFn: () => base44.entities.CompteVendeur.list("-created_date"),
-  });
+     queryKey: ["comptes_vendeurs"],
+     queryFn: () => base44.entities.CompteVendeur.list("-created_date"),
+     refetchInterval: 30000,
+   });
+
+   const { data: vendeurs = [] } = useQuery({
+     queryKey: ["vendeurs"],
+     queryFn: () => base44.entities.Vendeur.list(),
+     refetchInterval: 30000,
+   });
 
   const validerKYC = async (statut) => {
-    setEnCours(true);
-    
-    // Mettre à jour le statut KYC et le statut général du CompteVendeur
-    await adminApi.updateCompteVendeur(compteSelectionne.id, { 
-      statut_kyc: statut, 
-      notes_admin: notes, 
-      statut: statut === "valide" ? "actif" : "en_attente_kyc" // Reste en attente si rejeté pour permettre une nouvelle soumission
-    });
-    
-    if (statut === "valide") {
-      // Créer ou mettre à jour l'entité Vendeur si le KYC est validé
-      const vendeurs = await base44.entities.Vendeur.list();
-      const dejaExistant = vendeurs.find(v => v.email === compteSelectionne.user_email);
-      if (!dejaExistant) {
-        await adminApi.createVendeur({ 
-          nom_complet: compteSelectionne.nom_complet, 
-          email: compteSelectionne.user_email, 
-          telephone: compteSelectionne.telephone, 
-          statut: "actif", 
-          date_embauche: new Date().toISOString().split("T")[0], 
-          solde_commission: 0, 
-          total_commissions_gagnees: 0, 
-          total_commissions_payees: 0, 
-          nombre_ventes: 0, 
-          chiffre_affaires_genere: 0 
-        });
-        await adminApi.createJournalAudit({ 
-          action: "Nouveau vendeur créé automatiquement", 
-          module: "vendeur", 
-          details: `Vendeur ${compteSelectionne.nom_complet} (${compteSelectionne.user_email}) créé suite à la validation KYC`, 
-          entite_id: compteSelectionne.id 
-        });
-      }
-      
-      // Notifier le vendeur que son compte est validé
-      await adminApi.createNotificationVendeur({
-        vendeur_email: compteSelectionne.user_email,
-        titre: "Compte validé !",
-        message: "Votre compte a été validé. Regardez la vidéo de formation pour débloquer le catalogue et accéder à tous les services !",
-        type: "succes",
-      });
-    } else if (statut === "rejete") {
-      // Notifier le vendeur pour qu'il résoumette ses documents KYC
-      await adminApi.createNotificationVendeur({
-        vendeur_email: compteSelectionne.user_email,
-        titre: "Dossier KYC rejeté",
-        message: `Votre dossier KYC a été rejeté. ${notes || "Veuillez soumettre à nouveau vos documents en vous assurant qu'ils sont clairs et conformes."}`,
-        type: "alerte",
-      });
-    }
-    
-    queryClient.invalidateQueries({ queryKey: ["comptes_vendeurs"] });
-    queryClient.invalidateQueries({ queryKey: ["vendeurs"] });
-    setCompteSelectionne(null);
-    setEnCours(false);
-  };
+     setEnCours(true);
+     try {
+       if (statut === "valide") {
+         // Valider le KYC et activer le vendeur, créer l'entité Vendeur et envoyer l'email
+         await adminApi.validateKycAndActivate({
+           compteVendeurId: compteSelectionne.id,
+           mot_de_passe: compteSelectionne.mot_de_passe,
+         });
+         toast({ title: "KYC Validé et Vendeur Activé", description: `${compteSelectionne.nom_complet} a reçu son email de bienvenue.` });
+       } else if (statut === "rejete") {
+         // Mettre à jour le statut KYC à rejeté
+         await adminApi.updateCompteVendeur(compteSelectionne.id, { 
+           statut_kyc: statut, 
+           notes_admin: notes, 
+           statut: "en_attente_kyc"
+         });
+         // Notifier le vendeur
+         await adminApi.createNotificationVendeur({
+           vendeur_email: compteSelectionne.user_email,
+           titre: "Dossier KYC rejeté",
+           message: `Votre dossier KYC a été rejeté. ${notes || "Veuillez soumettre à nouveau vos documents en vous assurant qu'ils sont clairs et conformes."}`,
+           type: "alerte",
+         });
+         toast({ title: "Dossier rejeté", description: `${compteSelectionne.nom_complet} a été notifié du rejet.` });
+       }
+
+       queryClient.invalidateQueries({ queryKey: ["comptes_vendeurs"] });
+       queryClient.invalidateQueries({ queryKey: ["vendeurs"] });
+       setCompteSelectionne(null);
+     } catch (error) {
+       toast({ title: "Erreur", description: error.message, variant: "destructive" });
+     } finally {
+       setEnCours(false);
+     }
+   }
 
   if (isLoading) return <div className="space-y-3">{Array(5).fill(0).map((_, i) => <Skeleton key={i} className="h-16 rounded-xl" />)}</div>;
 
-  const enAttente = comptes.filter(c => c.statut_kyc === "en_attente");
+  // Filtrer les comptes non encore créés dans l'entité Vendeur
+  const comptesSansVendeur = comptes.filter(c => !vendeurs.some(v => v.email === c.user_email));
+  const enAttente = comptesSansVendeur.filter(c => c.statut_kyc === "en_attente");
   const traites = comptes.filter(c => c.statut_kyc !== "en_attente");
 
   return (
@@ -389,11 +367,14 @@ function ValidationKYC() {
             </div>
           )}
           {compteSelectionne?.statut_kyc === "en_attente" && (
-            <DialogFooter className="flex gap-2">
-              <Button variant="destructive" onClick={() => validerKYC("rejete")} disabled={enCours}><XCircle className="w-4 h-4 mr-1" /> Rejeter</Button>
-              <Button onClick={() => validerKYC("valide")} disabled={enCours} className="bg-emerald-600 hover:bg-emerald-700"><CheckCircle2 className="w-4 h-4 mr-1" /> Valider le KYC</Button>
-            </DialogFooter>
-          )}
+             <DialogFooter className="flex gap-2">
+               <Button variant="destructive" onClick={() => validerKYC("rejete")} disabled={enCours}><XCircle className="w-4 h-4 mr-1" /> Rejeter</Button>
+               <Button onClick={() => validerKYC("valide")} disabled={enCours} className="bg-emerald-600 hover:bg-emerald-700">
+                 {enCours ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <CheckCircle2 className="w-4 h-4 mr-1" />}
+                 Valider le KYC
+               </Button>
+             </DialogFooter>
+           )}
         </DialogContent>
       </Dialog>
     </div>
