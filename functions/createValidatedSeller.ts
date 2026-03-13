@@ -1,5 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
-import { hash } from 'npm:bcryptjs@2.4.3';
+import bcrypt from 'npm:bcryptjs@2.4.3';
 
 Deno.serve(async (req) => {
   try {
@@ -23,7 +23,7 @@ Deno.serve(async (req) => {
     }
 
     // Hacher le mot de passe
-    const hashedPassword = await hash(mot_de_passe, 10);
+    const hashedPassword = bcrypt.hashSync(mot_de_passe, 10);
 
     // Créer le CompteVendeur avec statut validé
     const compteVendeur = await base44.asServiceRole.entities.CompteVendeur.create({
