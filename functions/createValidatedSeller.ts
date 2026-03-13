@@ -37,51 +37,34 @@ Deno.serve(async (req) => {
     // Hacher le mot de passe
     const hashedPassword = bcrypt.hashSync(mot_de_passe, 10);
 
-    // Créer le CompteVendeur avec statut validé - MINIMAL
-    console.log('📝 Création du CompteVendeur minimal pour:', email);
-    const minimalData = {
+    // Créer le CompteVendeur avec statut validé
+    console.log('📝 Création du CompteVendeur pour:', email);
+    const dataCompte = {
       user_email: email,
       nom_complet,
       telephone: telephone || 'N/A',
+      ville: ville || 'N/A',
+      quartier: quartier || 'N/A',
+      numero_mobile_money: numero_mobile_money || '',
+      operateur_mobile_money: operateur_mobile_money || 'orange_money',
+      statut_kyc: 'valide',
+      statut: 'actif',
+      mot_de_passe_hash: hashedPassword,
+      video_vue: true,
+      conditions_acceptees: true,
+      catalogue_debloque: true,
+      solde_commission: 0,
+      total_commissions_gagnees: 0,
+      total_commissions_payees: 0,
+      nombre_ventes: 0,
+      ventes_reussies: 0,
+      ventes_echouees: 0,
     };
 
-    console.log('📋 Données minimales:', JSON.stringify(minimalData));
-
-    let compteVendeur;
-    try {
-      compteVendeur = await base44.asServiceRole.entities.CompteVendeur.create(minimalData);
-      console.log('✅ CompteVendeur minimal créé, ID:', compteVendeur?.id);
-
-      // Maintenant mettre à jour avec les champs supplémentaires
-      if (compteVendeur && compteVendeur.id) {
-        console.log('🔄 Mise à jour du CompteVendeur...');
-        await base44.asServiceRole.entities.CompteVendeur.update(compteVendeur.id, {
-          ville: ville || 'N/A',
-          quartier: quartier || 'N/A',
-          numero_mobile_money: numero_mobile_money || '',
-          operateur_mobile_money: operateur_mobile_money || 'orange_money',
-          statut_kyc: 'valide',
-          statut: 'actif',
-          mot_de_passe_hash: hashedPassword,
-          video_vue: true,
-          conditions_acceptees: true,
-          catalogue_debloque: true,
-          solde_commission: 0,
-          total_commissions_gagnees: 0,
-          total_commissions_payees: 0,
-          nombre_ventes: 0,
-          ventes_reussies: 0,
-          ventes_echouees: 0,
-        });
-        console.log('✅ CompteVendeur mis à jour');
-      }
-    } catch (createError) {
-      console.error('❌ ERREUR CompteVendeur:', createError.message || createError);
-      throw createError;
-    }
+    const compteVendeur = await base44.asServiceRole.entities.CompteVendeur.create(dataCompte);
 
     if (!compteVendeur || !compteVendeur.id) {
-      throw new Error('Échec création CompteVendeur');
+      throw new Error('Échec création CompteVendeur - no ID returned');
     }
 
     // Créer l'entité Vendeur (OBLIGATOIRE pour affichage dans la liste)
