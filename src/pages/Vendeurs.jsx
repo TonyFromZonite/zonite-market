@@ -287,8 +287,8 @@ function ValidationKYC() {
       <div className="grid grid-cols-3 gap-4">
         {[
           { label: "En attente", val: enAttente.length, couleur: "text-yellow-600" },
-          { label: "Validés", val: comptes.filter(c => c.statut_kyc === "valide").length, couleur: "text-emerald-600" },
-          { label: "Rejetés", val: comptes.filter(c => c.statut_kyc === "rejete").length, couleur: "text-red-600" },
+          { label: "Validés", val: sellers.filter(s => s.statut_kyc === "valide").length, couleur: "text-emerald-600" },
+          { label: "Rejetés", val: sellers.filter(s => s.statut_kyc === "rejete").length, couleur: "text-red-600" },
         ].map(({ label, val, couleur }) => (
           <div key={label} className="bg-white rounded-xl border border-slate-200 p-4 text-center">
             <p className={`text-2xl font-bold ${couleur}`}>{val}</p>
