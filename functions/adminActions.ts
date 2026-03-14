@@ -349,6 +349,82 @@ Deno.serve(async (req) => {
         return Response.json({ success: true });
       }
 
+      // ─── SYNC & VERIFICATION ─────────────────────────────────────────────────
+      case 'syncSellerBase44Users': {
+        // Action de synchronisation: vérifie tous les sellers et crée les users manquants
+        try {
+          const allSellers = await db.Seller.list();
+          const results = { total: 0, synced: 0, errors: [] };
+
+          for (const seller of allSellers) {
+            results.total++;
+            try {
+              // Vérifier si l'utilisateur Base44 existe
+              const users = await db.User.filter({ email: seller.email });
+
+              if (users.length === 0) {
+                // Créer l'utilisateur manquant
+                const newUser = await db.User.create({
+                  email: seller.email,
+                  full_name: seller.nom_complet,
+                  role: 'user'
+                });
+
+                // Mettre à jour le seller avec l'ID Base44
+                await db.Seller.update(seller.id, {
+                  user_id_base44: newUser.id
+                });
+
+                results.synced++;
+                console.log(`✅ Synced: ${seller.email} -> User ID: ${newUser.id}`);
+              } else {
+                // L'utilisateur existe, mettre à jour le seller
+                await db.Seller.update(seller.id, {
+                  user_id_base44: users[0].id
+                });
+                results.synced++;
+              }
+            } catch (itemError) {
+              results.errors.push({ email: seller.email, error: itemError.message });
+              console.error(`❌ Erreur sync ${seller.email}:`, itemError.message);
+            }
+          }
+
+          return Response.json({ success: true, sync_results: results });
+        } catch (error) {
+          return Response.json({ error: error.message }, { status: 500 });
+        }
+      }
+
+      case 'verifySellersSync': {
+        // Action de vérification: liste les sellers orphelins (sans user Base44)
+        try {
+          const allSellers = await db.Seller.list();
+          const orphans = [];
+          const synced = [];
+
+          for (const seller of allSellers) {
+            const users = await db.User.filter({ email: seller.email });
+            if (users.length === 0) {
+              orphans.push({ seller_id: seller.id, email: seller.email, nom: seller.nom_complet });
+            } else {
+              synced.push({ seller_id: seller.id, email: seller.email, user_id: users[0].id });
+            }
+          }
+
+          return Response.json({ 
+            success: true, 
+            total_sellers: allSellers.length, 
+            synced_count: synced.length, 
+            orphans_count: orphans.length,
+            orphan_sellers: orphans,
+            synced_sellers: synced 
+          });
+        } catch (error) {
+          return Response.json({ error: error.message }, { status: 500 });
+        }
+      }
+
       default:
         return Response.json({ error: `Action inconnue: ${action}` }, { status: 400 });
     }
