@@ -174,34 +174,58 @@ export default function EspaceVendeur() {
 
   return (
     <div className="min-h-screen bg-slate-50 pb-20">
-      {/* Modal KYC - Self-registered sellers awaiting validation */}
-      {activeModal === 'kyc' && (
+      {/* Restriction message modal */}
+      {restrictionMessage && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full text-center shadow-lg">
+            <AlertCircle className="w-12 h-12 text-yellow-500 mx-auto mb-3" />
+            <h2 className="text-lg font-bold text-slate-900 mb-2">Accès restreint</h2>
+            <p className="text-sm text-slate-500 mb-4">{restrictionMessage}</p>
+            <Button onClick={() => setRestrictionMessage(null)} className="w-full bg-[#1a1f5e] hover:bg-[#141952]">
+              Fermer
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Required modal based on seller status */}
+      {compteVendeur.seller_status === SELLER_STATUSES.KYC_REQUIRED && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl p-6 max-w-sm w-full text-center shadow-lg">
             <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <span className="text-3xl">📋</span>
             </div>
             <h2 className="text-lg font-bold text-slate-900 mb-2">Complétez votre dossier KYC</h2>
-            <p className="text-sm text-slate-500 mb-4">Nous avons besoin de vérifier votre identité avant que vous puissiez commencer à vendre. Cela prend quelques minutes.</p>
+            <p className="text-sm text-slate-500 mb-4">Nous avons besoin de vérifier votre identité avant que vous puissiez commencer à vendre.</p>
             <Link to={createPageUrl("ResoumissionKYC")}>
               <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold">
                 Soumettre mes documents →
               </Button>
             </Link>
-            <p className="text-xs text-slate-400 mt-3">Vous pouvez consulter votre profil en attendant.</p>
           </div>
         </div>
       )}
 
-      {/* Modal Video - Watch training before catalog access */}
-      {activeModal === 'video' && (
+      {/* KYC Pending modal */}
+      {compteVendeur.seller_status === SELLER_STATUSES.KYC_PENDING && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full text-center shadow-lg">
+            <Clock className="w-12 h-12 text-yellow-500 mx-auto mb-3" />
+            <h2 className="text-lg font-bold text-slate-900 mb-2">Dossier en révision</h2>
+            <p className="text-sm text-slate-500">Votre dossier KYC est en cours de vérification. Vous recevrez un email sous 24-48h.</p>
+          </div>
+        </div>
+      )}
+
+      {/* Training Required modal */}
+      {compteVendeur.seller_status === SELLER_STATUSES.KYC_APPROVED_TRAINING_REQUIRED && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl p-6 max-w-sm w-full text-center shadow-lg">
             <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <span className="text-3xl">🎬</span>
             </div>
             <h2 className="text-lg font-bold text-slate-900 mb-2">Formation obligatoire</h2>
-            <p className="text-sm text-slate-500 mb-4">Regardez la vidéo de présentation ZONITE pour déverrouiller l'accès au catalogue produits et commencer à vendre.</p>
+            <p className="text-sm text-slate-500 mb-4">Regardez la vidéo de présentation ZONITE pour déverrouiller l'accès complet.</p>
             <Link to={createPageUrl("VideoFormation")}>
               <Button className="w-full bg-[#F5C518] hover:bg-[#e0b010] text-[#1a1f5e] font-bold">
                 Commencer la formation →
