@@ -68,45 +68,59 @@ Deno.serve(async (req) => {
           report.summary.ghostAccountsFound++;
           
           if (autoFix) {
-            // Créer le compte Seller manquant
+            // Option 1: Créer le compte Seller manquant
+            // Option 2: Supprimer le User Base44 fantôme (recommandé si compte incomplet)
+            
             try {
-              const newSeller = await base44.asServiceRole.entities.Seller.create({
-                email: b44User.email,
-                nom_complet: b44User.full_name || b44User.email,
-                telephone: '',
-                mot_de_passe_hash: '', // Mot de passe déjà géré par Base44 User
-                statut_kyc: 'en_attente',
-                statut: 'en_attente_kyc',
-                video_vue: false,
-                conditions_acceptees: false,
-                catalogue_debloque: false,
-                taux_commission: 0,
-                solde_commission: 0,
-                total_commissions_gagnees: 0,
-                total_commissions_payees: 0,
-                nombre_ventes: 0,
-                chiffre_affaires_genere: 0,
-                ventes_reussies: 0,
-                ventes_echouees: 0
-              });
+              // Vérifier si le user Base44 a des données complètes
+              const hasCompleteData = b44User.full_name && b44User.full_name.trim().length > 0;
               
-              // Créer notification KYC en attente
-              await base44.asServiceRole.entities.Notification.create({
-                destinataire_email: b44User.email,
-                destinataire_role: 'vendeur',
-                type: 'kyc_soumis',
-                titre: '📋 Complétez votre KYC',
-                message: 'Veuillez soumettre vos documents KYC pour activer votre compte vendeur.',
-                lien: '/InscriptionVendeur',
-                priorite: 'importante'
-              });
-              
-              report.corrections.push(`Compte Seller créé pour ${b44User.email} (ID: ${newSeller.id})`);
-              report.summary.accountsFixed++;
+              if (hasCompleteData) {
+                // Créer le Seller manquant
+                const newSeller = await base44.asServiceRole.entities.Seller.create({
+                  email: b44User.email,
+                  nom_complet: b44User.full_name || b44User.email,
+                  telephone: '',
+                  mot_de_passe_hash: '', // Mot de passe déjà géré par Base44 User
+                  statut_kyc: 'en_attente',
+                  statut: 'en_attente_kyc',
+                  video_vue: false,
+                  conditions_acceptees: false,
+                  catalogue_debloque: false,
+                  taux_commission: 0,
+                  solde_commission: 0,
+                  total_commissions_gagnees: 0,
+                  total_commissions_payees: 0,
+                  nombre_ventes: 0,
+                  chiffre_affaires_genere: 0,
+                  ventes_reussies: 0,
+                  ventes_echouees: 0
+                });
+                
+                // Créer notification KYC en attente
+                await base44.asServiceRole.entities.Notification.create({
+                  destinataire_email: b44User.email,
+                  destinataire_role: 'vendeur',
+                  type: 'kyc_soumis',
+                  titre: '📋 Complétez votre KYC',
+                  message: 'Veuillez soumettre vos documents KYC pour activer votre compte vendeur.',
+                  lien: '/InscriptionVendeur',
+                  priorite: 'importante'
+                });
+                
+                report.corrections.push(`✅ Seller créé pour ${b44User.email} (ID: ${newSeller.id})`);
+                report.summary.accountsFixed++;
+                
+              } else {
+                // Supprimer le User Base44 incomplet/fantôme
+                await base44.asServiceRole.entities.User.delete(b44User.id);
+                report.corrections.push(`🗑️ User Base44 fantôme supprimé: ${b44User.email} (données incomplètes)`);
+                report.summary.accountsFixed++;
+              }
               
             } catch (error) {
-              console.error(`Erreur création seller pour ${b44User.email}:`, error);
-              report.corrections.push(`ERREUR: Impossible de créer Seller pour ${b44User.email}: ${error.message}`);
+              console.error(`Erreur traitement ghost account ${b44User.email}:`, error);
+              report.corrections.push(`❌ ERREUR: ${b44User.email}: ${error.message}`);
             }
           }
         }
@@ -135,11 +149,15 @@ Deno.serve(async (req) => {
         report.summary.orphanAccountsFound++;
         
         if (autoFix) {
-          // Pour les comptes orphelins, on ne peut pas créer automatiquement un User Base44
-          // car Base44 gère l'authentification. Ces comptes doivent être soit:
-          // 1. Supprimés de l'app
-          // 2. L'utilisateur doit se réinscrire via Base44
-          report.corrections.push(`ATTENTION: Compte orphelin ${seller.email} - Action manuelle requise (supprimer ou demander réinscription)`);
+          // Pour les comptes orphelins: supprimer le Seller de l'app car pas de User Base44 = pas d'authentification possible
+          try {
+            await base44.asServiceRole.entities.Seller.delete(seller.id);
+            report.corrections.push(`🗑️ Seller orphelin supprimé: ${seller.email} (pas de User Base44)`);
+            report.summary.accountsFixed++;
+          } catch (error) {
+            console.error(`Erreur suppression seller orphelin ${seller.email}:`, error);
+            report.corrections.push(`❌ ERREUR: Impossible de supprimer ${seller.email}: ${error.message}`);
+          }
         }
       }
     }
