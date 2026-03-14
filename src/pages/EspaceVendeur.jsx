@@ -63,7 +63,17 @@ export default function EspaceVendeur() {
         setUtilisateur({ email: emailVendeur });
         const sellers = await base44.entities.Seller.filter({ email: emailVendeur });
         if (sellers.length > 0) {
-          setCompteVendeur(sellers[0]);
+          const seller = sellers[0];
+          setCompteVendeur(seller);
+          
+          // Auto-initialize first-login modal based on account state
+          if (seller.created_by && seller.statut_kyc === "valide" && !seller.video_vue) {
+            setActiveModal('video');
+          } else if (!seller.created_by && seller.statut_kyc === "en_attente") {
+            setActiveModal('kyc');
+          } else if (seller.statut_kyc === "valide" && !seller.video_vue) {
+            setActiveModal('video');
+          }
         } else {
           window.location.href = createPageUrl("Connexion");
         }
