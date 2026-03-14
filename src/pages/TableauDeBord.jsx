@@ -128,7 +128,7 @@ function DashboardAdmin() {
 
   const { data: vendeurs = [], isLoading: chargementVendeurs } = useCachedQuery(
     'VENDEURS',
-    () => base44.entities.Vendeur.list(),
+    () => base44.entities.Seller.list(),
     { ttl: 60 * 60 * 1000 }
   );
 
@@ -149,7 +149,7 @@ function DashboardAdmin() {
 
   const { data: kycEnAttente } = useCachedQuery(
     'KYC',
-    () => base44.entities.CompteVendeur.filter({ statut_kyc: "en_attente" }),
+    () => base44.entities.Seller.filter({ statut_kyc: "en_attente" }),
     { ttl: 15 * 60 * 1000 }
   );
 

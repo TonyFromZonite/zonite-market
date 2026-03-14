@@ -41,7 +41,7 @@ export default function Commissions() {
 
   const { data: vendeurs = [], isLoading: chargementVendeurs } = useQuery({
     queryKey: ["vendeurs"],
-    queryFn: () => base44.entities.Vendeur.list(),
+    queryFn: () => base44.entities.Seller.list(),
   });
 
   const { data: paiements = [], isLoading: chargementPaiements } = useQuery({
@@ -69,7 +69,7 @@ export default function Commissions() {
       notes: notesPaiement,
     });
 
-    await base44.entities.Vendeur.update(vendeurPaiement.id, {
+    await base44.entities.Seller.update(vendeurPaiement.id, {
       solde_commission: Math.max(0, (vendeurPaiement.solde_commission || 0) - montantPaiement),
       total_commissions_payees: (vendeurPaiement.total_commissions_payees || 0) + montantPaiement,
     });
