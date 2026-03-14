@@ -7,10 +7,12 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import {
   ShoppingBag, Bell, Package,
   Clock, CheckCircle2, XCircle, Truck, Plus,
-  AlertCircle
+  AlertCircle, Eye
 } from "lucide-react";
 import { getVendeurSession, clearAllSessions } from "@/components/useSessionGuard";
 import { LOGO_URL as LOGO } from "@/components/constants";
@@ -30,6 +32,8 @@ export default function EspaceVendeur() {
   const [utilisateur, setUtilisateur] = useState(null);
   const [compteVendeur, setCompteVendeur] = useState(null);
   const [chargement, setChargement] = useState(true);
+  const [dialogKYC, setDialogKYC] = useState(false);
+  const [enCours, setEnCours] = useState(false);
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -107,7 +111,15 @@ export default function EspaceVendeur() {
         <div className="bg-white rounded-2xl p-6 max-w-sm w-full text-center shadow-lg">
           <Clock className="w-12 h-12 text-blue-400 mx-auto mb-3" />
           <h2 className="text-lg font-bold text-slate-900 mb-2">En attente de validation</h2>
-          <p className="text-sm text-slate-500">Votre compte est en cours de vérification par notre équipe. Vous recevrez une notification dès que votre compte sera activé.</p>
+          <p className="text-sm text-slate-500 mb-4">Votre compte est en cours de vérification par notre équipe.</p>
+          <Button onClick={() => setDialogKYC(true)} className="w-full bg-blue-600 hover:bg-blue-700">
+            <Eye className="w-4 h-4 mr-2" />
+            Voir mon dossier KYC
+          </Button>
+          <KYCDialog open={dialogKYC} onOpenChange={setDialogKYC} vendeur={compteVendeur} onSuccess={() => {
+            setCompteVendeur({...compteVendeur, statut_kyc: 'valide', statut: 'actif'});
+            setDialogKYC(false);
+          }} />
         </div>
       </div>
     );
@@ -275,5 +287,93 @@ export default function EspaceVendeur() {
         ))}
       </div>
     </div>
+  );
+}
+
+// Dialog KYC pour vendeur
+function KYCDialog({ open, onOpenChange, vendeur, onSuccess }) {
+  const [notes, setNotes] = useState(vendeur?.notes_admin || "");
+  const [enCours, setEnCours] = useState(false);
+
+  const verifierKYC = async () => {
+    if (!vendeur?.photo_identite_url || !vendeur?.selfie_url) {
+      alert('Documents KYC incomplets');
+      return;
+    }
+    
+    setEnCours(true);
+    try {
+      const response = await base44.functions.invoke('validateKYC', {
+        seller_id: vendeur.id,
+        statut: 'valide',
+        notes: notes || ''
+      });
+      
+      if (response.data?.success) {
+        onSuccess();
+        setNotes("");
+      } else {
+        alert('Erreur lors de la validation');
+      }
+    } catch (error) {
+      console.error('Erreur KYC:', error);
+      alert('Erreur: ' + error.message);
+    } finally {
+      setEnCours(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Mon dossier KYC</DialogTitle>
+        </DialogHeader>
+        
+        {vendeur && (
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-3 text-sm">
+              <div><p className="text-slate-400">Email</p><p className="font-medium">{vendeur.email}</p></div>
+              <div><p className="text-slate-400">Téléphone</p><p className="font-medium">{vendeur.telephone}</p></div>
+              <div><p className="text-slate-400">Ville</p><p className="font-medium">{vendeur.ville}</p></div>
+              <div><p className="text-slate-400">Quartier</p><p className="font-medium">{vendeur.quartier || "—"}</p></div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              {vendeur.photo_identite_url && (
+                <div>
+                  <p className="text-xs text-slate-400 mb-1">Pièce d'identité</p>
+                  <img src={vendeur.photo_identite_url} alt="ID" className="w-full rounded-lg object-cover h-32 cursor-pointer hover:opacity-80" onClick={() => window.open(vendeur.photo_identite_url)} />
+                </div>
+              )}
+              {vendeur.selfie_url && (
+                <div>
+                  <p className="text-xs text-slate-400 mb-1">Selfie</p>
+                  <img src={vendeur.selfie_url} alt="Selfie" className="w-full rounded-lg object-cover h-32 cursor-pointer hover:opacity-80" onClick={() => window.open(vendeur.selfie_url)} />
+                </div>
+              )}
+            </div>
+
+            {vendeur.notes_admin && (
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                <p className="text-xs text-yellow-800"><strong>Notes :</strong> {vendeur.notes_admin}</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Fermer
+          </Button>
+          {vendeur?.statut_kyc === "en_attente" && (
+            <Button onClick={verifierKYC} disabled={enCours} className="bg-emerald-600 hover:bg-emerald-700">
+              <CheckCircle2 className="w-4 h-4 mr-1" />
+              {enCours ? "Vérification..." : "Validé & Continuer"}
+            </Button>
+          )}
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
