@@ -207,7 +207,8 @@ export default function AuditSysteme() {
           <div className="space-y-4">
             {rapport.sections.map((section, idx) => {
               const Icone = ICONES_SECTION[section.name] || Shield;
-              const nbProblemes = section.issues.length;
+              // Ne compter que les vrais problèmes (pas les messages "info")
+              const nbProblemes = section.issues.filter(issue => issue.severity !== 'info').length;
               const nbCorrections = section.corrections.length;
               
               return (

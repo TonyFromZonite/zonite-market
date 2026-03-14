@@ -545,7 +545,9 @@ Deno.serve(async (req) => {
     report.summary.totalEntities = sellers.length + produits.length + ventes.length + commandesVendeur.length + zones.length + coursiers.length + notifications.length;
     
     for (const section of report.sections) {
-      report.summary.totalIssues += section.issues.length;
+      // Ne compter que les vrais problèmes (pas les messages "info")
+      const realIssues = section.issues.filter(issue => issue.severity !== 'info');
+      report.summary.totalIssues += realIssues.length;
       report.summary.correctedIssues += section.corrections.length;
     }
     
