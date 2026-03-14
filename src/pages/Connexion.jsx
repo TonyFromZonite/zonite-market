@@ -68,7 +68,6 @@ export default function Connexion() {
         userType: 'vendeur'
       });
       if (response.data.success) {
-        console.log("✅ Login success:", response.data.session);
         sessionStorage.setItem("vendeur_session", JSON.stringify(response.data.session));
         window.location.href = createPageUrl("EspaceVendeur");
       } else if (response.data.pendingApproval) {

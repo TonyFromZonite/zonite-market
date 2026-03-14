@@ -18,8 +18,19 @@ const authenticateSeller = async (base44, email, password) => {
     return { success: false, error: 'Email ou mot de passe incorrect' };
   }
 
-  // Allow login for any seller (access control happens on the frontend via SellerStatusEngine)
-  // No KYC or status checks here—the seller will see modals if their account isn't fully activated
+  // Vérifier le statut KYC
+  if (seller.statut_kyc !== 'valide') {
+    return { 
+      success: false, 
+      error: 'Votre compte est en attente de validation KYC',
+      status_code: 'kyc_pending'
+    };
+  }
+
+  // Vérifier le statut du compte
+  if (seller.statut !== 'actif') {
+    return { success: false, error: 'Votre compte est suspendu' };
+  }
 
   return { success: true, seller };
 };
@@ -79,18 +90,12 @@ Deno.serve(async (req) => {
     if (userType === 'vendeur' && email && password) {
       const result = await authenticateSeller(base44, email, password);
       if (result.success) {
-        const seller = result.seller;
         return Response.json({ 
           success: true, 
           session: { 
-            ...seller,
-            id: seller.id,
-            email: seller.email,
-            nom_complet: seller.nom_complet,
-            seller_status: seller.seller_status || "active_seller",
-            training_completed: seller.training_completed !== undefined ? seller.training_completed : false,
-            statut_kyc: seller.statut_kyc || "en_attente",
-            role: 'vendeur'
+            ...result.seller, 
+            role: 'vendeur',
+            email: result.seller.email 
           } 
         }, { status: 200 });
       }

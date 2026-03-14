@@ -16,7 +16,7 @@ import {
 import { getVendeurSession, clearAllSessions } from "@/components/useSessionGuard";
 import { LOGO_URL as LOGO } from "@/components/constants";
 import NotificationCenterVendeur from "@/components/NotificationCenterVendeur";
-import { SELLER_STATUSES, canAccessFeature, shouldShowTrainingModal } from "@/components/SellerStatusEngine";
+import { SELLER_STATUSES, canAccessFeature, getRestrictionMessage, getRequiredModal } from "@/components/SellerStatusEngine";
 
 const STATUTS = {
   en_attente_validation_admin: { label: "En attente", couleur: "bg-yellow-100 text-yellow-800" },
@@ -60,44 +60,19 @@ export default function EspaceVendeur() {
           return;
         }
         
-        setUtilisateur({ email: session.email });
-        
-        // If session already has seller data from login, use it directly
-        if (session.id && session.nom_complet) {
-          setCompteVendeur(session);
-          
-          // Subscribe to real-time updates by ID
-          const unsubscribe = base44.entities.Seller.subscribe((event) => {
-            if (event.id === session.id) {
-              setCompteVendeur(event.data);
-            }
-          });
-          
-          setChargement(false);
-          return unsubscribe;
-        }
-        
-        // Otherwise, fetch from database
         const emailVendeur = session.email;
+        setUtilisateur({ email: emailVendeur });
         const sellers = await base44.entities.Seller.filter({ email: emailVendeur });
         if (sellers.length > 0) {
           setCompteVendeur(sellers[0]);
-          
-          // Subscribe to real-time seller updates
-          const unsubscribe = base44.entities.Seller.subscribe((event) => {
-            if (event.data?.email === emailVendeur) {
-              setCompteVendeur(event.data);
-            }
-          });
-          
-          setChargement(false);
-          return unsubscribe;
         } else {
           window.location.href = createPageUrl("Connexion");
         }
       } catch (error) {
         console.error('Erreur chargement espace vendeur:', error);
         window.location.href = createPageUrl("Connexion");
+      } finally {
+        setChargement(false);
       }
     };
     charger();
@@ -242,8 +217,8 @@ export default function EspaceVendeur() {
         </div>
       )}
 
-      {/* Training Required modal - show if training not completed */}
-      {shouldShowTrainingModal(compteVendeur.seller_status, compteVendeur.training_completed) && (
+      {/* Training Required modal */}
+      {compteVendeur.seller_status === SELLER_STATUSES.KYC_APPROVED_TRAINING_REQUIRED && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl p-6 max-w-sm w-full text-center shadow-lg">
             <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -312,7 +287,7 @@ export default function EspaceVendeur() {
 
         {/* Actions rapides */}
         <div className="grid grid-cols-2 gap-3 mb-5">
-          {canAccessFeature(compteVendeur.seller_status, "sales", compteVendeur.training_completed) ? (
+          {canAccessFeature(compteVendeur.seller_status, "sales") ? (
             <Link to={createPageUrl("NouvelleCommandeVendeur")}>
               <div className="bg-[#1a1f5e] text-white rounded-2xl p-4 flex items-center gap-3 hover:bg-[#141952] transition-colors">
                 <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
@@ -325,8 +300,8 @@ export default function EspaceVendeur() {
               </div>
             </Link>
           ) : (
-            <button disabled className="cursor-not-allowed">
-              <div className="bg-slate-300 text-slate-500 rounded-2xl p-4 flex items-center gap-3 opacity-60">
+            <button onClick={() => setRestrictionMessage(getRestrictionMessage(compteVendeur.seller_status, "sales"))}>
+              <div className="bg-slate-300 text-slate-500 rounded-2xl p-4 flex items-center gap-3 cursor-not-allowed opacity-60">
                 <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
                   <Plus className="w-5 h-5" />
                 </div>
@@ -337,7 +312,7 @@ export default function EspaceVendeur() {
               </div>
             </button>
           )}
-          {canAccessFeature(compteVendeur.seller_status, "catalog", compteVendeur.training_completed) ? (
+          {canAccessFeature(compteVendeur.seller_status, "catalog") ? (
             <Link to={createPageUrl("CatalogueVendeur")}>
               <div className="bg-[#F5C518] text-[#1a1f5e] rounded-2xl p-4 flex items-center gap-3 hover:bg-[#e0b010] transition-colors">
                 <div className="w-10 h-10 bg-[#1a1f5e]/10 rounded-xl flex items-center justify-center">
@@ -350,8 +325,8 @@ export default function EspaceVendeur() {
               </div>
             </Link>
           ) : (
-            <button disabled className="cursor-not-allowed">
-              <div className="bg-slate-300 text-slate-500 rounded-2xl p-4 flex items-center gap-3 opacity-60">
+            <button onClick={() => setRestrictionMessage(getRestrictionMessage(compteVendeur.seller_status, "catalog"))}>
+              <div className="bg-slate-300 text-slate-500 rounded-2xl p-4 flex items-center gap-3 cursor-not-allowed opacity-60">
                 <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
                   <Package className="w-5 h-5" />
                 </div>
@@ -405,14 +380,14 @@ export default function EspaceVendeur() {
           { label: "Profil", page: "ProfilVendeur", icone: "👤", feature: "profile" },
           { label: "Aide", page: "AideVendeur", icone: "❓", feature: "dashboard" },
         ].map(({ label, page, icone, feature }) => {
-          const canAccess = canAccessFeature(compteVendeur.seller_status, feature, compteVendeur.training_completed);
+          const canAccess = canAccessFeature(compteVendeur.seller_status, feature);
           return canAccess ? (
             <Link key={page} to={createPageUrl(page)} className="flex-1 flex flex-col items-center py-2.5 gap-1 hover:text-[#1a1f5e] transition-colors">
               <span className="text-xl">{icone}</span>
               <span className="text-[10px] text-slate-500">{label}</span>
             </Link>
           ) : (
-            <button key={page} disabled className="flex-1 flex flex-col items-center py-2.5 gap-1 opacity-40 cursor-not-allowed">
+            <button key={page} onClick={() => setRestrictionMessage(getRestrictionMessage(compteVendeur.seller_status, feature))} className="flex-1 flex flex-col items-center py-2.5 gap-1 opacity-40 cursor-not-allowed">
               <span className="text-xl">{icone}</span>
               <span className="text-[10px] text-slate-400">{label}</span>
             </button>

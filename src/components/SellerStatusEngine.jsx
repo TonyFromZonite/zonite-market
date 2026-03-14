@@ -20,13 +20,9 @@ export const STATUS_LABELS = {
 };
 
 /**
- * Check if seller can access a feature based on their status and training completion
- * @param {string} sellerStatus - The seller's current status
- * @param {string} feature - The feature to check access for
- * @param {boolean} trainingCompleted - Whether seller has completed training
- * @returns {boolean} - True if seller can access the feature
+ * Check if seller can access a feature based on their status
  */
-export const canAccessFeature = (sellerStatus, feature, trainingCompleted = false) => {
+export const canAccessFeature = (sellerStatus, feature) => {
   const accessMap = {
     dashboard: {
       [SELLER_STATUSES.PENDING_VERIFICATION]: false,
@@ -65,16 +61,7 @@ export const canAccessFeature = (sellerStatus, feature, trainingCompleted = fals
     },
   };
 
-  let canAccess = accessMap[feature]?.[sellerStatus] ?? false;
-
-  // If training is required but not completed, block catalog/sales access
-  if (sellerStatus === SELLER_STATUSES.KYC_APPROVED_TRAINING_REQUIRED && !trainingCompleted) {
-    if (["catalog", "sales"].includes(feature)) {
-      canAccess = false;
-    }
-  }
-
-  return canAccess;
+  return accessMap[feature]?.[sellerStatus] ?? false;
 };
 
 /**
@@ -94,12 +81,9 @@ export const getRestrictionMessage = (sellerStatus, feature) => {
 };
 
 /**
- * Get the modal to show based on seller status and training completion
- * @param {string} sellerStatus - The seller's current status
- * @param {boolean} trainingCompleted - Whether seller has completed training
- * @returns {string|null} - Modal type to show, or null if no modal needed
+ * Get the modal to show based on seller status
  */
-export const getRequiredModal = (sellerStatus, trainingCompleted = false) => {
+export const getRequiredModal = (sellerStatus) => {
   const modals = {
     [SELLER_STATUSES.PENDING_VERIFICATION]: "email_verification",
     [SELLER_STATUSES.KYC_REQUIRED]: "kyc_submission",
@@ -107,21 +91,5 @@ export const getRequiredModal = (sellerStatus, trainingCompleted = false) => {
     [SELLER_STATUSES.KYC_APPROVED_TRAINING_REQUIRED]: "training_required",
   };
 
-  // Always show training modal if training not completed and seller is at training stage
-  if (sellerStatus === SELLER_STATUSES.KYC_APPROVED_TRAINING_REQUIRED && !trainingCompleted) {
-    return "training_required";
-  }
-
   return modals[sellerStatus] || null;
-};
-
-/**
- * Check if seller needs training modal to appear
- * Used to auto-show training modal when accessing restricted features
- * @param {string} sellerStatus - The seller's current status
- * @param {boolean} trainingCompleted - Whether seller has completed training
- * @returns {boolean} - True if training modal should appear
- */
-export const shouldShowTrainingModal = (sellerStatus, trainingCompleted = false) => {
-  return sellerStatus === SELLER_STATUSES.KYC_APPROVED_TRAINING_REQUIRED && !trainingCompleted;
 };
