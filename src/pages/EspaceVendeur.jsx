@@ -84,13 +84,22 @@ export default function EspaceVendeur() {
     { ttl: 5 * 60 * 1000, enabled: !!compteVendeur?.id }
   );
 
-  const { data: compteActualise } = useCachedQuery(
+  const { data: compteActualise, isLoading: loadingCompte } = useCachedQuery(
     'COMPTE_VENDEUR',
     () => base44.entities.Seller.filter({ id: compteVendeur.id }),
     { ttl: 3 * 60 * 1000, enabled: !!compteVendeur?.id }
   );
 
   const soldeAffiche = compteActualise?.[0] || compteVendeur;
+  
+  // Attendre le chargement du compte avant d'afficher
+  if (loadingCompte && !compteActualise) {
+    return (
+      <div className="p-4 space-y-4">
+        {Array(4).fill(0).map((_, i) => <Skeleton key={i} className="h-24 rounded-2xl" />)}
+      </div>
+    );
+  }
 
   const formater = (n) => `${Math.round(n || 0).toLocaleString("fr-FR")} FCFA`;
 
