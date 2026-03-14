@@ -161,16 +161,21 @@ export default function InscriptionVendeur() {
           <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <CheckCircle2 className="w-10 h-10 text-emerald-600" />
           </div>
-          <h2 className="text-xl font-bold text-slate-900 mb-2">Inscription envoyée ! 🎉</h2>
-          <p className="text-sm text-slate-500 mb-2">
-            Votre dossier a été soumis avec succès.
+          <h2 className="text-xl font-bold text-slate-900 mb-2">Inscription réussie ! 🎉</h2>
+          <p className="text-sm text-slate-500 mb-3">
+            Votre compte a été créé et vos identifiants ont été envoyés par email.
           </p>
+          <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 text-xs text-blue-800 mb-3">
+            <p className="font-semibold mb-1">📧 Email reçu :</p>
+            <p>Identifiants de connexion + instructions</p>
+          </div>
           <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-3 text-xs text-yellow-800 mb-5">
-            Notre équipe va examiner votre dossier KYC sous <strong>24 à 48h</strong>. Vous recevrez un email avec votre décision et vos identifiants de connexion.
+            <p className="font-semibold mb-1">⏳ Prochaine étape :</p>
+            <p>Notre équipe va vérifier votre dossier KYC sous <strong>24 à 48h</strong>. Vous recevrez un email de confirmation.</p>
           </div>
           <Link to={createPageUrl("Connexion")}>
             <Button className="w-full bg-[#1a1f5e] hover:bg-[#141952]">
-              Aller à la connexion
+              Me connecter
             </Button>
           </Link>
         </div>
