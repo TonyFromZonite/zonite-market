@@ -27,6 +27,7 @@ export default function GestionKYC() {
       const { data } = await base44.functions.invoke('getAllVendeurs', {});
       return Array.isArray(data) ? data : [];
     },
+    refetchInterval: 30000, // Rafraîchir toutes les 30 secondes
   });
 
   const validerKYC = async (statut) => {
@@ -54,6 +55,20 @@ export default function GestionKYC() {
 
   return (
     <div className="space-y-5">
+      <div className="flex items-center justify-between mb-2">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Validation KYC</h1>
+          <p className="text-sm text-slate-500 mt-1">
+            Gestion centralisée des dossiers KYC vendeurs
+          </p>
+        </div>
+        {enAttente.length > 0 && (
+          <Badge className="bg-yellow-500 text-white text-lg px-4 py-2">
+            {enAttente.length} en attente
+          </Badge>
+        )}
+      </div>
+
       <div className="grid grid-cols-3 gap-4">
         {[
           { label: "En attente", val: enAttente.length, couleur: "text-yellow-600" },
@@ -125,6 +140,21 @@ export default function GestionKYC() {
           </DialogHeader>
           {compteSelectionne && (
             <div className="space-y-4">
+              <div className="flex items-center justify-between bg-slate-50 rounded-lg p-3">
+                <div>
+                  <p className="text-xs text-slate-500">Statut KYC actuel</p>
+                  <Badge className={`${STATUTS_KYC[compteSelectionne.statut_kyc]?.couleur} border-0 mt-1`}>
+                    {STATUTS_KYC[compteSelectionne.statut_kyc]?.label}
+                  </Badge>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs text-slate-500">Date inscription</p>
+                  <p className="text-xs font-medium text-slate-900">
+                    {new Date(compteSelectionne.created_date).toLocaleDateString('fr-FR')}
+                  </p>
+                </div>
+              </div>
+
               {compteSelectionne.statut_kyc === "en_attente" && (
                 <div className="bg-blue-50 rounded-lg p-3 text-xs text-blue-700">
                   ℹ️ En validant ce dossier, un email avec les identifiants de connexion sera automatiquement envoyé au vendeur.
