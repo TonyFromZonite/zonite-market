@@ -12,7 +12,8 @@ export default function SelecteurLocalisation({
   produit, 
   value, 
   onChange,
-  disabled 
+  disabled,
+  livraisons = []
 }) {
   const [disponibilite, setDisponibilite] = useState(null);
   const [villeSelectionnee, setVilleSelectionnee] = useState(value?.ville || "");
@@ -59,18 +60,35 @@ export default function SelecteurLocalisation({
   const handleZoneChange = (zone) => {
     setZoneSelectionnee(zone);
     setVariationSelectionnee("");
-    onChange?.({ ville: villeSelectionnee, zone, variation: "", stockDisponible: 0 });
+    const prixLivraison = getPrixLivraisonZone(villeSelectionnee, zone);
+    onChange?.({ ville: villeSelectionnee, zone, variation: "", stockDisponible: 0, prixLivraison });
   };
 
   const handleVariationChange = (variation) => {
     setVariationSelectionnee(variation);
     const stock = getStockVariation(variation);
+    const prixLivraison = getPrixLivraisonZone(villeSelectionnee, zoneSelectionnee);
     onChange?.({ 
       ville: villeSelectionnee, 
       zone: zoneSelectionnee, 
       variation, 
-      stockDisponible: stock 
+      stockDisponible: stock,
+      prixLivraison
     });
+  };
+
+  const getPrixLivraisonZone = (ville, zone) => {
+    for (const livraison of livraisons) {
+      if (livraison.zones_couvertes) {
+        const zoneCouv = livraison.zones_couvertes.find(
+          zc => zc.ville === ville && (zc.quartiers === zone || zc.quartiers?.includes(zone))
+        );
+        if (zoneCouv) {
+          return zoneCouv.prix_standard || 0;
+        }
+      }
+    }
+    return 0;
   };
 
   const getVillesDisponibles = () => {

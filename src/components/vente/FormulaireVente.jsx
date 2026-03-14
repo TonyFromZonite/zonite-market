@@ -20,6 +20,8 @@ export default function FormulaireVente({ produits, vendeurs, livraisons, onSubm
     livraison_id: "",
     quantite: "",
     prix_unitaire: "",
+    prix_livraison: "",
+    mode_paiement: "paiement_livraison",
     client_nom: "",
     client_telephone: "",
     client_adresse: "",
@@ -56,13 +58,13 @@ export default function FormulaireVente({ produits, vendeurs, livraisons, onSubm
   // Calculs automatiques
   const qte = parseFloat(donnees.quantite) || 0;
   const prixUnit = parseFloat(donnees.prix_unitaire) || 0;
+  const prixLivraison = parseFloat(donnees.prix_livraison) || 0;
   const montantTotal = qte * prixUnit;
-  const coutLivraison = livraisonSelectionnee?.cout || 0;
   const prixGros = produitSelectionne?.prix_gros || 0;
   const prixAchat = produitSelectionne?.prix_achat || 0;
   const commission = (prixUnit - prixGros) * qte;
-  const profitZonite = (prixGros - prixAchat) * qte - coutLivraison;
-  const tauxCommission = 0;
+  const profitZonite = (prixGros - prixAchat) * qte - prixLivraison;
+  const tauxCommission = vendeurSelectionne?.taux_commission || 0;
 
   const modifier = (champ, valeur) => {
     setDonnees((prev) => ({ ...prev, [champ]: valeur }));
@@ -83,7 +85,8 @@ export default function FormulaireVente({ produits, vendeurs, livraisons, onSubm
       ...prev,
       ville: loc.ville,
       zone: loc.zone,
-      variation: loc.variation
+      variation: loc.variation,
+      prix_livraison: loc.prixLivraison || prev.prix_livraison
     }));
     setErreur("");
   };
@@ -106,8 +109,9 @@ export default function FormulaireVente({ produits, vendeurs, livraisons, onSubm
       ...donnees,
       quantite: qte,
       prix_unitaire: prixUnit,
+      prix_livraison: prixLivraison,
       montantTotal,
-      coutLivraison,
+      coutLivraison: prixLivraison,
       commission,
       tauxCommission,
       profitZonite,
@@ -160,6 +164,7 @@ export default function FormulaireVente({ produits, vendeurs, livraisons, onSubm
           value={localisation}
           onChange={handleLocalisationChange}
           disabled={enCours}
+          livraisons={livraisons}
         />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -213,19 +218,34 @@ export default function FormulaireVente({ produits, vendeurs, livraisons, onSubm
             )}
           </div>
 
-          {/* Livraison */}
+          {/* Prix Livraison */}
           <div className="space-y-2">
-            <Label>Livraison</Label>
-            <Select value={donnees.livraison_id} onValueChange={(v) => modifier("livraison_id", v)}>
+            <Label>Prix Livraison (FCFA) *</Label>
+            <Input
+              type="number"
+              min="0"
+              step="100"
+              value={donnees.prix_livraison}
+              onChange={(e) => modifier("prix_livraison", e.target.value)}
+              placeholder="0"
+            />
+            {localisation.zone && (
+              <p className="text-xs text-blue-600">
+                ✓ Prix auto-rempli pour {localisation.ville} - {localisation.zone}
+              </p>
+            )}
+          </div>
+
+          {/* Mode de Paiement */}
+          <div className="space-y-2">
+            <Label>Mode de Paiement *</Label>
+            <Select value={donnees.mode_paiement} onValueChange={(v) => modifier("mode_paiement", v)}>
               <SelectTrigger>
-                <SelectValue placeholder="Choisir une livraison" />
+                <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {livraisons.filter(l => l.statut === "actif").map((l) => (
-                  <SelectItem key={l.id} value={l.id}>
-                    {l.nom} – {formater(l.cout)}
-                  </SelectItem>
-                ))}
+                <SelectItem value="paiement_livraison">Paiement à la livraison</SelectItem>
+                <SelectItem value="paiement_avance">Paiement avant livraison</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -268,24 +288,62 @@ export default function FormulaireVente({ produits, vendeurs, livraisons, onSubm
           />
         </div>
 
-        {/* Récapitulatif financier */}
-        <div className="bg-slate-50 rounded-xl p-5 border border-slate-200">
-          <h3 className="text-sm font-semibold text-slate-900 mb-3">Récapitulatif Financier</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-            <div>
-              <p className="text-slate-500">Montant Total</p>
-              <p className="font-bold text-lg text-slate-900">{formater(montantTotal)}</p>
+        {/* Récapitulatif Commande */}
+        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-5 border-2 border-blue-200">
+          <h3 className="text-sm font-semibold text-slate-900 mb-4">📋 Récapitulatif de la Commande</h3>
+          
+          {/* Détails Produit */}
+          <div className="bg-white rounded-lg p-4 mb-4 space-y-2">
+            <div className="flex justify-between text-sm">
+              <span className="text-slate-600">Produit:</span>
+              <span className="font-semibold text-slate-900">{produitSelectionne?.nom || "—"}</span>
             </div>
-            <div>
-              <p className="text-slate-500">Coût Livraison</p>
-              <p className="font-bold text-lg text-slate-900">{formater(coutLivraison)}</p>
+            <div className="flex justify-between text-sm">
+              <span className="text-slate-600">Variation:</span>
+              <span className="font-semibold text-slate-900">{localisation.variation || "—"}</span>
             </div>
-            <div>
-              <p className="text-slate-500">Commission Vendeur</p>
+            <div className="flex justify-between text-sm">
+              <span className="text-slate-600">Localisation:</span>
+              <span className="font-semibold text-slate-900">
+                {localisation.ville && localisation.zone ? `${localisation.ville} - ${localisation.zone}` : "—"}
+              </span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-slate-600">Quantité:</span>
+              <span className="font-semibold text-slate-900">{qte || 0}</span>
+            </div>
+          </div>
+
+          {/* Calculs Financiers */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-white rounded-lg p-3">
+              <p className="text-xs text-slate-500 mb-1">Prix de Vente</p>
+              <p className="font-bold text-lg text-slate-900">{formater(prixUnit)}</p>
+            </div>
+            <div className="bg-white rounded-lg p-3">
+              <p className="text-xs text-slate-500 mb-1">Livraison</p>
+              <p className="font-bold text-lg text-slate-900">{formater(prixLivraison)}</p>
+            </div>
+            <div className="bg-white rounded-lg p-3">
+              <p className="text-xs text-slate-500 mb-1">Montant Total</p>
+              <p className="font-bold text-lg text-blue-600">{formater(montantTotal)}</p>
+            </div>
+            <div className="bg-white rounded-lg p-3">
+              <p className="text-xs text-slate-500 mb-1">Mode Paiement</p>
+              <p className="font-semibold text-xs text-slate-700">
+                {donnees.mode_paiement === "paiement_livraison" ? "À la livraison" : "Avant livraison"}
+              </p>
+            </div>
+          </div>
+
+          {/* Commissions */}
+          <div className="grid grid-cols-2 gap-3 mt-3">
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+              <p className="text-xs text-yellow-700 mb-1">Commission Vendeur</p>
               <p className="font-bold text-lg text-yellow-600">{formater(commission)}</p>
             </div>
-            <div>
-              <p className="text-slate-500">Profit ZONITE</p>
+            <div className={`${profitZonite >= 0 ? 'bg-emerald-50 border-emerald-200' : 'bg-red-50 border-red-200'} border rounded-lg p-3`}>
+              <p className={`text-xs mb-1 ${profitZonite >= 0 ? 'text-emerald-700' : 'text-red-700'}`}>Profit ZONITE</p>
               <p className={`font-bold text-lg ${profitZonite >= 0 ? "text-emerald-600" : "text-red-600"}`}>
                 {formater(profitZonite)}
               </p>
