@@ -62,13 +62,13 @@ Deno.serve(async (req) => {
         return Response.json({ success: true, result });
       }
 
-      // ─── VENDEUR ─────────────────────────────────────────────────────────────
+      // ─── VENDEUR (SELLER) ────────────────────────────────────────────────────
       case 'listVendeurs': {
-        const result = await db.Vendeur.list('-created_date');
+        const result = await db.Seller.list('-created_date');
         return Response.json({ success: true, result });
       }
       case 'updateVendeur': {
-        const result = await db.Vendeur.update(payload.vendeurId, payload.data);
+        const result = await db.Seller.update(payload.vendeurId, payload.data);
         return Response.json({ success: true, result });
       }
       case 'createVendeurInitial': {
@@ -137,7 +137,7 @@ Deno.serve(async (req) => {
       }
       case 'deleteVendeur': {
         try {
-          await db.Vendeur.delete(payload.vendeurId);
+          await db.Seller.delete(payload.vendeurId);
           return Response.json({ success: true });
         } catch (error) {
           if (error.message.includes('not found')) {
