@@ -258,8 +258,8 @@ export default function FormulaireVente({ produits, vendeurs, livraisons, onSubm
         </div>
         </div>
 
-        {/* Notes */}
-      <div className="space-y-2">
+          {/* Notes */}
+        <div className="space-y-2">
         <Label>Notes</Label>
         <Textarea
           value={donnees.notes}
