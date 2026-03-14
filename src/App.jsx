@@ -7,6 +7,8 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import SystemIntegrity from './pages/SystemIntegrity';
+import GestionZones from './pages/GestionZones';
+import GestionCoursiers from './pages/GestionCoursiers';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -63,6 +65,22 @@ const AuthenticatedApp = () => {
         element={
           <LayoutWrapper currentPageName="SystemIntegrity">
             <SystemIntegrity />
+          </LayoutWrapper>
+        }
+      />
+      <Route
+        path="/GestionZones"
+        element={
+          <LayoutWrapper currentPageName="GestionZones">
+            <GestionZones />
+          </LayoutWrapper>
+        }
+      />
+      <Route
+        path="/GestionCoursiers"
+        element={
+          <LayoutWrapper currentPageName="GestionCoursiers">
+            <GestionCoursiers />
           </LayoutWrapper>
         }
       />
