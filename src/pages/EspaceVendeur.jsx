@@ -16,6 +16,7 @@ import {
 import { getVendeurSession, clearAllSessions } from "@/components/useSessionGuard";
 import { LOGO_URL as LOGO } from "@/components/constants";
 import NotificationCenterVendeur from "@/components/NotificationCenterVendeur";
+import { SELLER_STATUSES, canAccessFeature, getRestrictionMessage, getRequiredModal } from "@/components/SellerStatusEngine";
 
 const STATUTS = {
   en_attente_validation_admin: { label: "En attente", couleur: "bg-yellow-100 text-yellow-800" },
