@@ -85,23 +85,46 @@ Deno.serve(async (req) => {
            const seller = await db.Seller.create({
              email, nom_complet, telephone: telephone || '', ville: ville || '', quartier: quartier || '',
              numero_mobile_money: numero_mobile_money || '', operateur_mobile_money,
-             mot_de_passe_hash: hashedPassword, statut_kyc: 'en_attente', statut: 'en_attente_kyc',
-             video_vue: false, conditions_acceptees: false, catalogue_debloque: false,
+             mot_de_passe_hash: hashedPassword, 
+             statut_kyc: 'valide',  // NOUVEAU : Admin-created sellers are immediately valid
+             statut: 'actif',       // NOUVEAU : Statut actif immédiatement
+             video_vue: false, conditions_acceptees: true, catalogue_debloque: false,  // NOUVEAU : conditions_acceptees = true
              taux_commission: 10, solde_commission: 0, total_commissions_gagnees: 0, total_commissions_payees: 0,
              nombre_ventes: 0, chiffre_affaires_genere: 0, ventes_reussies: 0, ventes_echouees: 0,
              date_embauche: new Date().toISOString().split('T')[0]
            });
-           
-           // Créer aussi l'utilisateur Base44 avec rôle vendeur
+
+           // NOUVEAU : Créer immédiatement l'utilisateur Base44 avec rôle vendeur (statut actif)
+           let userCreated = false;
            try {
              await base44.users.inviteUser(email, 'vendeur');
+             userCreated = true;
+             console.log(`✅ Utilisateur Base44 créé pour ${email}`);
            } catch (userError) {
-             console.warn('Erreur création utilisateur Base44:', userError.message);
+             console.error('❌ Erreur création utilisateur Base44:', userError.message);
            }
-           
+
            const adminUser = await base44.auth.me().catch(() => null);
-           await db.JournalAudit.create({ action: 'Vendeur créé par admin', module: 'vendeur', details: `Vendeur ${nom_complet} (${email}) créé`, utilisateur: adminUser?.email || 'system', entite_id: seller.id });
-           return Response.json({ success: true, seller_id: seller.id, email, status: 'en_attente_kyc' });
+           await db.JournalAudit.create({ 
+             action: 'Vendeur créé par admin (immédiatement actif)', 
+             module: 'vendeur', 
+             details: `Vendeur ${nom_complet} (${email}) créé par ${adminUser?.email || 'admin'} - Statut: ACTIF${userCreated ? ' - Utilisateur Base44 créé' : ''}`, 
+             utilisateur: adminUser?.email || 'system', 
+             entite_id: seller.id 
+           });
+
+           // NOUVEAU : Envoyer email avec identifiants immédiatement
+           try {
+             await base44.integrations.Core.SendEmail({
+               to: email,
+               subject: '🎉 Votre compte ZONITE a été créé - Identifiants de connexion',
+               body: `Bonjour ${nom_complet},\n\n🎉 Bienvenue chez ZONITE !\n\nVotre compte vendeur a été créé par notre équipe et est immédiatement actif.\n\n📧 Email : ${email}\n🔐 Mot de passe : ${mot_de_passe}\n\n⚠️ Pour votre sécurité, changez ce mot de passe dès votre première connexion.\n\n📹 Prochaine étape : Regardez la vidéo de formation pour accéder à votre catalogue de produits.\n\nBon courage et bonne vente !\n\nL'équipe ZONITE`
+             });
+           } catch (e) {
+             console.error('Email send failed:', e.message);
+           }
+
+           return Response.json({ success: true, seller_id: seller.id, email, status: 'actif', user_created: userCreated });
          } catch (error) {
            console.error('Erreur création vendeur:', error);
            return Response.json({ error: error.message }, { status: 500 });
