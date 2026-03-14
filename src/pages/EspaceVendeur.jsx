@@ -65,6 +65,15 @@ export default function EspaceVendeur() {
         const sellers = await base44.entities.Seller.filter({ email: emailVendeur });
         if (sellers.length > 0) {
           setCompteVendeur(sellers[0]);
+          
+          // Subscribe to real-time seller updates
+          const unsubscribe = base44.entities.Seller.subscribe((event) => {
+            if (event.data?.email === emailVendeur) {
+              setCompteVendeur(event.data);
+            }
+          });
+          
+          return unsubscribe;
         } else {
           window.location.href = createPageUrl("Connexion");
         }
