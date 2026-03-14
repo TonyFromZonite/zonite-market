@@ -48,8 +48,23 @@ export default function InscriptionVendeur() {
   const [uploadEnCours, setUploadEnCours] = useState({ id: false, idVerso: false, selfie: false });
   const [erreur, setErreur] = useState("");
   const [succes, setSucces] = useState(false);
+  const [emailVerifie, setEmailVerifie] = useState(null); // null = pas verifié, true = ok, false = déjà utilisé
 
   const modifier = (champ, val) => setForm(p => ({ ...p, [champ]: val }));
+
+  // Vérifier l'unicité de l'email en temps réel
+  const verifierEmail = async (email) => {
+    if (!email || !email.includes("@")) {
+      setEmailVerifie(null);
+      return;
+    }
+    try {
+      const response = await base44.functions.invoke('checkEmailExists', { email });
+      setEmailVerifie(!response.data.exists);
+    } catch (e) {
+      setEmailVerifie(null);
+    }
+  };
 
   const uploadFichier = async (fichier, champ) => {
     const key = champ === "photo_identite_url" ? "id" : champ === "photo_identite_verso_url" ? "idVerso" : "selfie";
