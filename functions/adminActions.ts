@@ -72,64 +72,12 @@ Deno.serve(async (req) => {
         return Response.json({ success: true, result });
       }
       case 'createVendeurInitial': {
-        const { nom_complet, email, telephone, ville, quartier, mot_de_passe, numero_mobile_money, operateur_mobile_money } = payload.data || payload;
-        
-        if (!nom_complet || !email || !mot_de_passe) {
-          throw new Error('Données manquantes (nom, email, mot de passe requis)');
-        }
-
-        // Vérifier si un vendeur existe déjà
-        const sellersExistants = await db.Seller.filter({ email });
-        if (sellersExistants.length > 0) {
-          throw new Error('Un compte vendeur existe déjà avec cet email');
-        }
-
-        // Hacher le mot de passe
-        const hashedPassword = await bcrypt.hash(mot_de_passe, 10);
-
-        // Créer le vendeur validé
-        const sellerData = {
-          email,
-          nom_complet,
-          telephone: telephone || '',
-          ville: ville || '',
-          quartier: quartier || '',
-          numero_mobile_money: numero_mobile_money || '',
-          operateur_mobile_money: operateur_mobile_money || 'orange_money',
-          mot_de_passe_hash: hashedPassword,
-          statut_kyc: 'valide',
-          statut: 'actif',
-          video_vue: true,
-          conditions_acceptees: true,
-          catalogue_debloque: true,
-          date_embauche: new Date().toISOString().split('T')[0],
-          solde_commission: 0,
-          total_commissions_gagnees: 0,
-          total_commissions_payees: 0,
-          nombre_ventes: 0,
-          chiffre_affaires_genere: 0,
-        };
-
-        const sellerCree = await db.Seller.create(sellerData);
-
-        // Audit log
-        await db.JournalAudit.create({
-          action: 'Vendeur créé par admin',
-          module: 'vendeur',
-          details: `Vendeur ${nom_complet} (${email}) créé directement par admin`,
-          utilisateur: rootSession?.email || 'admin',
-          entite_id: sellerCree.id,
-        }).catch(() => {});
-
-        // Notification in-app
-        await db.NotificationVendeur.create({
-          vendeur_email: email,
-          titre: '🎉 Bienvenue chez ZONITE !',
-          message: 'Votre compte vendeur a été créé. Connectez-vous avec vos identifiants pour commencer.',
-          type: 'succes',
-        }).catch(() => {});
-
-        return Response.json({ success: true, message: 'Vendeur créé avec succès', seller_id: sellerCree.id });
+        // ⚠️ DÉPRÉCIÉ: Utiliser createSellerTransactional à la place
+        // Cette fonction est conservée pour la rétrocompatibilité
+        const vendeurResult = await base44.functions.invoke('createSellerTransactional', payload);
+        return vendeurResult.data ? 
+          Response.json(vendeurResult.data) : 
+          Response.json({ error: 'Erreur création vendeur transactionnelle' }, { status: 500 });
       }
       case 'validateKycAndActivate': {
         const validateResult = await base44.functions.invoke('validateKycAndActivateSeller', payload);
