@@ -162,9 +162,6 @@ export default function EspaceVendeur() {
   const commandesEchouees = (commandes || []).filter(c => ["echec_livraison", "annulee"].includes(c.statut)).length;
   const commandesEnLivraison = (commandes || []).filter(c => c.statut === "en_livraison").length;
 
-  // Modal vidéo si catalogue non déverrouillé
-  const [showVideoModal, setShowVideoModal] = useState(!compteVendeur?.catalogue_debloque);
-
   // État de chargement si données critiques manquent
   if (!compteVendeur || !soldeAffiche) {
     return (
