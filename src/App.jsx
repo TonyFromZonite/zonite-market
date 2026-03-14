@@ -64,78 +64,43 @@ const AuthenticatedApp = () => {
   // Render the main app
   return (
     <Routes>
-      <Route path="/" element={
-        <LayoutWrapper currentPageName={mainPageKey}>
-          <MainPage />
-        </LayoutWrapper>
-      } />
-      {Object.entries(Pages).map(([path, Page]) => (
-        <Route
-          key={path}
-          path={`/${path}`}
-          element={
-            <LayoutWrapper currentPageName={path}>
-              <Page />
-            </LayoutWrapper>
-          }
-        />
-      ))}
-      <Route
-        path="/SystemIntegrity"
-        element={
-          <LayoutWrapper currentPageName="SystemIntegrity">
-            <SystemIntegrity />
-          </LayoutWrapper>
-        }
-      />
-      <Route
-        path="/GestionZones"
-        element={
-          <LayoutWrapper currentPageName="GestionZones">
-            <GestionZones />
-          </LayoutWrapper>
-        }
-      />
-      <Route
-        path="/GestionCoursiers"
-        element={
-          <LayoutWrapper currentPageName="GestionCoursiers">
-            <GestionCoursiers />
-          </LayoutWrapper>
-        }
-      />
-      <Route
-        path="/DataConsistency"
-        element={
-          <LayoutWrapper currentPageName="DataConsistency">
-            <DataConsistency />
-          </LayoutWrapper>
-        }
-      />
-      <Route
-        path="/AuditSysteme"
-        element={
-          <LayoutWrapper currentPageName="AuditSysteme">
-            <AuditSysteme />
-          </LayoutWrapper>
-        }
-      />
-      <Route
-        path="/AuditComptes"
-        element={
-          <LayoutWrapper currentPageName="AuditComptes">
-            <AuditComptes />
-          </LayoutWrapper>
-        }
-      />
-      <Route
-        path="/AuditComplet"
-        element={
-          <LayoutWrapper currentPageName="AuditComplet">
-            <AuditComplet />
-          </LayoutWrapper>
-        }
-      />
+      <Route path="/" element={<Navigate to="/Connexion" replace />} />
+      
+      {/* Pages Admin */}
+      <Route path="/TableauDeBord" element={<Layout currentPageName="TableauDeBord"><TableauDeBord /></Layout>} />
+      <Route path="/NouvelleVente" element={<Layout currentPageName="NouvelleVente"><NouvelleVente /></Layout>} />
+      <Route path="/Commandes" element={<Layout currentPageName="Commandes"><Commandes /></Layout>} />
+      <Route path="/GestionCommandes" element={<Layout currentPageName="GestionCommandes"><GestionCommandes /></Layout>} />
+      <Route path="/CommandesVendeurs" element={<Layout currentPageName="CommandesVendeurs"><CommandesVendeurs /></Layout>} />
+      <Route path="/Produits" element={<Layout currentPageName="Produits"><Produits /></Layout>} />
+      <Route path="/Vendeurs" element={<Layout currentPageName="Vendeurs"><Vendeurs /></Layout>} />
+      <Route path="/GestionZones" element={<Layout currentPageName="GestionZones"><GestionZones /></Layout>} />
+      <Route path="/GestionCoursiers" element={<Layout currentPageName="GestionCoursiers"><GestionCoursiers /></Layout>} />
+      <Route path="/SupportAdmin" element={<Layout currentPageName="SupportAdmin"><SupportAdmin /></Layout>} />
+      <Route path="/JournalAudit" element={<Layout currentPageName="JournalAudit"><JournalAudit /></Layout>} />
+      <Route path="/AuditComplet" element={<Layout currentPageName="AuditComplet"><AuditComplet /></Layout>} />
+      <Route path="/AuditSysteme" element={<Layout currentPageName="AuditSysteme"><AuditSysteme /></Layout>} />
+      <Route path="/AuditComptes" element={<Layout currentPageName="AuditComptes"><AuditComptes /></Layout>} />
+      <Route path="/SystemIntegrity" element={<Layout currentPageName="SystemIntegrity"><SystemIntegrity /></Layout>} />
+      <Route path="/DataConsistency" element={<Layout currentPageName="DataConsistency"><DataConsistency /></Layout>} />
+      <Route path="/GestionPermissionsAdmin" element={<Layout currentPageName="GestionPermissionsAdmin"><GestionPermissionsAdmin /></Layout>} />
+      <Route path="/GestionSousAdmins" element={<Layout currentPageName="GestionSousAdmins"><GestionSousAdmins /></Layout>} />
+      <Route path="/ConfigurationApp" element={<Layout currentPageName="ConfigurationApp"><ConfigurationApp /></Layout>} />
+      
+      {/* Pages Vendeurs (sans Layout) */}
+      <Route path="/Connexion" element={<Connexion />} />
+      <Route path="/EspaceVendeur" element={<EspaceVendeur />} />
+      <Route path="/InscriptionVendeur" element={<InscriptionVendeur />} />
+      <Route path="/VideoFormation" element={<VideoFormation />} />
+      <Route path="/CatalogueVendeur" element={<CatalogueVendeur />} />
+      <Route path="/NouvelleCommandeVendeur" element={<NouvelleCommandeVendeur />} />
+      <Route path="/MesCommandesVendeur" element={<MesCommandesVendeur />} />
+      <Route path="/ProfilVendeur" element={<ProfilVendeur />} />
+      <Route path="/DemandePaiement" element={<DemandePaiement />} />
+      <Route path="/NotificationsVendeur" element={<NotificationsVendeur />} />
+      <Route path="/AideVendeur" element={<AideVendeur />} />
+      <Route path="/EspaceSousAdmin" element={<EspaceSousAdmin />} />
+      
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
