@@ -91,6 +91,14 @@ Deno.serve(async (req) => {
              nombre_ventes: 0, chiffre_affaires_genere: 0, ventes_reussies: 0, ventes_echouees: 0,
              date_embauche: new Date().toISOString().split('T')[0]
            });
+           
+           // Créer aussi l'utilisateur Base44 avec rôle vendeur
+           try {
+             await base44.users.inviteUser(email, 'vendeur');
+           } catch (userError) {
+             console.warn('Erreur création utilisateur Base44:', userError.message);
+           }
+           
            const adminUser = await base44.auth.me().catch(() => null);
            await db.JournalAudit.create({ action: 'Vendeur créé par admin', module: 'vendeur', details: `Vendeur ${nom_complet} (${email}) créé`, utilisateur: adminUser?.email || 'system', entite_id: seller.id });
            return Response.json({ success: true, seller_id: seller.id, email, status: 'en_attente_kyc' });
