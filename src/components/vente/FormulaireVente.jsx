@@ -162,7 +162,7 @@ export default function FormulaireVente({ produits, vendeurs, livraisons, onSubm
           disabled={enCours}
         />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
 
       {/* Vendeur */}
         <div className="space-y-2">
