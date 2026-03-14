@@ -165,6 +165,21 @@ Deno.serve(async (req) => {
       }
       case 'createSousAdmin': {
         const result = await db.SousAdmin.create(payload.data);
+
+        // Envoyer email avec identifiants de connexion
+        const { email, nom_complet, mot_de_passe } = payload.data;
+        if (email && nom_complet && mot_de_passe) {
+          try {
+            await base44.integrations.Core.SendEmail({
+              to: email,
+              subject: '🔐 Accès ZONITE Administrateur - Vos identifiants de connexion',
+              body: `Bonjour ${nom_complet},\n\n🔐 Vous avez été nommé sous-administrateur de ZONITE.\n\nVoici vos identifiants de connexion :\n\n📧 Email : ${email}\n🔑 Mot de passe : ${mot_de_passe}\n\n⚠️ Pour votre sécurité, changez ce mot de passe dès votre première connexion.\n\n🔗 Lien de connexion : ${Deno.env.get('APP_URL') || 'https://zonite.app'}\n\nBienvenue dans l'équipe !\n\nL'équipe ZONITE`
+            });
+          } catch (e) {
+            console.error('Email send failed:', e.message);
+          }
+        }
+
         return Response.json({ success: true, result });
       }
       case 'deleteSousAdmin': {
