@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2, Loader2, Search, Wallet, DollarSign, AlertCircle, CheckCircle2, XCircle, Eye, Clock } from "lucide-react";
+import { Plus, Pencil, Trash2, Loader2, Search, Wallet, DollarSign, AlertCircle, CheckCircle2, XCircle, Eye, Clock, UserCog } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/components/ui/use-toast";
 
