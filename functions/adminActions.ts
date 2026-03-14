@@ -72,7 +72,7 @@ Deno.serve(async (req) => {
         return Response.json({ success: true, result });
       }
       case 'createVendeurInitial': {
-        const { nom_complet, email, telephone, ville, quartier, mot_de_passe, numero_mobile_money, operateur_mobile_money } = payload;
+        const { nom_complet, email, telephone, ville, quartier, mot_de_passe, numero_mobile_money, operateur_mobile_money } = payload.data || payload;
         
         if (!nom_complet || !email || !mot_de_passe) {
           throw new Error('Données manquantes (nom, email, mot de passe requis)');
