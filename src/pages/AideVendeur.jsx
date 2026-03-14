@@ -58,8 +58,8 @@ export default function AideVendeur() {
   }, []);
 
   const { data: tickets = [] } = useQuery({
-    queryKey: ["tickets_vendeur", compteVendeur?.user_email],
-    queryFn: () => base44.entities.TicketSupport.filter({ vendeur_email: compteVendeur.user_email }, "-created_date"),
+    queryKey: ["tickets_vendeur", compteVendeur?.email],
+    queryFn: () => base44.entities.TicketSupport.filter({ vendeur_email: compteVendeur.email }, "-created_date"),
     enabled: !!compteVendeur,
   });
 
