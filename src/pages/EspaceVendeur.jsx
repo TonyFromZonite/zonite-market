@@ -127,39 +127,7 @@ export default function EspaceVendeur() {
     );
   }
 
-  // Compte en attente de validation KYC
-  if (compteVendeur.statut === "en_attente_kyc") {
-    return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl p-6 max-w-sm w-full text-center shadow-lg">
-          <Clock className="w-12 h-12 text-yellow-400 mx-auto mb-3" />
-          <h2 className="text-lg font-bold text-slate-900 mb-2">Validation en cours</h2>
-          <p className="text-sm text-slate-500">Votre compte est en cours de validation par notre équipe. Vous recevrez un email sous 24-48h avec la décision.</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (compteVendeur.statut_kyc === "en_attente") {
-    return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl p-6 max-w-sm w-full text-center shadow-lg">
-          <Clock className="w-12 h-12 text-blue-400 mx-auto mb-3" />
-          <h2 className="text-lg font-bold text-slate-900 mb-2">En attente de validation</h2>
-          <p className="text-sm text-slate-500 mb-4">Votre compte est en cours de vérification par notre équipe.</p>
-          <Button onClick={() => setDialogKYC(true)} className="w-full bg-blue-600 hover:bg-blue-700">
-            <Eye className="w-4 h-4 mr-2" />
-            Voir mon dossier KYC
-          </Button>
-          <KYCDialog open={dialogKYC} onOpenChange={setDialogKYC} vendeur={compteVendeur} onSuccess={() => {
-            setCompteVendeur({...compteVendeur, statut_kyc: 'valide', statut: 'actif'});
-            setDialogKYC(false);
-          }} />
-        </div>
-      </div>
-    );
-  }
-
+  // Compte rejeté KYC
   if (compteVendeur.statut_kyc === "rejete") {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
@@ -171,6 +139,24 @@ export default function EspaceVendeur() {
       </div>
     );
   }
+
+  // Auto-initialize first-login modal based on account state
+  useEffect(() => {
+    if (!compteVendeur || activeModal) return;
+
+    // Seller created by admin: KYC is auto-validated, show video modal if not watched
+    if (compteVendeur.created_by && compteVendeur.statut_kyc === "valide" && !compteVendeur.video_vue) {
+      setActiveModal('video');
+    } 
+    // Self-registered seller: KYC status is pending, show KYC modal
+    else if (!compteVendeur.created_by && compteVendeur.statut_kyc === "en_attente") {
+      setActiveModal('kyc');
+    }
+    // KYC approved but video not watched yet
+    else if (compteVendeur.statut_kyc === "valide" && !compteVendeur.video_vue) {
+      setActiveModal('video');
+    }
+  }, [compteVendeur, activeModal]);
   const commandesEnAttente = (commandes || []).filter(c => ["en_attente_validation_admin", "validee_admin", "attribuee_livreur"].includes(c.statut)).length;
   const commandesReussies = (commandes || []).filter(c => c.statut === "livree").length;
   const commandesEchouees = (commandes || []).filter(c => ["echec_livraison", "annulee"].includes(c.statut)).length;
