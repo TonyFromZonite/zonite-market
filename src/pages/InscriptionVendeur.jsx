@@ -81,6 +81,9 @@ export default function InscriptionVendeur() {
     if (!form.email.includes("@")) {
       setErreur("L'email saisi n'est pas valide."); return;
     }
+    if (emailVerifie === false) {
+      setErreur("Cet email est déjà utilisé. Veuillez en choisir un autre."); return;
+    }
     if (form.mot_de_passe.length < 6) {
       setErreur("Le mot de passe doit contenir au moins 6 caractères."); return;
     }
