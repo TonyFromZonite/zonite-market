@@ -74,10 +74,13 @@ Deno.serve(async (req) => {
       case 'createVendeurInitial': {
         // ⚠️ DÉPRÉCIÉ: Utiliser createSellerTransactional à la place
         // Cette fonction est conservée pour la rétrocompatibilité
-        const vendeurResult = await base44.functions.invoke('createSellerTransactional', payload);
-        return vendeurResult.data ? 
-          Response.json(vendeurResult.data) : 
-          Response.json({ error: 'Erreur création vendeur transactionnelle' }, { status: 500 });
+        try {
+          const vendeurResult = await base44.asServiceRole.functions.invoke('createSellerTransactional', payload.data || payload);
+          return Response.json(vendeurResult);
+        } catch (error) {
+          console.error('Erreur createSellerTransactional:', error);
+          return Response.json({ error: error.message }, { status: 500 });
+        }
       }
       case 'validateKycAndActivate': {
         const validateResult = await base44.functions.invoke('validateKycAndActivateSeller', payload);
