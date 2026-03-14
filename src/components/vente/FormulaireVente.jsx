@@ -163,154 +163,153 @@ export default function FormulaireVente({ produits, vendeurs, livraisons, onSubm
         />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {/* Vendeur */}
+          <div className="space-y-2">
+            <Label>Vendeur *</Label>
+            <Select value={donnees.vendeur_id} onValueChange={(v) => modifier("vendeur_id", v)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Choisir un vendeur" />
+              </SelectTrigger>
+              <SelectContent>
+                {vendeurs.filter(v => v.statut === "actif").map((v) => (
+                  <SelectItem key={v.id} value={v.id}>
+                    {v.nom_complet}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-      {/* Vendeur */}
-        <div className="space-y-2">
-          <Label>Vendeur *</Label>
-          <Select value={donnees.vendeur_id} onValueChange={(v) => modifier("vendeur_id", v)}>
-            <SelectTrigger>
-              <SelectValue placeholder="Choisir un vendeur" />
-            </SelectTrigger>
-            <SelectContent>
-              {vendeurs.filter(v => v.statut === "actif").map((v) => (
-                <SelectItem key={v.id} value={v.id}>
-                  {v.nom_complet}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {/* Quantité */}
+          <div className="space-y-2">
+            <Label>Quantité *</Label>
+            <Input
+              type="number"
+              min="1"
+              value={donnees.quantite}
+              onFocus={(e) => e.target.select()}
+              onChange={(e) => modifier("quantite", e.target.value)}
+              onBlur={(e) => { if (e.target.value === "") modifier("quantite", ""); }}
+              placeholder="0"
+            />
+          </div>
+
+          {/* Prix unitaire */}
+          <div className="space-y-2">
+            <Label>Prix de Vente (FCFA) *</Label>
+            <Input
+              type="number"
+              min="0"
+              step="0.01"
+              value={donnees.prix_unitaire}
+              onFocus={(e) => e.target.select()}
+              onChange={(e) => modifier("prix_unitaire", e.target.value)}
+              placeholder="0"
+            />
+            {produitSelectionne && (
+              <p className="text-xs text-slate-400">
+                Prix de gros (minimum) : {(produitSelectionne.prix_gros || 0).toLocaleString("fr-FR")} FCFA
+              </p>
+            )}
+          </div>
+
+          {/* Livraison */}
+          <div className="space-y-2">
+            <Label>Livraison</Label>
+            <Select value={donnees.livraison_id} onValueChange={(v) => modifier("livraison_id", v)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Choisir une livraison" />
+              </SelectTrigger>
+              <SelectContent>
+                {livraisons.filter(l => l.statut === "actif").map((l) => (
+                  <SelectItem key={l.id} value={l.id}>
+                    {l.nom} – {formater(l.cout)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Client */}
+          <div className="space-y-2">
+            <Label>Nom du Client</Label>
+            <Input
+              value={donnees.client_nom}
+              onChange={(e) => modifier("client_nom", e.target.value)}
+              placeholder="Nom du client"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Téléphone Client</Label>
+            <Input
+              value={donnees.client_telephone}
+              onChange={(e) => modifier("client_telephone", e.target.value)}
+              placeholder="Numéro de téléphone"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Adresse de Livraison</Label>
+            <Input
+              value={donnees.client_adresse}
+              onChange={(e) => modifier("client_adresse", e.target.value)}
+              placeholder="Adresse complète"
+            />
+          </div>
         </div>
 
-        {/* Quantité */}
+        {/* Notes */}
         <div className="space-y-2">
-          <Label>Quantité *</Label>
-          <Input
-            type="number"
-            min="1"
-            value={donnees.quantite}
-            onFocus={(e) => e.target.select()}
-            onChange={(e) => modifier("quantite", e.target.value)}
-            onBlur={(e) => { if (e.target.value === "") modifier("quantite", ""); }}
-            placeholder="0"
+          <Label>Notes</Label>
+          <Textarea
+            value={donnees.notes}
+            onChange={(e) => modifier("notes", e.target.value)}
+            placeholder="Notes supplémentaires..."
+            rows={2}
           />
         </div>
 
-        {/* Prix unitaire */}
-        <div className="space-y-2">
-          <Label>Prix de Vente (FCFA) *</Label>
-          <Input
-            type="number"
-            min="0"
-            step="0.01"
-            value={donnees.prix_unitaire}
-            onFocus={(e) => e.target.select()}
-            onChange={(e) => modifier("prix_unitaire", e.target.value)}
-            placeholder="0"
-          />
-          {produitSelectionne && (
-            <p className="text-xs text-slate-400">
-              Prix de gros (minimum) : {(produitSelectionne.prix_gros || 0).toLocaleString("fr-FR")} FCFA
-            </p>
-          )}
-        </div>
-
-        {/* Livraison */}
-        <div className="space-y-2">
-          <Label>Livraison</Label>
-          <Select value={donnees.livraison_id} onValueChange={(v) => modifier("livraison_id", v)}>
-            <SelectTrigger>
-              <SelectValue placeholder="Choisir une livraison" />
-            </SelectTrigger>
-            <SelectContent>
-              {livraisons.filter(l => l.statut === "actif").map((l) => (
-                <SelectItem key={l.id} value={l.id}>
-                  {l.nom} – {formater(l.cout)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Client */}
-        <div className="space-y-2">
-          <Label>Nom du Client</Label>
-          <Input
-            value={donnees.client_nom}
-            onChange={(e) => modifier("client_nom", e.target.value)}
-            placeholder="Nom du client"
-          />
-        </div>
-        <div className="space-y-2">
-          <Label>Téléphone Client</Label>
-          <Input
-            value={donnees.client_telephone}
-            onChange={(e) => modifier("client_telephone", e.target.value)}
-            placeholder="Numéro de téléphone"
-          />
-        </div>
-        <div className="space-y-2">
-          <Label>Adresse de Livraison</Label>
-          <Input
-            value={donnees.client_adresse}
-            onChange={(e) => modifier("client_adresse", e.target.value)}
-            placeholder="Adresse complète"
-          />
-        </div>
-        </div>
-
-          {/* Notes */}
-        <div className="space-y-2">
-        <Label>Notes</Label>
-        <Textarea
-          value={donnees.notes}
-          onChange={(e) => modifier("notes", e.target.value)}
-          placeholder="Notes supplémentaires..."
-          rows={2}
-        />
-        </div>
-
-          {/* Récapitulatif financier */}
+        {/* Récapitulatif financier */}
         <div className="bg-slate-50 rounded-xl p-5 border border-slate-200">
-        <h3 className="text-sm font-semibold text-slate-900 mb-3">Récapitulatif Financier</h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-          <div>
-            <p className="text-slate-500">Montant Total</p>
-            <p className="font-bold text-lg text-slate-900">{formater(montantTotal)}</p>
+          <h3 className="text-sm font-semibold text-slate-900 mb-3">Récapitulatif Financier</h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+            <div>
+              <p className="text-slate-500">Montant Total</p>
+              <p className="font-bold text-lg text-slate-900">{formater(montantTotal)}</p>
+            </div>
+            <div>
+              <p className="text-slate-500">Coût Livraison</p>
+              <p className="font-bold text-lg text-slate-900">{formater(coutLivraison)}</p>
+            </div>
+            <div>
+              <p className="text-slate-500">Commission Vendeur</p>
+              <p className="font-bold text-lg text-yellow-600">{formater(commission)}</p>
+            </div>
+            <div>
+              <p className="text-slate-500">Profit ZONITE</p>
+              <p className={`font-bold text-lg ${profitZonite >= 0 ? "text-emerald-600" : "text-red-600"}`}>
+                {formater(profitZonite)}
+              </p>
+            </div>
           </div>
-          <div>
-            <p className="text-slate-500">Coût Livraison</p>
-            <p className="font-bold text-lg text-slate-900">{formater(coutLivraison)}</p>
-          </div>
-          <div>
-            <p className="text-slate-500">Commission Vendeur</p>
-            <p className="font-bold text-lg text-yellow-600">{formater(commission)}</p>
-          </div>
-          <div>
-            <p className="text-slate-500">Profit ZONITE</p>
-            <p className={`font-bold text-lg ${profitZonite >= 0 ? "text-emerald-600" : "text-red-600"}`}>
-              {formater(profitZonite)}
-            </p>
-          </div>
-        </div>
         </div>
 
-          {/* Bouton validation */}
+        {/* Bouton validation */}
         <Button
-        onClick={valider}
-        disabled={enCours}
-        className="w-full h-12 text-base bg-[#1a1f5e] hover:bg-[#141952] text-white"
-      >
-        {enCours ? (
-          <>
-            <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-            Enregistrement...
-          </>
-        ) : (
-          <>
-            <ShoppingCart className="w-5 h-5 mr-2" />
-            Enregistrer la Vente
-          </>
-        )}
+          onClick={valider}
+          disabled={enCours}
+          className="w-full h-12 text-base bg-[#1a1f5e] hover:bg-[#141952] text-white"
+        >
+          {enCours ? (
+            <>
+              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+              Enregistrement...
+            </>
+          ) : (
+            <>
+              <ShoppingCart className="w-5 h-5 mr-2" />
+              Enregistrer la Vente
+            </>
+          )}
         </Button>
       </div>
     </div>
