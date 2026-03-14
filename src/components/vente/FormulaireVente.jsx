@@ -311,7 +311,8 @@ export default function FormulaireVente({ produits, vendeurs, livraisons, onSubm
             Enregistrer la Vente
           </>
         )}
-      </Button>
+        </Button>
+      </div>
     </div>
   );
 }
