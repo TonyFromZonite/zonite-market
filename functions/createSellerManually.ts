@@ -26,6 +26,21 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Ce compte existe déjà' }, { status: 400 });
     }
 
+    // Créer l'utilisateur dans Base44 s'il n'existe pas
+    const usersExistants = await base44.asServiceRole.entities.User.filter({ email });
+    if (usersExistants.length === 0) {
+      try {
+        await base44.asServiceRole.entities.User.create({
+          email,
+          full_name: nom_complet || email.split('@')[0],
+          role: 'user'
+        });
+      } catch (userError) {
+        console.error('Erreur création utilisateur:', userError.message);
+        return Response.json({ error: 'Erreur lors de la création du compte utilisateur' }, { status: 500 });
+      }
+    }
+
     // Hasher le mot de passe
     const passwordHash = await bcrypt.hash(password, 10);
 
