@@ -12,8 +12,9 @@ import { LOGO_URL as LOGO } from "@/components/constants";
 
 const ETAPES = [
   { num: 1, label: "Mon compte" },
-  { num: 2, label: "Mon profil" },
-  { num: 3, label: "Vérification" },
+  { num: 2, label: "Vérifier email" },
+  { num: 3, label: "Mon profil" },
+  { num: 4, label: "Vérification KYC" },
 ];
 
 // Générer un mot de passe aléatoire lisible (fallback si vendeur ne choisit pas)
@@ -32,13 +33,15 @@ export default function InscriptionVendeur() {
     telephone: "",
     mot_de_passe: "",
     confirmer_mdp: "",
-    // Étape 2 - Profil vendeur
+    // Étape 2 - Vérification email
+    verification_code: "",
+    // Étape 3 - Profil vendeur
     ville: "",
     quartier: "",
     numero_mobile_money: "",
     operateur_mobile_money: "orange_money",
     experience_vente: "",
-    // Étape 3 - KYC
+    // Étape 4 - KYC
     photo_identite_url: "",      // passeport ou CNI recto
     photo_identite_verso_url: "", // CNI verso uniquement
     selfie_url: "",
@@ -49,6 +52,8 @@ export default function InscriptionVendeur() {
   const [erreur, setErreur] = useState("");
   const [succes, setSucces] = useState(false);
   const [emailVerifie, setEmailVerifie] = useState(null); // null = pas verifié, true = ok, false = déjà utilisé
+  const [vendeurEmail, setVendeurEmail] = useState(""); // Email du vendeur en cours d'inscription
+  const [reenvoyerDisable, setReenvoyerDisable] = useState(false);
 
   const modifier = (champ, val) => setForm(p => ({ ...p, [champ]: val }));
 
@@ -74,7 +79,7 @@ export default function InscriptionVendeur() {
     setUploadEnCours(p => ({ ...p, [key]: false }));
   };
 
-  const validerEtape1 = () => {
+  const validerEtape1 = async () => {
     if (!form.nom_complet || !form.email || !form.telephone) {
       setErreur("Nom complet, email et téléphone sont obligatoires."); return;
     }
@@ -90,16 +95,84 @@ export default function InscriptionVendeur() {
     if (form.mot_de_passe !== form.confirmer_mdp) {
       setErreur("Les mots de passe ne correspondent pas."); return;
     }
+
+    setEnCours(true);
     setErreur("");
-    setEtape(2);
+
+    try {
+      const response = await base44.functions.invoke('registerVendor', {
+        email: form.email,
+        nom_complet: form.nom_complet,
+        telephone: form.telephone,
+        mot_de_passe: form.mot_de_passe,
+        ville: form.ville,
+        quartier: form.quartier,
+        numero_mobile_money: form.numero_mobile_money,
+        operateur_mobile_money: form.operateur_mobile_money,
+        photo_identite_url: "",
+        photo_identite_verso_url: "",
+        selfie_url: "",
+      });
+
+      if (response.data?.success) {
+        setVendeurEmail(form.email);
+        setErreur("");
+        setEtape(2);
+      } else {
+        setErreur(response.data?.error || "Erreur lors de l'inscription");
+      }
+    } catch (error) {
+      setErreur(error.message || "Erreur lors de l'inscription");
+    } finally {
+      setEnCours(false);
+    }
   };
 
-  const validerEtape2 = () => {
+  const validerEtape2 = async () => {
+    if (!form.verification_code || form.verification_code.length !== 6) {
+      setErreur("Veuillez entrer un code à 6 chiffres"); return;
+    }
+
+    setEnCours(true);
+    setErreur("");
+
+    try {
+      const response = await base44.functions.invoke('verifyEmailCode', {
+        email: vendeurEmail,
+        verification_code: form.verification_code,
+      });
+
+      if (response.data?.success) {
+        setErreur("");
+        setEtape(3);
+      } else {
+        setErreur(response.data?.error || "Code invalide ou expiré");
+      }
+    } catch (error) {
+      setErreur(error.message || "Erreur lors de la vérification");
+    } finally {
+      setEnCours(false);
+    }
+  };
+
+  const renvoyerCode = async () => {
+    setReenvoyerDisable(true);
+    try {
+      await base44.functions.invoke('resendVerificationCode', { email: vendeurEmail });
+      setErreur("Code renvoyé par email");
+      setTimeout(() => setReenvoyerDisable(false), 30000); // 30 secondes
+    } catch (error) {
+      setErreur("Erreur lors de l'envoi du code");
+      setReenvoyerDisable(false);
+    }
+  };
+
+  const validerEtape3 = () => {
     if (!form.ville || !form.quartier || !form.numero_mobile_money) {
       setErreur("Ville, quartier et numéro Mobile Money sont obligatoires."); return;
     }
     setErreur("");
-    setEtape(3);
+    setEtape(4);
   };
 
   const soumettre = async () => {
@@ -116,12 +189,12 @@ export default function InscriptionVendeur() {
     setErreur("");
 
     try {
-      // ✅ Tout est géré côté serveur : hachage, création, email
+      // Soumettre les documents KYC (compte déjà créé et email vérifié)
       const response = await base44.functions.invoke('registerVendor', {
-        email: form.email,
+        email: vendeurEmail,
         nom_complet: form.nom_complet,
         telephone: form.telephone,
-        mot_de_passe: form.mot_de_passe, // envoyé en clair via HTTPS, haché côté serveur
+        mot_de_passe: form.mot_de_passe,
         ville: form.ville,
         quartier: form.quartier,
         numero_mobile_money: form.numero_mobile_money,
@@ -277,8 +350,57 @@ export default function InscriptionVendeur() {
           </div>
         )}
 
-        {/* ÉTAPE 2 : Profil vendeur */}
+        {/* ÉTAPE 2 : Vérification Email */}
         {etape === 2 && (
+          <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-6 border border-white/20 space-y-4">
+            <h2 className="text-white font-bold">Vérifier votre email</h2>
+            <p className="text-slate-300 text-sm">Un code de vérification a été envoyé à <span className="font-semibold">{vendeurEmail}</span></p>
+            
+            <div>
+              <Label className="text-slate-200 text-xs">Code de vérification (6 chiffres) *</Label>
+              <Input 
+                type="text" 
+                maxLength="6"
+                placeholder="000000" 
+                value={form.verification_code} 
+                onChange={e => modifier("verification_code", e.target.value.replace(/[^0-9]/g, ''))} 
+                className="bg-white/10 border-white/20 text-white placeholder:text-slate-400 rounded-xl h-11 mt-1 text-center text-2xl tracking-widest font-mono" 
+              />
+            </div>
+
+            <div className="text-sm text-slate-300">
+              <p>Vous n'avez pas reçu le code ?</p>
+              <button 
+                type="button"
+                onClick={renvoyerCode}
+                disabled={reenvoyerDisable || enCours}
+                className="text-[#F5C518] hover:underline font-semibold disabled:opacity-50"
+              >
+                {reenvoyerDisable ? "Renvoyer dans 30s..." : "Renvoyer le code"}
+              </button>
+            </div>
+
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                onClick={() => { setEtape(1); setErreur(""); setVendeurEmail(""); }} 
+                className="flex-1 border-white/20 text-white hover:bg-white/10 rounded-xl h-11"
+              >
+                <ChevronLeft className="w-4 h-4 mr-1" /> Retour
+              </Button>
+              <Button 
+                onClick={validerEtape2} 
+                disabled={enCours || form.verification_code.length !== 6}
+                className="flex-1 h-11 bg-[#F5C518] hover:bg-[#e0b010] text-[#1a1f5e] font-black rounded-xl"
+              >
+                {enCours ? <Loader2 className="w-4 h-4 animate-spin" /> : "Vérifier →"}
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* ÉTAPE 3 : Profil vendeur */}
+        {etape === 3 && (
           <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-6 border border-white/20 space-y-4">
             <h2 className="text-white font-bold">Mon profil vendeur</h2>
             <div className="grid grid-cols-2 gap-3">
@@ -312,18 +434,18 @@ export default function InscriptionVendeur() {
               <Input value={form.experience_vente} onChange={e => modifier("experience_vente", e.target.value)} placeholder="Ex: vente en ligne, boutique physique..." className="bg-white/10 border-white/20 text-white placeholder:text-slate-400 rounded-xl h-11 mt-1" />
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" onClick={() => { setEtape(1); setErreur(""); }} className="flex-1 border-white/20 text-white hover:bg-white/10 rounded-xl h-11">
+              <Button variant="outline" onClick={() => { setEtape(2); setErreur(""); }} className="flex-1 border-white/20 text-white hover:bg-white/10 rounded-xl h-11">
                 <ChevronLeft className="w-4 h-4 mr-1" /> Retour
               </Button>
-              <Button onClick={validerEtape2} className="flex-1 h-11 bg-[#F5C518] hover:bg-[#e0b010] text-[#1a1f5e] font-black rounded-xl">
+              <Button onClick={validerEtape3} className="flex-1 h-11 bg-[#F5C518] hover:bg-[#e0b010] text-[#1a1f5e] font-black rounded-xl">
                 Continuer →
               </Button>
             </div>
           </div>
         )}
 
-        {/* ÉTAPE 3 : KYC */}
-        {etape === 3 && (
+        {/* ÉTAPE 4 : KYC */}
+        {etape === 4 && (
           <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-6 border border-white/20 space-y-4">
             <div>
               <h2 className="text-white font-bold">Vérification d'identité (KYC)</h2>
@@ -462,7 +584,7 @@ export default function InscriptionVendeur() {
             </div>
 
             <div className="flex gap-2">
-              <Button variant="outline" onClick={() => { setEtape(2); setErreur(""); }} className="flex-1 border-white/20 text-white hover:bg-white/10 rounded-xl h-11">
+              <Button variant="outline" onClick={() => { setEtape(3); setErreur(""); }} className="flex-1 border-white/20 text-white hover:bg-white/10 rounded-xl h-11">
                 <ChevronLeft className="w-4 h-4 mr-1" /> Retour
               </Button>
               <Button onClick={soumettre} disabled={enCours || uploadEnCours.id || uploadEnCours.selfie} className="flex-1 h-11 bg-[#F5C518] hover:bg-[#e0b010] text-[#1a1f5e] font-black rounded-xl">
