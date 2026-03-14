@@ -24,10 +24,20 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Données manquantes (email, nom, mot de passe, mobile money requis)' }, { status: 400 });
     }
 
-    // Vérifier si un vendeur existe déjà avec cet email
+    // Vérifier si un vendeur existe déjà avec cet email (avec lock)
     const sellersExistants = await base44.asServiceRole.entities.Seller.filter({ email });
     if (sellersExistants.length > 0) {
-      return Response.json({ error: 'Un compte vendeur existe déjà avec cet email' }, { status: 400 });
+      return Response.json({ error: 'Un compte vendeur existe déjà avec cet email' }, { status: 409 });
+    }
+    
+    // Vérifier aussi dans User entity (Base44) pour éviter les doublons
+    try {
+      const usersExistants = await base44.asServiceRole.entities.User.filter({ email });
+      if (usersExistants.length > 0) {
+        return Response.json({ error: 'Cet email est déjà utilisé dans le système' }, { status: 409 });
+      }
+    } catch (_) {
+      // Si User.filter échoue, continuer
     }
 
     // Hacher le mot de passe
