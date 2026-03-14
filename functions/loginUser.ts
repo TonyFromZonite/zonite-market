@@ -18,19 +18,8 @@ const authenticateSeller = async (base44, email, password) => {
     return { success: false, error: 'Email ou mot de passe incorrect' };
   }
 
-  // Vérifier le statut KYC
-  if (seller.statut_kyc !== 'valide') {
-    return { 
-      success: false, 
-      error: 'Votre compte est en attente de validation KYC',
-      status_code: 'kyc_pending'
-    };
-  }
-
-  // Vérifier le statut du compte
-  if (seller.statut !== 'actif') {
-    return { success: false, error: 'Votre compte est suspendu' };
-  }
+  // Allow login for any seller (access control happens on the frontend via SellerStatusEngine)
+  // No KYC or status checks here—the seller will see modals if their account isn't fully activated
 
   return { success: true, seller };
 };
