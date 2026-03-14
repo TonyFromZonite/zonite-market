@@ -24,6 +24,15 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Un compte vendeur existe déjà avec cet email' }, { status: 400 });
     }
 
+    // Inviter l'utilisateur dans Base44
+    try {
+      await base44.users.inviteUser(email, 'user');
+    } catch (inviteError) {
+      if (!inviteError.message.includes('already exists')) {
+        console.error('Invite error:', inviteError.message);
+      }
+    }
+
     // Hacher le mot de passe (async pour éviter CPU timeout)
     const hashedPassword = await bcrypt.hash(mot_de_passe, 10);
 
