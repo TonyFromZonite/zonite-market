@@ -94,49 +94,21 @@ Deno.serve(async (req) => {
              date_embauche: new Date().toISOString().split('T')[0]
            });
 
-           // NOUVEAU : Créer immédiatement l'utilisateur Base44 avec rôle vendeur
-           const adminUser = await base44.auth.me().catch(() => null);
-           let userCreatedInBase44 = false;
-           let base44UserId = null;
-
+           // NOUVEAU : Créer immédiatement l'utilisateur Base44 avec rôle vendeur (statut actif)
+           let userCreated = false;
            try {
-             // Vérifier si l'utilisateur existe déjà dans base44.users
-             const existingUsers = await db.User.filter({ email });
-
-             if (existingUsers.length === 0) {
-               // Créer l'utilisateur dans base44.users avec rôle 'user'
-               const newUser = await db.User.create({
-                 email,
-                 full_name: nom_complet,
-                 role: 'user'
-               });
-               base44UserId = newUser.id;
-               userCreatedInBase44 = true;
-               console.log(`✅ Utilisateur Base44 créé: ${email} (ID: ${base44UserId})`);
-             } else {
-               base44UserId = existingUsers[0].id;
-               console.log(`ℹ️ Utilisateur Base44 existant: ${email} (ID: ${base44UserId})`);
-             }
+             await base44.users.inviteUser(email, 'user');
+             userCreated = true;
+             console.log(`✅ Utilisateur Base44 créé pour ${email}`);
            } catch (userError) {
-             console.error(`⚠️ Erreur création/recherche utilisateur Base44 pour ${email}:`, userError.message);
+             console.error('❌ Erreur création utilisateur Base44:', userError.message);
            }
 
-           // Ajouter l'ID Base44 au seller pour synchronisation
-           try {
-             if (base44UserId) {
-               await db.Seller.update(seller.id, {
-                 user_id_base44: base44UserId
-               });
-             }
-           } catch (syncError) {
-             console.error(`⚠️ Erreur mise à jour seller avec user_id_base44:`, syncError.message);
-           }
-
-           // Créer l'audit avec plus de détails
+           const adminUser = await base44.auth.me().catch(() => null);
            await db.JournalAudit.create({ 
              action: 'Vendeur créé par admin (immédiatement actif)', 
              module: 'vendeur', 
-             details: `Vendeur ${nom_complet} (${email}) créé par ${adminUser?.email || 'admin'} - Statut: ACTIF - Utilisateur Base44: ${userCreatedInBase44 ? 'CRÉÉ' : 'EXISTANT'} (ID: ${base44UserId})`, 
+             details: `Vendeur ${nom_complet} (${email}) créé par ${adminUser?.email || 'admin'} - Statut: ACTIF${userCreated ? ' - Utilisateur Base44 créé' : ''}`, 
              utilisateur: adminUser?.email || 'system', 
              entite_id: seller.id 
            });
@@ -152,7 +124,7 @@ Deno.serve(async (req) => {
              console.error('Email send failed:', e.message);
            }
 
-           return Response.json({ success: true, seller_id: seller.id, email, status: 'actif' });
+           return Response.json({ success: true, seller_id: seller.id, email, status: 'actif', user_created: userCreated });
          } catch (error) {
            console.error('Erreur création vendeur:', error);
            return Response.json({ error: error.message }, { status: 500 });
@@ -193,21 +165,6 @@ Deno.serve(async (req) => {
       }
       case 'createSousAdmin': {
         const result = await db.SousAdmin.create(payload.data);
-
-        // Envoyer email avec identifiants de connexion
-        const { email, nom_complet, mot_de_passe } = payload.data;
-        if (email && nom_complet && mot_de_passe) {
-          try {
-            await base44.integrations.Core.SendEmail({
-              to: email,
-              subject: '🔐 Accès ZONITE Administrateur - Vos identifiants de connexion',
-              body: `Bonjour ${nom_complet},\n\n🔐 Vous avez été nommé sous-administrateur de ZONITE.\n\nVoici vos identifiants de connexion :\n\n📧 Email : ${email}\n🔑 Mot de passe : ${mot_de_passe}\n\n⚠️ Pour votre sécurité, changez ce mot de passe dès votre première connexion.\n\n🔗 Lien de connexion : ${Deno.env.get('APP_URL') || 'https://zonite.app'}\n\nBienvenue dans l'équipe !\n\nL'équipe ZONITE`
-            });
-          } catch (e) {
-            console.error('Email send failed:', e.message);
-          }
-        }
-
         return Response.json({ success: true, result });
       }
       case 'deleteSousAdmin': {
@@ -347,82 +304,6 @@ Deno.serve(async (req) => {
       case 'deleteLivraison': {
         await db.Livraison.delete(payload.livraisonId);
         return Response.json({ success: true });
-      }
-
-      // ─── SYNC & VERIFICATION ─────────────────────────────────────────────────
-      case 'syncSellerBase44Users': {
-        // Action de synchronisation: vérifie tous les sellers et crée les users manquants
-        try {
-          const allSellers = await db.Seller.list();
-          const results = { total: 0, synced: 0, errors: [] };
-
-          for (const seller of allSellers) {
-            results.total++;
-            try {
-              // Vérifier si l'utilisateur Base44 existe
-              const users = await db.User.filter({ email: seller.email });
-
-              if (users.length === 0) {
-                // Créer l'utilisateur manquant
-                const newUser = await db.User.create({
-                  email: seller.email,
-                  full_name: seller.nom_complet,
-                  role: 'user'
-                });
-
-                // Mettre à jour le seller avec l'ID Base44
-                await db.Seller.update(seller.id, {
-                  user_id_base44: newUser.id
-                });
-
-                results.synced++;
-                console.log(`✅ Synced: ${seller.email} -> User ID: ${newUser.id}`);
-              } else {
-                // L'utilisateur existe, mettre à jour le seller
-                await db.Seller.update(seller.id, {
-                  user_id_base44: users[0].id
-                });
-                results.synced++;
-              }
-            } catch (itemError) {
-              results.errors.push({ email: seller.email, error: itemError.message });
-              console.error(`❌ Erreur sync ${seller.email}:`, itemError.message);
-            }
-          }
-
-          return Response.json({ success: true, sync_results: results });
-        } catch (error) {
-          return Response.json({ error: error.message }, { status: 500 });
-        }
-      }
-
-      case 'verifySellersSync': {
-        // Action de vérification: liste les sellers orphelins (sans user Base44)
-        try {
-          const allSellers = await db.Seller.list();
-          const orphans = [];
-          const synced = [];
-
-          for (const seller of allSellers) {
-            const users = await db.User.filter({ email: seller.email });
-            if (users.length === 0) {
-              orphans.push({ seller_id: seller.id, email: seller.email, nom: seller.nom_complet });
-            } else {
-              synced.push({ seller_id: seller.id, email: seller.email, user_id: users[0].id });
-            }
-          }
-
-          return Response.json({ 
-            success: true, 
-            total_sellers: allSellers.length, 
-            synced_count: synced.length, 
-            orphans_count: orphans.length,
-            orphan_sellers: orphans,
-            synced_sellers: synced 
-          });
-        } catch (error) {
-          return Response.json({ error: error.message }, { status: 500 });
-        }
       }
 
       default:

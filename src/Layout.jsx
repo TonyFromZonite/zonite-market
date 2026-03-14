@@ -38,7 +38,6 @@ const MENUS_ADMIN = [
   { nom: "Audit Comptes",        page: "AuditComptes",            icone: Users },
   { nom: "Intégrité Système",    page: "SystemIntegrity",         icone: Shield },
   { nom: "Cohérence Données",    page: "DataConsistency",         icone: Shield },
-  { nom: "Sync Sellers-Users",   page: "SyncSellerUsers",         icone: Shield },
   { nom: "Permissions Admin",    page: "GestionPermissionsAdmin", icone: Shield },
   { nom: "Sous-Admins",          page: "GestionSousAdmins",       icone: UserCog },
   { nom: "Configuration App",    page: "ConfigurationApp",        icone: Settings },
@@ -88,12 +87,7 @@ export default function Layout({ children, currentPageName }) {
   };
 
   // Pages vendeur : interface mobile standalone, sans sidebar admin
-  if (PAGES_VENDEUR.includes(currentPageName)) {
-    return <>{children}</>;
-  }
-
-  // Si session vendeur ET pas connecté en tant qu'admin/sous-admin
-  if (vendeurSession && !adminSession && !sousAdmin) {
+  if (PAGES_VENDEUR.includes(currentPageName) || vendeurSession) {
     return <>{children}</>;
   }
 
@@ -195,7 +189,7 @@ export default function Layout({ children, currentPageName }) {
           <h1 className="text-base font-semibold text-slate-900 truncate flex-1">
             {TOUS_LES_MENUS.find((i) => i.page === currentPageName)?.nom || "ZONITE"}
           </h1>
-          <RechercheGlobale />
+          {!sousAdmin && !adminSession && <RechercheGlobale />}
           <div className="flex items-center gap-2">
             <NotificationCenter />
             {vendeurSession && (
