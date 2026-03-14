@@ -381,14 +381,14 @@ export default function EspaceVendeur() {
           { label: "Profil", page: "ProfilVendeur", icone: "👤", feature: "profile" },
           { label: "Aide", page: "AideVendeur", icone: "❓", feature: "dashboard" },
         ].map(({ label, page, icone, feature }) => {
-          const canAccess = canAccessFeature(compteVendeur.seller_status, feature);
+          const canAccess = canAccessFeature(compteVendeur.seller_status, feature, compteVendeur.training_completed);
           return canAccess ? (
             <Link key={page} to={createPageUrl(page)} className="flex-1 flex flex-col items-center py-2.5 gap-1 hover:text-[#1a1f5e] transition-colors">
               <span className="text-xl">{icone}</span>
               <span className="text-[10px] text-slate-500">{label}</span>
             </Link>
           ) : (
-            <button key={page} onClick={() => setRestrictionMessage(getRestrictionMessage(compteVendeur.seller_status, feature))} className="flex-1 flex flex-col items-center py-2.5 gap-1 opacity-40 cursor-not-allowed">
+            <button key={page} disabled className="flex-1 flex flex-col items-center py-2.5 gap-1 opacity-40 cursor-not-allowed">
               <span className="text-xl">{icone}</span>
               <span className="text-[10px] text-slate-400">{label}</span>
             </button>
