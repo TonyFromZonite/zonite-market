@@ -13,6 +13,7 @@ import DataConsistency from './pages/DataConsistency';
 import AuditSysteme from './pages/AuditSysteme';
 import AuditComptes from './pages/AuditComptes';
 import AuditComplet from './pages/AuditComplet';
+import ResoumissionKYC from './pages/ResoumissionKYC';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
