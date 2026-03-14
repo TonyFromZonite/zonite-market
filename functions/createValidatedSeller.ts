@@ -24,12 +24,22 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Un compte vendeur existe déjà avec cet email' }, { status: 400 });
     }
 
-    // Inviter l'utilisateur dans Base44
-    try {
-      await base44.users.inviteUser(email, 'user');
-    } catch (inviteError) {
-      if (!inviteError.message.includes('already exists')) {
-        console.error('Invite error:', inviteError.message);
+    // Vérifier si l'utilisateur existe déjà dans Base44
+    const usersExistants = await base44.asServiceRole.entities.User.filter({ email });
+    
+    // Créer l'utilisateur dans Base44 s'il n'existe pas
+    if (usersExistants.length === 0) {
+      try {
+        console.log('📝 Création de l\'utilisateur Base44...');
+        await base44.asServiceRole.entities.User.create({
+          email,
+          full_name: nom_complet,
+          role: 'user'
+        });
+        console.log('✅ Utilisateur Base44 créé');
+      } catch (userError) {
+        console.error('Erreur création utilisateur:', userError.message);
+        return Response.json({ error: 'Erreur lors de la création du compte utilisateur' }, { status: 500 });
       }
     }
 
