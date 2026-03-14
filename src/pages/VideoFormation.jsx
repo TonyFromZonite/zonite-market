@@ -205,24 +205,29 @@ export default function VideoFormation() {
 
                 <Button
                    onClick={async () => {
-                     if (!accepte || !compteVendeur?.id) return;
-                     setEnCours(true);
-                     setErreur("");
-                     try {
-                       await vendeurApi.debloquerCatalogue(compteVendeur.id);
-                       await new Promise(r => setTimeout(r, 500));
-                     } catch (err) {
-                       console.error("Finalisation:", err);
-                       setErreur("Erreur lors de la finalisation. Rechargez la page.");
-                     } finally {
-                       setEnCours(false);
-                     }
-                   }}
-                   disabled={!accepte || enCours || !compteVendeur?.id}
-                   className="w-full bg-[#F5C518] hover:bg-[#e0b010] text-[#1a1f5e] font-bold h-12"
-                 >
-                   {enCours ? <Loader2 className="w-5 h-5 animate-spin" /> : "Débloquer le catalogue →"}
-                 </Button>
+                      if (!accepte || !compteVendeur?.id) return;
+                      setEnCours(true);
+                      setErreur("");
+                      try {
+                        // Update seller status to active_seller and video_vue to true
+                        await base44.entities.Seller.update(compteVendeur.id, {
+                          seller_status: "active_seller",
+                          video_vue: true,
+                          catalogue_debloque: true
+                        });
+                        await new Promise(r => setTimeout(r, 500));
+                      } catch (err) {
+                        console.error("Finalisation:", err);
+                        setErreur("Erreur lors de la finalisation. Rechargez la page.");
+                      } finally {
+                        setEnCours(false);
+                      }
+                    }}
+                    disabled={!accepte || enCours || !compteVendeur?.id}
+                    className="w-full bg-[#F5C518] hover:bg-[#e0b010] text-[#1a1f5e] font-bold h-12"
+                  >
+                    {enCours ? <Loader2 className="w-5 h-5 animate-spin" /> : "Débloquer le catalogue →"}
+                  </Button>
               </div>
             )}
           </>
