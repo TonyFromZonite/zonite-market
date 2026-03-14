@@ -38,6 +38,7 @@ const MENUS_ADMIN = [
   { nom: "Audit Comptes",        page: "AuditComptes",            icone: Users },
   { nom: "Intégrité Système",    page: "SystemIntegrity",         icone: Shield },
   { nom: "Cohérence Données",    page: "DataConsistency",         icone: Shield },
+  { nom: "Sync Sellers-Users",   page: "SyncSellerUsers",         icone: Shield },
   { nom: "Permissions Admin",    page: "GestionPermissionsAdmin", icone: Shield },
   { nom: "Sous-Admins",          page: "GestionSousAdmins",       icone: UserCog },
   { nom: "Configuration App",    page: "ConfigurationApp",        icone: Settings },
