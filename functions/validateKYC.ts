@@ -94,7 +94,18 @@ Deno.serve(async (req) => {
         priorite: 'urgente',
       }).catch(() => {});
 
-      return Response.json({ success: true, message: 'KYC rejeté avec succès' });
+      // NOUVEAU : Envoyer email avec détails du rejet et instructions pour resoumission
+      try {
+        await base44.integrations.Core.SendEmail({
+          to: seller.email,
+          subject: '❌ Votre dossier KYC a été rejeté - Instructions pour resoumission',
+          body: `Bonjour ${seller.nom_complet},\n\nNous avons examiné votre dossier KYC, mais malheureusement, il ne peut pas être approuvé pour le moment.\n\n📋 Motif du rejet :\n${notes || 'Veuillez contacter le support pour plus de détails.'}\n\n📝 Comment corriger votre dossier :\n1. Connectez-vous à votre espace vendeur avec vos identifiants\n2. Allez à la section "Profil" ou "Vérification d'identité"\n3. Corrigez les documents requis selon les indications ci-dessus\n4. Resoumettez votre dossier KYC\n\nNotre équipe examinera votre nouveau dossier dès que possible.\n\nSi vous avez des questions, n'hésitez pas à nous contacter via le support.\n\nBon courage !\n\nL'équipe ZONITE`
+        });
+      } catch (e) {
+        console.error('Email send failed:', e.message);
+      }
+
+      return Response.json({ success: true, message: 'KYC rejeté avec succès - Email de notification envoyé' });
     }
 
     return Response.json({ error: 'Statut invalide' }, { status: 400 });
