@@ -20,7 +20,7 @@ export default function NouvelleVente() {
 
   const { data: vendeurs = [] } = useQuery({
     queryKey: ["vendeurs"],
-    queryFn: () => base44.entities.Vendeur.list(),
+    queryFn: () => base44.entities.Seller.list(),
   });
 
   const { data: livraisons = [] } = useQuery({
@@ -60,13 +60,14 @@ export default function NouvelleVente() {
       notes: donnees.notes,
     });
 
-    // 2. Diminuer le stock global
+    // 2. Diminuer le stock global (pas le stock réservé car vente directe admin)
     const ancienStock = produit.stock_global || 0;
     const nouveauStock = ancienStock - donnees.quantite;
+    const stockDispo = Math.max(0, nouveauStock - (produit.stock_reserve || 0));
     await adminApi.updateProduit(produit.id, {
       stock_global: nouveauStock,
       total_vendu: (produit.total_vendu || 0) + donnees.quantite,
-      statut: nouveauStock <= 0 ? "rupture" : "actif",
+      statut: stockDispo <= 0 ? "rupture" : "actif",
     });
 
     // 3. Mouvement stock via backend
@@ -80,8 +81,8 @@ export default function NouvelleVente() {
       raison: "Vente enregistrée",
     });
 
-    // 4. Mettre à jour le vendeur
-    await adminApi.updateVendeur(vendeur.id, {
+    // 4. Mettre à jour le seller (vendeur)
+    await base44.asServiceRole.entities.Seller.update(vendeur.id, {
       solde_commission: (vendeur.solde_commission || 0) + donnees.commission,
       total_commissions_gagnees: (vendeur.total_commissions_gagnees || 0) + donnees.commission,
       nombre_ventes: (vendeur.nombre_ventes || 0) + 1,

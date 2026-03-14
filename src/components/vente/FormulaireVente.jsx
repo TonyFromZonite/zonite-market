@@ -74,8 +74,11 @@ export default function FormulaireVente({ produits, vendeurs, livraisons, onSubm
     if (produitSelectionne && prixUnit < prixGros) {
       return setErreur(`Le prix de vente (${prixUnit} FCFA) doit être ≥ au prix de gros (${prixGros} FCFA)`);
     }
-    if (produitSelectionne && qte > (produitSelectionne.stock_global || 0)) {
-      return setErreur(`Stock insuffisant (${produitSelectionne.stock_global || 0} disponibles)`);
+    const stockDispo = produitSelectionne 
+      ? Math.max(0, (produitSelectionne.stock_global || 0) - (produitSelectionne.stock_reserve || 0))
+      : 0;
+    if (produitSelectionne && qte > stockDispo) {
+      return setErreur(`Stock insuffisant (${stockDispo} disponibles)`);
     }
     onSubmit({
       ...donnees,
@@ -112,16 +115,19 @@ export default function FormulaireVente({ produits, vendeurs, livraisons, onSubm
               <SelectValue placeholder="Choisir un produit" />
             </SelectTrigger>
             <SelectContent>
-              {produits.filter(p => p.statut === "actif").map((p) => (
-                <SelectItem key={p.id} value={p.id}>
-                  {p.nom} – Stock: {p.stock_actuel || 0}
-                </SelectItem>
-              ))}
+              {produits.filter(p => p.statut === "actif").map((p) => {
+                const stockDispo = Math.max(0, (p.stock_global || 0) - (p.stock_reserve || 0));
+                return (
+                  <SelectItem key={p.id} value={p.id} disabled={stockDispo === 0}>
+                    {p.nom} – Stock: {stockDispo}{stockDispo === 0 ? " (rupture)" : ""}
+                  </SelectItem>
+                );
+              })}
             </SelectContent>
           </Select>
           {produitSelectionne && (
             <p className="text-xs text-slate-500">
-              Prix de gros: {formater(produitSelectionne.prix_gros)} | Stock: {produitSelectionne.stock_global || 0}
+              Prix de gros: {formater(produitSelectionne.prix_gros)} | Stock disponible: {Math.max(0, (produitSelectionne.stock_global || 0) - (produitSelectionne.stock_reserve || 0))}
             </p>
           )}
         </div>
