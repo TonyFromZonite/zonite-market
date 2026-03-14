@@ -239,7 +239,10 @@ function ValidationKYC() {
 
    const { data: sellers = [], isLoading } = useQuery({
       queryKey: ["sellers"],
-      queryFn: () => base44.entities.Seller.list("-created_date"),
+      queryFn: async () => {
+        const res = await base44.functions.invoke('getAllVendeurs', {});
+        return res.data;
+      },
       refetchInterval: 30000,
     });
 
