@@ -12,6 +12,7 @@ import GestionCoursiers from './pages/GestionCoursiers';
 import DataConsistency from './pages/DataConsistency';
 import AuditSysteme from './pages/AuditSysteme';
 import AuditComptes from './pages/AuditComptes';
+import AuditComplet from './pages/AuditComplet';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -108,6 +109,14 @@ const AuthenticatedApp = () => {
         element={
           <LayoutWrapper currentPageName="AuditComptes">
             <AuditComptes />
+          </LayoutWrapper>
+        }
+      />
+      <Route
+        path="/AuditComplet"
+        element={
+          <LayoutWrapper currentPageName="AuditComplet">
+            <AuditComplet />
           </LayoutWrapper>
         }
       />

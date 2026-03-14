@@ -4,7 +4,7 @@ import { createPageUrl } from "@/utils";
 import {
   LayoutDashboard, ShoppingCart, Package, Users, Truck,
   ClipboardList, Shield, Menu, X, ChevronRight,
-  LogOut, MessageSquare, UserCog, Settings
+  LogOut, MessageSquare, UserCog, Settings, Database
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import RechercheGlobale from "@/components/RechercheGlobale";
@@ -33,6 +33,7 @@ const MENUS_ADMIN = [
   { nom: "Coursiers",            page: "GestionCoursiers",        icone: Truck },
   { nom: "Support Vendeurs",     page: "SupportAdmin",            icone: MessageSquare },
   { nom: "Journal d'Audit",      page: "JournalAudit",            icone: Shield },
+  { nom: "Audit Complet",        page: "AuditComplet",            icone: Database },
   { nom: "Audit Système",        page: "AuditSysteme",            icone: Shield },
   { nom: "Audit Comptes",        page: "AuditComptes",            icone: Users },
   { nom: "Intégrité Système",    page: "SystemIntegrity",         icone: Shield },
