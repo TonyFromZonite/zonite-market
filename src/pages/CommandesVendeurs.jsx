@@ -123,13 +123,13 @@ export default function CommandesVendeurs() {
       });
     }
 
-    const tousComptes = await base44.entities.CompteVendeur.list();
-    const compte = tousComptes.find(c => c.id === commandeSelectionnee.vendeur_id);
-    if (compte) {
-      await adminApi.updateCompteVendeur(compte.id, {
-        solde_commission: (compte.solde_commission || 0) + (commandeSelectionnee.commission_vendeur || 0),
-        total_commissions_gagnees: (compte.total_commissions_gagnees || 0) + (commandeSelectionnee.commission_vendeur || 0),
-        ventes_reussies: (compte.ventes_reussies || 0) + 1,
+    const sellers = await base44.entities.Seller.filter({ id: commandeSelectionnee.vendeur_id });
+    if (sellers.length > 0) {
+      const seller = sellers[0];
+      await base44.asServiceRole.entities.Seller.update(seller.id, {
+        solde_commission: (seller.solde_commission || 0) + (commandeSelectionnee.commission_vendeur || 0),
+        total_commissions_gagnees: (seller.total_commissions_gagnees || 0) + (commandeSelectionnee.commission_vendeur || 0),
+        ventes_reussies: (seller.ventes_reussies || 0) + 1,
       });
     }
 
@@ -171,11 +171,11 @@ export default function CommandesVendeurs() {
         raison: `Échec livraison — commande ${commandeSelectionnee.id}`,
       });
     }
-    const tousComptesEchec = await base44.entities.CompteVendeur.list();
-    const compteEchec = tousComptesEchec.find(c => c.id === commandeSelectionnee.vendeur_id);
-    if (compteEchec) {
-      await adminApi.updateCompteVendeur(compteEchec.id, {
-        ventes_echouees: (compteEchec.ventes_echouees || 0) + 1,
+    const sellersEchec = await base44.entities.Seller.filter({ id: commandeSelectionnee.vendeur_id });
+    if (sellersEchec.length > 0) {
+      const sellerEchec = sellersEchec[0];
+      await base44.asServiceRole.entities.Seller.update(sellerEchec.id, {
+        ventes_echouees: (sellerEchec.ventes_echouees || 0) + 1,
       });
     }
     await adminApi.updateCommandeVendeur(commandeSelectionnee.id, { statut: "echec_livraison", notes_admin: notesAdmin || commandeSelectionnee.notes_admin });
