@@ -374,17 +374,25 @@ export default function EspaceVendeur() {
       {/* Bottom nav */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 flex z-50" style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
         {[
-          { label: "Accueil", page: "EspaceVendeur", icone: "🏠", actif: true },
-          { label: "Commandes", page: "MesCommandesVendeur", icone: "📋", actif: false },
-          { label: "Catalogue", page: "CatalogueVendeur", icone: "📦", actif: false },
-          { label: "Profil", page: "ProfilVendeur", icone: "👤", actif: false },
-          { label: "Aide", page: "AideVendeur", icone: "❓", actif: false },
-        ].map(({ label, page, icone, actif }) => (
-          <Link key={page} to={createPageUrl(page)} className="flex-1 flex flex-col items-center py-2.5 gap-1">
-            <span className="text-xl">{icone}</span>
-            <span className={`text-[10px] ${actif ? "text-[#1a1f5e] font-bold" : "text-slate-500"}`}>{label}</span>
-          </Link>
-        ))}
+          { label: "Accueil", page: "EspaceVendeur", icone: "🏠", feature: "dashboard" },
+          { label: "Commandes", page: "MesCommandesVendeur", icone: "📋", feature: "sales" },
+          { label: "Catalogue", page: "CatalogueVendeur", icone: "📦", feature: "catalog" },
+          { label: "Profil", page: "ProfilVendeur", icone: "👤", feature: "profile" },
+          { label: "Aide", page: "AideVendeur", icone: "❓", feature: "dashboard" },
+        ].map(({ label, page, icone, feature }) => {
+          const canAccess = canAccessFeature(compteVendeur.seller_status, feature);
+          return canAccess ? (
+            <Link key={page} to={createPageUrl(page)} className="flex-1 flex flex-col items-center py-2.5 gap-1 hover:text-[#1a1f5e] transition-colors">
+              <span className="text-xl">{icone}</span>
+              <span className="text-[10px] text-slate-500">{label}</span>
+            </Link>
+          ) : (
+            <button key={page} onClick={() => setRestrictionMessage(getRestrictionMessage(compteVendeur.seller_status, feature))} className="flex-1 flex flex-col items-center py-2.5 gap-1 opacity-40 cursor-not-allowed">
+              <span className="text-xl">{icone}</span>
+              <span className="text-[10px] text-slate-400">{label}</span>
+            </button>
+          );
+        })}
       </div>
     </div>
   );
