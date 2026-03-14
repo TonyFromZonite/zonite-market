@@ -28,6 +28,7 @@ const MENUS_ADMIN = [
   { nom: "Commandes Vendeurs",   page: "CommandesVendeurs",       icone: ShoppingCart },
   { nom: "Produits",             page: "Produits",                icone: Package },
   { nom: "Vendeurs",             page: "Vendeurs",                icone: Users },
+  { nom: "Validation KYC",       page: "GestionKYC",              icone: Shield },
   { nom: "Zones Livraison",      page: "GestionZones",            icone: Truck },
   { nom: "Coursiers",            page: "GestionCoursiers",        icone: Truck },
   { nom: "Support Vendeurs",     page: "SupportAdmin",            icone: MessageSquare },
@@ -50,6 +51,7 @@ import { LOGO_URL as LOGO } from "@/components/constants";
 export default function Layout({ children, currentPageName }) {
   const [menuOuvert, setMenuOuvert] = useState(false);
   const [nbCommandesAttente, setNbCommandesAttente] = useState(0);
+  const [nbKycAttente, setNbKycAttente] = useState(0);
   const [sousAdmin] = useState(() => getSousAdminSession());
   const [adminSession] = useState(() => getAdminSession());
   const [vendeurSession] = useState(() => getVendeurSession());
@@ -66,6 +68,12 @@ export default function Layout({ children, currentPageName }) {
       try {
         const cmdAttente = await base44.entities.CommandeVendeur.filter({ statut: "en_attente_validation_admin" });
         setNbCommandesAttente(cmdAttente.length);
+        
+        // Compter les KYC en attente
+        const { data } = await base44.functions.invoke('getAllVendeurs', {});
+        const vendeurs = Array.isArray(data) ? data : [];
+        const kycAttente = vendeurs.filter(v => v.statut_kyc === 'en_attente').length;
+        setNbKycAttente(kycAttente);
       } catch (error) {
         console.error('Erreur chargement badges:', error);
       }
@@ -85,6 +93,7 @@ export default function Layout({ children, currentPageName }) {
 
   const getBadge = (page) => {
     if (page === "CommandesVendeurs" && nbCommandesAttente > 0) return nbCommandesAttente;
+    if (page === "GestionKYC" && nbKycAttente > 0) return nbKycAttente;
     return 0;
   };
 

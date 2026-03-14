@@ -74,8 +74,8 @@ Deno.serve(async (req) => {
       case 'createVendeurInitial': {
         const { nom_complet, email, telephone, ville, quartier, mot_de_passe, numero_mobile_money, operateur_mobile_money } = payload.data || payload;
         
-        if (!nom_complet || !email || !mot_de_passe || !numero_mobile_money) {
-          throw new Error('Données manquantes (nom, email, mot de passe et numéro mobile money requis)');
+        if (!nom_complet || !email || !mot_de_passe) {
+          throw new Error('Données manquantes (nom, email, mot de passe requis)');
         }
 
         // Vérifier si un vendeur existe déjà
@@ -84,19 +84,10 @@ Deno.serve(async (req) => {
           throw new Error('Un compte vendeur existe déjà avec cet email');
         }
 
-        // Inviter l'utilisateur dans Base44
-        try {
-          await base44.users.inviteUser(email, 'vendeur');
-        } catch (inviteError) {
-          if (!inviteError.message.includes('already exists')) {
-            console.error('⚠️ Erreur invitation Base44:', inviteError.message);
-          }
-        }
-
         // Hacher le mot de passe
         const hashedPassword = await bcrypt.hash(mot_de_passe, 10);
 
-        // Créer le vendeur EN ATTENTE de validation KYC
+        // Créer le vendeur validé
         const sellerData = {
           email,
           nom_complet,
@@ -106,19 +97,16 @@ Deno.serve(async (req) => {
           numero_mobile_money: numero_mobile_money || '',
           operateur_mobile_money: operateur_mobile_money || 'orange_money',
           mot_de_passe_hash: hashedPassword,
-          statut_kyc: 'en_attente',
-          statut: 'en_attente_kyc',
-          video_vue: false,
-          conditions_acceptees: false,
-          catalogue_debloque: false,
-          taux_commission: 0,
+          statut_kyc: 'valide',
+          statut: 'actif',
+          video_vue: true,
+          conditions_acceptees: true,
+          catalogue_debloque: true,
           date_embauche: new Date().toISOString().split('T')[0],
           solde_commission: 0,
           total_commissions_gagnees: 0,
           total_commissions_payees: 0,
           nombre_ventes: 0,
-          ventes_reussies: 0,
-          ventes_echouees: 0,
           chiffre_affaires_genere: 0,
         };
 
@@ -126,57 +114,22 @@ Deno.serve(async (req) => {
 
         // Audit log
         await db.JournalAudit.create({
-          action: 'Vendeur créé par admin - KYC en attente',
+          action: 'Vendeur créé par admin',
           module: 'vendeur',
-          details: `Vendeur ${nom_complet} (${email}) créé par admin - En attente de validation KYC`,
+          details: `Vendeur ${nom_complet} (${email}) créé directement par admin`,
           utilisateur: rootSession?.email || 'admin',
           entite_id: sellerCree.id,
         }).catch(() => {});
 
-        // Notification admin pour KYC
-        await db.Notification.create({
-          destinataire_email: rootSession?.email || 'admin@zonite.com',
-          destinataire_role: 'admin',
-          type: 'kyc_soumis',
-          titre: '📋 Nouveau vendeur créé - KYC à valider',
-          message: `${nom_complet} (${email}) a été ajouté et attend la validation KYC`,
-          reference_id: sellerCree.id,
-          reference_type: 'Seller',
-          lien: '/Vendeurs',
-          priorite: 'normale',
+        // Notification in-app
+        await db.NotificationVendeur.create({
+          vendeur_email: email,
+          titre: '🎉 Bienvenue chez ZONITE !',
+          message: 'Votre compte vendeur a été créé. Connectez-vous avec vos identifiants pour commencer.',
+          type: 'succes',
         }).catch(() => {});
 
-        // Envoyer email avec identifiants
-        try {
-          await base44.asServiceRole.integrations.Core.SendEmail({
-            to: email,
-            subject: '🎉 Bienvenue chez ZONITE - Vos identifiants',
-            body: `
-Bonjour ${nom_complet},
-
-Votre compte vendeur ZONITE a été créé avec succès !
-
-📧 Email : ${email}
-🔑 Mot de passe : ${mot_de_passe}
-
-Vous pouvez dès maintenant vous connecter à votre espace vendeur. Votre compte sera activé après validation de votre dossier KYC par notre équipe.
-
-Bienvenue dans l'équipe ZONITE ! 🚀
-
-L'équipe ZONITE
-            `.trim(),
-          });
-        } catch (emailError) {
-          console.error('⚠️ Erreur envoi email:', emailError.message);
-        }
-
-        return Response.json({ 
-          success: true, 
-          message: 'Vendeur créé avec succès - En attente de validation KYC', 
-          seller_id: sellerCree.id,
-          email,
-          mot_de_passe,
-        });
+        return Response.json({ success: true, message: 'Vendeur créé avec succès', seller_id: sellerCree.id });
       }
       case 'validateKycAndActivate': {
         const validateResult = await base44.functions.invoke('validateKycAndActivateSeller', payload);
