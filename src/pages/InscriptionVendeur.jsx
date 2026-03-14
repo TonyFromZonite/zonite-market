@@ -236,8 +236,15 @@ export default function InscriptionVendeur() {
               <Input value={form.nom_complet} onChange={e => modifier("nom_complet", e.target.value)} placeholder="Jean Dupont" className="bg-white/10 border-white/20 text-white placeholder:text-slate-400 rounded-xl h-11 mt-1" />
             </div>
             <div>
-              <Label className="text-slate-200 text-xs">Email * <span className="text-slate-400">(servira d'identifiant)</span></Label>
-              <Input type="email" value={form.email} onChange={e => modifier("email", e.target.value)} placeholder="votre@email.com" className="bg-white/10 border-white/20 text-white placeholder:text-slate-400 rounded-xl h-11 mt-1" />
+               <Label className="text-slate-200 text-xs">Email * <span className="text-slate-400">(servira d'identifiant)</span></Label>
+               <div className="relative">
+                 <Input type="email" value={form.email} onChange={e => { modifier("email", e.target.value); verifierEmail(e.target.value); }} placeholder="votre@email.com" className="bg-white/10 border-white/20 text-white placeholder:text-slate-400 rounded-xl h-11 mt-1" />
+                 {form.email && emailVerifie !== null && (
+                   <div className={`text-xs mt-1 font-medium ${emailVerifie ? "text-emerald-400" : "text-red-400"}`}>
+                     {emailVerifie ? "✓ Email disponible" : "✗ Email déjà utilisé"}
+                   </div>
+                 )}
+               </div>
             </div>
             <div>
               <Label className="text-slate-200 text-xs">Téléphone *</Label>
