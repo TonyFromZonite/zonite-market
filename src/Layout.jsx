@@ -9,6 +9,7 @@ import {
 import { base44 } from "@/api/base44Client";
 import RechercheGlobale from "@/components/RechercheGlobale";
 import NotificationBell from "@/components/NotificationBell";
+import NotificationCenter from "@/components/NotificationCenter";
 import { NotificationToaster } from "@/components/NotificationSystem";
 import { getAdminSession, getSousAdminSession, getVendeurSession, clearAllSessions } from "@/components/useSessionGuard";
 
@@ -190,6 +191,7 @@ export default function Layout({ children, currentPageName }) {
           </h1>
           {!sousAdmin && !adminSession && <RechercheGlobale />}
           <div className="flex items-center gap-2">
+            <NotificationCenter />
             <NotificationBell />
             {vendeurSession && (
               <span className="text-xs bg-[#F5C518]/20 text-[#1a1f5e] font-semibold px-2 py-1 rounded-full hidden sm:block">
