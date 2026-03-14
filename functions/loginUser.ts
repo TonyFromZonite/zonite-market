@@ -79,13 +79,17 @@ Deno.serve(async (req) => {
     if (userType === 'vendeur' && email && password) {
       const result = await authenticateSeller(base44, email, password);
       if (result.success) {
+        const seller = result.seller;
         return Response.json({ 
           success: true, 
           session: { 
-            ...result.seller,
-            id: result.seller.id,
-            email: result.seller.email,
-            nom_complet: result.seller.nom_complet,
+            ...seller,
+            id: seller.id,
+            email: seller.email,
+            nom_complet: seller.nom_complet,
+            seller_status: seller.seller_status || "active_seller",
+            training_completed: seller.training_completed !== undefined ? seller.training_completed : false,
+            statut_kyc: seller.statut_kyc || "en_attente",
             role: 'vendeur'
           } 
         }, { status: 200 });
