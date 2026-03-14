@@ -124,7 +124,7 @@ Deno.serve(async (req) => {
              console.error('Email send failed:', e.message);
            }
 
-           return Response.json({ success: true, seller_id: seller.id, email, status: 'actif', user_created: userCreated });
+           return Response.json({ success: true, seller_id: seller.id, email, status: 'actif' });
          } catch (error) {
            console.error('Erreur création vendeur:', error);
            return Response.json({ error: error.message }, { status: 500 });
