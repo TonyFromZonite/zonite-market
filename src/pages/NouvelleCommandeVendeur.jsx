@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { CheckCircle2, Loader2, ChevronLeft, AlertCircle } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
+import SelecteurLocalisation from "@/components/vente/SelecteurLocalisation";
 
 export default function NouvelleCommandeVendeur() {
   const [compteVendeur, setCompteVendeur] = useState(null);
@@ -18,6 +19,12 @@ export default function NouvelleCommandeVendeur() {
     livraison_incluse: false,
     client_nom: "", client_telephone: "", client_ville: "", client_quartier: "", client_adresse: "",
     notes: "",
+  });
+  const [localisation, setLocalisation] = useState({
+    ville: "",
+    zone: "",
+    variation: "",
+    stockDisponible: 0
   });
   const [enCours, setEnCours] = useState(false);
   const [erreur, setErreur] = useState("");
@@ -53,22 +60,26 @@ export default function NouvelleCommandeVendeur() {
     setErreur("");
   };
 
+  const handleLocalisationChange = (loc) => {
+    setLocalisation(loc);
+    setErreur("");
+  };
+
   const produitSelectionne = produits.find(p => p.id === form.produit_id);
   const qte = parseInt(form.quantite) || 1;
   const prixGros = produitSelectionne?.prix_gros || 0;
   const prixFinal = parseFloat(form.prix_final_client) || 0;
   const commission = Math.max(0, (prixFinal - prixGros) * qte);
   const formater = n => `${Math.round(n || 0).toLocaleString("fr-FR")} FCFA`;
-  // Stock disponible = stock_global - stock_reserve
-  const stockDisponible = produitSelectionne 
-    ? Math.max(0, (produitSelectionne.stock_global || 0) - (produitSelectionne.stock_reserve || 0))
-    : 0;
 
   const soumettre = async () => {
     if (!compteVendeur) return setErreur("Compte vendeur non chargé.");
     if (!form.produit_id) return setErreur("Sélectionnez un produit.");
+    if (!localisation.ville) return setErreur("Sélectionnez une ville.");
+    if (!localisation.zone) return setErreur("Sélectionnez une zone.");
+    if (!localisation.variation) return setErreur("Sélectionnez une variation (taille/couleur).");
     if (qte < 1) return setErreur("La quantité doit être au moins 1.");
-    if (qte > stockDisponible) return setErreur(`Stock insuffisant. Stock disponible : ${stockDisponible} unité(s).`);
+    if (qte > localisation.stockDisponible) return setErreur(`Stock insuffisant pour cette variation. Stock disponible : ${localisation.stockDisponible} unité(s).`);
     if (!prixFinal || prixFinal < prixGros) return setErreur(`Le prix final doit être ≥ ${formater(prixGros)} (prix de gros).`);
     if (!form.client_nom || !form.client_telephone || !form.client_ville) return setErreur("Renseignez les informations du client.");
 
@@ -83,6 +94,9 @@ export default function NouvelleCommandeVendeur() {
          vendeur_email: compteVendeur.email,
         produit_id: form.produit_id,
         produit_nom: produitSelectionne.nom,
+        ville: localisation.ville,
+        zone: localisation.zone,
+        variation: localisation.variation,
         quantite: qte,
         prix_gros: prixGros,
         prix_final_client: prixFinal,
@@ -159,13 +173,24 @@ export default function NouvelleCommandeVendeur() {
               <SelectTrigger><SelectValue placeholder="Choisir un produit" /></SelectTrigger>
               <SelectContent>
                 {produits.map(p => (
-                  <SelectItem key={p.id} value={p.id} disabled={Math.max(0, (p.stock_global || 0) - (p.stock_reserve || 0)) <= 0}>
-                    {p.nom} — Dispo: {Math.max(0, (p.stock_global || 0) - (p.stock_reserve || 0))}{Math.max(0, (p.stock_global || 0) - (p.stock_reserve || 0)) <= 0 ? " (rupture)" : ""}
+                  <SelectItem key={p.id} value={p.id}>
+                    {p.nom}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
+          
+          {/* Sélecteur de localisation */}
+          {produitSelectionne && (
+            <SelecteurLocalisation
+              produit={produitSelectionne}
+              value={localisation}
+              onChange={handleLocalisationChange}
+              disabled={enCours}
+            />
+          )}
+
           {produitSelectionne && (
             <div className="bg-slate-50 rounded-xl p-3 text-sm">
               <p className="text-slate-500">Prix de gros : <span className="font-bold text-slate-900">{formater(prixGros)}</span></p>
@@ -189,8 +214,6 @@ export default function NouvelleCommandeVendeur() {
               <p className="text-xs text-slate-400">({formater(prixFinal - prixGros)} × {qte} unité{qte > 1 ? "s" : ""})</p>
             </div>
           )}
-
-
         </div>
 
         {/* Client */}
@@ -206,7 +229,7 @@ export default function NouvelleCommandeVendeur() {
               <Input value={form.client_telephone} onChange={e => modifier("client_telephone", e.target.value)} placeholder="+237 6XX XXX XXX" />
             </div>
             <div className="space-y-1">
-              <Label>Ville *</Label>
+              <Label>Ville livraison *</Label>
               <Input value={form.client_ville} onChange={e => modifier("client_ville", e.target.value)} />
             </div>
             <div className="space-y-1">
