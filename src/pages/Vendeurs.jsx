@@ -37,6 +37,9 @@ function ListeVendeurs() {
   const [vendeurEdite, setVendeurEdite] = useState(null);
   const [form, setForm] = useState(initVendeur);
   const [enCours, setEnCours] = useState(false);
+  const [dialogRoleOuvert, setDialogRoleOuvert] = useState(false);
+  const [vendeurRoleEdite, setVendeurRoleEdite] = useState(null);
+  const [nouveauRoleVendeur, setNouveauRoleVendeur] = useState("user");
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
