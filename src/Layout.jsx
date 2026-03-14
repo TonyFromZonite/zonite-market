@@ -8,9 +8,7 @@ import {
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import RechercheGlobale from "@/components/RechercheGlobale";
-import NotificationBell from "@/components/NotificationBell";
 import NotificationCenter from "@/components/NotificationCenter";
-import { NotificationToaster } from "@/components/NotificationSystem";
 import { getAdminSession, getSousAdminSession, getVendeurSession, clearAllSessions } from "@/components/useSessionGuard";
 
 // Pages de l'Application Vendeur (interface vendeur mobile, sans sidebar admin)
@@ -98,7 +96,6 @@ export default function Layout({ children, currentPageName }) {
 
   return (
     <div className="min-h-screen bg-slate-50 flex">
-      <NotificationToaster />
       {/* Overlay mobile */}
       {menuOuvert && (
         <div className="fixed inset-0 bg-black/40 z-40 lg:hidden" onClick={() => setMenuOuvert(false)} />
@@ -192,7 +189,6 @@ export default function Layout({ children, currentPageName }) {
           {!sousAdmin && !adminSession && <RechercheGlobale />}
           <div className="flex items-center gap-2">
             <NotificationCenter />
-            <NotificationBell />
             {vendeurSession && (
               <span className="text-xs bg-[#F5C518]/20 text-[#1a1f5e] font-semibold px-2 py-1 rounded-full hidden sm:block">
                 Vendeur

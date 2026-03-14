@@ -62,12 +62,6 @@ export default function EspaceVendeur() {
 
   const soldeAffiche = compteActualise?.[0] || compteVendeur;
 
-  const { data: notifications = [] } = useCachedQuery(
-    'NOTIFICATIONS',
-    () => base44.entities.NotificationVendeur.filter({ vendeur_email: utilisateur.email }, "-created_date", 10),
-    { ttl: 2 * 60 * 1000, enabled: !!utilisateur?.email }
-  );
-
   const formater = (n) => `${Math.round(n || 0).toLocaleString("fr-FR")} FCFA`;
 
   if (chargement) {
@@ -150,8 +144,6 @@ export default function EspaceVendeur() {
       </div>
     );
   }
-
-  const notifsNonLues = notifications.filter(n => !n.lue).length;
   const commandesEnAttente = commandes.filter(c => ["en_attente_validation_admin", "validee_admin", "attribuee_livreur"].includes(c.statut)).length;
   const commandesReussies = commandes.filter(c => c.statut === "livree").length;
   const commandesEchouees = commandes.filter(c => ["echec_livraison", "annulee"].includes(c.statut)).length;

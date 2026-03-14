@@ -43,7 +43,7 @@ Deno.serve(async (req) => {
         entite_id: seller_id,
       }).catch(() => {});
 
-      // Notification via le nouveau système
+      // Notification
       await base44.asServiceRole.entities.Notification.create({
         destinataire_email: seller.email,
         destinataire_role: 'vendeur',
@@ -52,14 +52,6 @@ Deno.serve(async (req) => {
         message: 'Félicitations ! Votre dossier KYC a été approuvé. Vous pouvez maintenant accéder à toutes les fonctionnalités.',
         lien: '/EspaceVendeur',
         priorite: 'importante',
-      }).catch(() => {});
-      
-      // Ancienne notification (rétrocompatibilité)
-      await base44.asServiceRole.entities.NotificationVendeur.create({
-        vendeur_email: seller.email,
-        titre: '✅ KYC Validé !',
-        message: 'Félicitations ! Votre dossier KYC a été approuvé. Vous pouvez maintenant accéder à toutes les fonctionnalités.',
-        type: 'succes',
       }).catch(() => {});
 
       // Email avec identifiants
@@ -91,7 +83,7 @@ Deno.serve(async (req) => {
         entite_id: seller_id,
       }).catch(() => {});
 
-      // Notification via le nouveau système
+      // Notification
       await base44.asServiceRole.entities.Notification.create({
         destinataire_email: seller.email,
         destinataire_role: 'vendeur',
@@ -100,14 +92,6 @@ Deno.serve(async (req) => {
         message: `Votre dossier KYC a été rejeté. Motif: ${notes || 'Veuillez contacter le support pour plus de détails.'}`,
         lien: '/ProfilVendeur',
         priorite: 'urgente',
-      }).catch(() => {});
-      
-      // Ancienne notification (rétrocompatibilité)
-      await base44.asServiceRole.entities.NotificationVendeur.create({
-        vendeur_email: seller.email,
-        titre: '❌ KYC Rejeté',
-        message: `Votre dossier KYC a été rejeté. Motif: ${notes || 'Veuillez contacter le support pour plus de détails.'}`,
-        type: 'alerte',
       }).catch(() => {});
 
       return Response.json({ success: true, message: 'KYC rejeté avec succès' });
