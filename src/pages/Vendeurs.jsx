@@ -191,6 +191,7 @@ function ListeVendeurs() {
                   <TableCell>
                     <div className="flex gap-1">
                       <Button variant="ghost" size="icon" onClick={() => ouvrir(v)}><Pencil className="w-4 h-4 text-slate-500" /></Button>
+                      <Button variant="ghost" size="icon" onClick={() => { setVendeurRoleEdite(v); setNouveauRoleVendeur("user"); setDialogRoleOuvert(true); }}><UserCog className="w-4 h-4 text-blue-500" /></Button>
                       <Button variant="ghost" size="icon" onClick={() => supprimer(v)}><Trash2 className="w-4 h-4 text-red-500" /></Button>
                     </div>
                   </TableCell>
