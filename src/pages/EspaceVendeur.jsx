@@ -60,8 +60,25 @@ export default function EspaceVendeur() {
           return;
         }
         
+        setUtilisateur({ email: session.email });
+        
+        // If session already has seller data from login, use it directly
+        if (session.id && session.nom_complet) {
+          setCompteVendeur(session);
+          
+          // Subscribe to real-time updates by ID
+          const unsubscribe = base44.entities.Seller.subscribe((event) => {
+            if (event.id === session.id) {
+              setCompteVendeur(event.data);
+            }
+          });
+          
+          setChargement(false);
+          return unsubscribe;
+        }
+        
+        // Otherwise, fetch from database
         const emailVendeur = session.email;
-        setUtilisateur({ email: emailVendeur });
         const sellers = await base44.entities.Seller.filter({ email: emailVendeur });
         if (sellers.length > 0) {
           setCompteVendeur(sellers[0]);
@@ -73,6 +90,7 @@ export default function EspaceVendeur() {
             }
           });
           
+          setChargement(false);
           return unsubscribe;
         } else {
           window.location.href = createPageUrl("Connexion");
@@ -80,8 +98,6 @@ export default function EspaceVendeur() {
       } catch (error) {
         console.error('Erreur chargement espace vendeur:', error);
         window.location.href = createPageUrl("Connexion");
-      } finally {
-        setChargement(false);
       }
     };
     charger();
