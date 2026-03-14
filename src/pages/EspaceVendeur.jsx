@@ -301,17 +301,17 @@ export default function EspaceVendeur() {
               </div>
             </Link>
           ) : (
-            <button onClick={() => setRestrictionMessage(getRestrictionMessage(compteVendeur.seller_status, "sales"))}>
-              <div className="bg-slate-300 text-slate-500 rounded-2xl p-4 flex items-center gap-3 cursor-not-allowed opacity-60">
-                <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
-                  <Plus className="w-5 h-5" />
-                </div>
-                <div>
-                  <p className="font-bold text-sm">Nouvelle</p>
-                  <p className="text-xs">commande</p>
-                </div>
-              </div>
-            </button>
+           <button onClick={() => shouldShowTrainingModal(compteVendeur.seller_status, compteVendeur.training_completed) ? null : setRestrictionMessage("Accès non autorisé pour le moment")}>
+             <div className="bg-slate-300 text-slate-500 rounded-2xl p-4 flex items-center gap-3 cursor-not-allowed opacity-60">
+               <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                 <Plus className="w-5 h-5" />
+               </div>
+               <div>
+                 <p className="font-bold text-sm">Nouvelle</p>
+                 <p className="text-xs">commande</p>
+               </div>
+             </div>
+           </button>
           )}
           {canAccessFeature(compteVendeur.seller_status, "catalog") ? (
             <Link to={createPageUrl("CatalogueVendeur")}>
