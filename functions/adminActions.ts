@@ -72,16 +72,32 @@ Deno.serve(async (req) => {
         return Response.json({ success: true, result });
       }
       case 'createVendeurInitial': {
-        // ⚠️ DÉPRÉCIÉ: Utiliser createSellerTransactional à la place
-        // Cette fonction est conservée pour la rétrocompatibilité
-        try {
-          const vendeurResult = await base44.asServiceRole.functions.invoke('createSellerTransactional', payload.data || payload);
-          return Response.json(vendeurResult);
-        } catch (error) {
-          console.error('Erreur createSellerTransactional:', error);
-          return Response.json({ error: error.message }, { status: 500 });
-        }
-      }
+         const { nom_complet, email, telephone, ville, quartier, mot_de_passe, numero_mobile_money, operateur_mobile_money = 'orange_money' } = payload.data || payload;
+         if (!nom_complet || !email || !mot_de_passe) {
+           return Response.json({ error: 'Données manquantes: nom_complet, email, mot_de_passe requis' }, { status: 400 });
+         }
+         try {
+           const existingSellers = await db.Seller.filter({ email });
+           if (existingSellers.length > 0) {
+             return Response.json({ error: `Un vendeur existe déjà avec l'email ${email}` }, { status: 409 });
+           }
+           const hashedPassword = await bcrypt.hash(mot_de_passe, 10);
+           const seller = await db.Seller.create({
+             email, nom_complet, telephone: telephone || '', ville: ville || '', quartier: quartier || '',
+             numero_mobile_money: numero_mobile_money || '', operateur_mobile_money,
+             mot_de_passe_hash: hashedPassword, statut_kyc: 'en_attente', statut: 'en_attente_kyc',
+             video_vue: false, conditions_acceptees: false, catalogue_debloque: false,
+             taux_commission: 10, solde_commission: 0, total_commissions_gagnees: 0, total_commissions_payees: 0,
+             nombre_ventes: 0, chiffre_affaires_genere: 0, ventes_reussies: 0, ventes_echouees: 0,
+             date_embauche: new Date().toISOString().split('T')[0]
+           });
+           await db.JournalAudit.create({ action: 'Vendeur créé par admin', module: 'vendeur', details: `Vendeur ${nom_complet} (${email}) créé`, utilisateur: user.email, entite_id: seller.id });
+           return Response.json({ success: true, seller_id: seller.id, email, status: 'en_attente_kyc' });
+         } catch (error) {
+           console.error('Erreur création vendeur:', error);
+           return Response.json({ error: error.message }, { status: 500 });
+         }
+       }
       case 'validateKycAndActivate': {
         const validateResult = await base44.functions.invoke('validateKycAndActivateSeller', payload);
         return Response.json(validateResult.data);
