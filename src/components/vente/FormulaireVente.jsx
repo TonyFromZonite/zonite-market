@@ -294,8 +294,8 @@ export default function FormulaireVente({ produits, vendeurs, livraisons, onSubm
         </div>
         </div>
 
-        {/* Bouton validation */}
-      <Button
+          {/* Bouton validation */}
+        <Button
         onClick={valider}
         disabled={enCours}
         className="w-full h-12 text-base bg-[#1a1f5e] hover:bg-[#141952] text-white"
