@@ -121,6 +121,14 @@ const AuthenticatedApp = () => {
           </LayoutWrapper>
         }
       />
+      <Route
+        path="/ResoumissionKYC"
+        element={
+          <LayoutWrapper currentPageName="ResoumissionKYC">
+            <ResoumissionKYC />
+          </LayoutWrapper>
+        }
+      />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
