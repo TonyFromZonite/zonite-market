@@ -82,9 +82,11 @@ Deno.serve(async (req) => {
         return Response.json({ 
           success: true, 
           session: { 
-            ...result.seller, 
-            role: 'vendeur',
-            email: result.seller.email 
+            ...result.seller,
+            id: result.seller.id,
+            email: result.seller.email,
+            nom_complet: result.seller.nom_complet,
+            role: 'vendeur'
           } 
         }, { status: 200 });
       }
