@@ -38,16 +38,42 @@ export default function EspaceVendeur() {
 
   useEffect(() => {
     const charger = async () => {
-      const session = getVendeurSession();
-      if (!session) {
+      try {
+        // Essayer d'abord la session stockée
+        let session = getVendeurSession();
+        
+        // Si pas de session mais connecté à Base44, créer une session vendeur
+        if (!session) {
+          try {
+            const user = await base44.auth.me();
+            if (user && user.role === 'user') {
+              session = { role: 'vendeur', email: user.email };
+              sessionStorage.setItem("vendeur_session", JSON.stringify(session));
+            }
+          } catch (_) {
+            // Pas connecté à Base44
+          }
+        }
+        
+        if (!session) {
+          window.location.href = createPageUrl("Connexion");
+          return;
+        }
+        
+        const emailVendeur = session.email;
+        setUtilisateur({ email: emailVendeur });
+        const sellers = await base44.entities.Seller.filter({ email: emailVendeur });
+        if (sellers.length > 0) {
+          setCompteVendeur(sellers[0]);
+        } else {
+          window.location.href = createPageUrl("Connexion");
+        }
+      } catch (error) {
+        console.error('Erreur chargement espace vendeur:', error);
         window.location.href = createPageUrl("Connexion");
-        return;
+      } finally {
+        setChargement(false);
       }
-      const emailVendeur = session.email;
-      setUtilisateur({ email: emailVendeur });
-      const sellers = await base44.entities.Seller.filter({ email: emailVendeur });
-      if (sellers.length > 0) setCompteVendeur(sellers[0]);
-      setChargement(false);
     };
     charger();
   }, []);
