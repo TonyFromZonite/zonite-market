@@ -14,6 +14,7 @@ import AuditSysteme from './pages/AuditSysteme';
 import AuditComptes from './pages/AuditComptes';
 import AuditComplet from './pages/AuditComplet';
 import ResoumissionKYC from './pages/ResoumissionKYC';
+import SyncSellerUsers from './pages/SyncSellerUsers';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -126,6 +127,14 @@ const AuthenticatedApp = () => {
         element={
           <LayoutWrapper currentPageName="ResoumissionKYC">
             <ResoumissionKYC />
+          </LayoutWrapper>
+        }
+      />
+      <Route
+        path="/SyncSellerUsers"
+        element={
+          <LayoutWrapper currentPageName="SyncSellerUsers">
+            <SyncSellerUsers />
           </LayoutWrapper>
         }
       />
