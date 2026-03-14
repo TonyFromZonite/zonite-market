@@ -9,27 +9,62 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Admin access required' }, { status: 403 });
     }
 
-    const { seller_id, seller_email } = await req.json();
+    const { seller_id } = await req.json();
 
-    if (!seller_id || !seller_email) {
-      return Response.json({ error: 'Missing seller_id or seller_email' }, { status: 400 });
+    if (!seller_id) {
+      return Response.json({ error: 'Missing seller_id' }, { status: 400 });
     }
 
-    // 1. Delete the Seller entity
-    await base44.asServiceRole.entities.Seller.delete(seller_id);
+    // 1. Récupérer les données du vendeur avant suppression
+    const sellers = await base44.asServiceRole.entities.Seller.filter({ id: seller_id });
+    if (sellers.length === 0) {
+      return Response.json({ error: 'Vendeur non trouvé' }, { status: 404 });
+    }
 
-    // 2. Find and delete the corresponding User
-    const users = await base44.asServiceRole.entities.User.filter({ email: seller_email });
-    if (users.length > 0) {
-      await base44.asServiceRole.entities.User.delete(users[0].id);
+    const sellerEmail = sellers[0].email;
+
+    // 2. Supprimer toutes les données liées au vendeur
+    try {
+      // Supprimer les notifications
+      const notifs = await base44.asServiceRole.entities.NotificationVendeur.filter({ vendeur_email: sellerEmail });
+      for (const notif of notifs) {
+        await base44.asServiceRole.entities.NotificationVendeur.delete(notif.id);
+      }
+    } catch (e) {
+      console.warn('Erreur suppression notifications:', e.message);
+    }
+
+    try {
+      // Supprimer les commandes
+      const commandes = await base44.asServiceRole.entities.CommandeVendeur.filter({ vendeur_email: sellerEmail });
+      for (const cmd of commandes) {
+        await base44.asServiceRole.entities.CommandeVendeur.delete(cmd.id);
+      }
+    } catch (e) {
+      console.warn('Erreur suppression commandes:', e.message);
+    }
+
+    // 3. Supprimer l'entité Seller
+    await base44.asServiceRole.entities.Seller.delete(seller_id);
+    console.log(`✅ Seller supprimé: ${sellerEmail}`);
+
+    // 4. Supprimer l'utilisateur Base44
+    try {
+      const users = await base44.asServiceRole.entities.User.filter({ email: sellerEmail });
+      if (users.length > 0) {
+        await base44.asServiceRole.entities.User.delete(users[0].id);
+        console.log(`✅ Utilisateur Base44 supprimé: ${sellerEmail}`);
+      }
+    } catch (userError) {
+      console.warn('⚠️ Erreur suppression utilisateur Base44:', userError.message);
     }
 
     return Response.json({ 
       success: true, 
-      message: `Vendeur et compte utilisateur supprimés avec succès` 
+      message: `Vendeur ${sellerEmail} et toutes ses données supprimés avec succès` 
     });
   } catch (error) {
-    console.error('Error deleting seller and user:', error);
+    console.error('Error:', error);
     return Response.json({ error: error.message }, { status: 500 });
   }
 });
