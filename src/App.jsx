@@ -36,7 +36,7 @@ import DemandePaiement from './pages/DemandePaiement';
 import NotificationsVendeur from './pages/NotificationsVendeur';
 import AideVendeur from './pages/AideVendeur';
 import EspaceSousAdmin from './pages/EspaceSousAdmin';
-import Layout from './layout';
+import Layout from '../layout';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
