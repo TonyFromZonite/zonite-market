@@ -292,9 +292,9 @@ export default function FormulaireVente({ produits, vendeurs, livraisons, onSubm
             </p>
           </div>
         </div>
-      </div>
+        </div>
 
-      {/* Bouton validation */}
+        {/* Bouton validation */}
       <Button
         onClick={valider}
         disabled={enCours}
