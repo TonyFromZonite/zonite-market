@@ -198,7 +198,7 @@ export default function EspaceVendeur() {
           </div>
         </div>
       )}
-    <div className="min-h-screen bg-slate-50 pb-20">
+
       {/* Header */}
       <div className="bg-[#1a1f5e] text-white px-4 pt-6 pb-10" style={{ paddingTop: "max(1.5rem, env(safe-area-inset-top, 0px))" }}>
         <div className="flex justify-between items-center mb-1">
