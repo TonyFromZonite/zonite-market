@@ -209,9 +209,10 @@ export default function VideoFormation() {
                       setEnCours(true);
                       setErreur("");
                       try {
-                        // Update seller status to active_seller and video_vue to true
+                        // Update seller: mark training as completed and grant full access
                         await base44.entities.Seller.update(compteVendeur.id, {
                           seller_status: "active_seller",
+                          training_completed: true,
                           video_vue: true,
                           catalogue_debloque: true
                         });
