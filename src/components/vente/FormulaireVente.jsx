@@ -256,9 +256,9 @@ export default function FormulaireVente({ produits, vendeurs, livraisons, onSubm
             placeholder="Adresse complète"
           />
         </div>
-      </div>
+        </div>
 
-      {/* Notes */}
+        {/* Notes */}
       <div className="space-y-2">
         <Label>Notes</Label>
         <Textarea
