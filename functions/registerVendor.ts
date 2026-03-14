@@ -43,6 +43,10 @@ Deno.serve(async (req) => {
     // Hacher le mot de passe
     const hashedPassword = bcrypt.hashSync(mot_de_passe, 10);
 
+    // Générer un code de vérification (6 chiffres)
+    const verificationCode = String(Math.floor(100000 + Math.random() * 900000));
+    const codeExpiryTime = new Date(Date.now() + 15 * 60 * 1000).toISOString(); // 15 minutes
+
     // Créer le vendeur dans Seller
     const dataSeller = {
       email,
@@ -62,6 +66,9 @@ Deno.serve(async (req) => {
       conditions_acceptees: true,
       catalogue_debloque: false,
       date_embauche: new Date().toISOString().split('T')[0],
+      email_verified: false,
+      verification_code: verificationCode,
+      verification_code_expiry: codeExpiryTime,
       solde_commission: 0,
       total_commissions_gagnees: 0,
       total_commissions_payees: 0,
@@ -75,40 +82,12 @@ Deno.serve(async (req) => {
       throw new Error('Échec de la création du vendeur');
     }
 
-    // Créer immédiatement l'utilisateur Base44 avec rôle "user" (vendeur)
-    let userCreated = false;
-    try {
-      await base44.users.inviteUser(email, 'user');
-      userCreated = true;
-      console.log(`✅ Utilisateur Base44 créé pour ${email} avec rôle user (vendeur)`);
-    } catch (userError) {
-      console.error('❌ Erreur création utilisateur Base44:', userError.message);
-      // Ne pas bloquer si l'invitation échoue
-    }
-
-    // Journal d'audit
-    await base44.asServiceRole.entities.JournalAudit.create({
-      action: 'Vendeur auto-inscrit',
-      module: 'vendeur',
-      details: `Vendeur ${nom_complet} (${email}) auto-inscrit${userCreated ? ' - Utilisateur Base44 créé' : ''}`,
-      utilisateur: email,
-      entite_id: sellerCree.id,
-    }).catch(() => {});
-
-    // Notification in-app
-    await base44.asServiceRole.entities.NotificationVendeur.create({
-      vendeur_email: email,
-      titre: '🎉 Bienvenue chez ZONITE !',
-      message: 'Votre inscription a été reçue. Votre dossier KYC est en cours de vérification. Nous vous contacterons dès que possible.',
-      type: 'info',
-    }).catch(() => {});
-
-    // Envoyer email de confirmation
+    // Envoyer le code de vérification par email
     try {
       await base44.integrations.Core.SendEmail({
         to: email,
-        subject: '🎉 Bienvenue chez ZONITE – Votre inscription est en cours de validation',
-        body: `Bonjour ${nom_complet},\n\nMerci de vous être inscrit chez ZONITE ! 🚀\n\n📧 Email : ${email}\n🔐 Mot de passe : ${mot_de_passe}\n\n⚠️ Pour votre sécurité, changez ce mot de passe dès votre première connexion.\n\nVotre dossier KYC est maintenant en cours de vérification. Notre équipe examinera vos documents et vous contactera sous peu.\n\nBon courage !\n\nL'équipe ZONITE`
+        subject: '🔐 Votre code de vérification ZONITE',
+        body: `Bonjour ${nom_complet},\n\nMerci de votre inscription chez ZONITE ! 🚀\n\nVotre code de vérification est : ${verificationCode}\n\nCe code expire dans 15 minutes.\n\nEntrez ce code pour vérifier votre email et accéder à votre compte.\n\nSi vous n'avez pas demandé cette inscription, ignorez ce message.\n\nL'équipe ZONITE`
       });
     } catch (e) {
       console.error('Email send failed:', e.message);
@@ -116,9 +95,10 @@ Deno.serve(async (req) => {
 
     return Response.json({ 
       success: true, 
-      message: 'Inscription réussie. Vérification KYC en cours.',
-      seller_id: sellerCree.id,
-      user_created: userCreated
+      seller_id: sellerCree.id, 
+      email, 
+      status: 'en_attente_verification',
+      message: 'Code de vérification envoyé par email'
     });
 
   } catch (error) {
