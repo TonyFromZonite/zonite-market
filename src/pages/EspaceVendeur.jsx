@@ -171,13 +171,13 @@ export default function EspaceVendeur() {
       </div>
     );
   }
-  const commandesEnAttente = commandes.filter(c => ["en_attente_validation_admin", "validee_admin", "attribuee_livreur"].includes(c.statut)).length;
-  const commandesReussies = commandes.filter(c => c.statut === "livree").length;
-  const commandesEchouees = commandes.filter(c => ["echec_livraison", "annulee"].includes(c.statut)).length;
-  const commandesEnLivraison = commandes.filter(c => c.statut === "en_livraison").length;
+  const commandesEnAttente = (commandes || []).filter(c => ["en_attente_validation_admin", "validee_admin", "attribuee_livreur"].includes(c.statut)).length;
+  const commandesReussies = (commandes || []).filter(c => c.statut === "livree").length;
+  const commandesEchouees = (commandes || []).filter(c => ["echec_livraison", "annulee"].includes(c.statut)).length;
+  const commandesEnLivraison = (commandes || []).filter(c => c.statut === "en_livraison").length;
 
   // Modal vidéo si catalogue non déverrouillé
-  const [showVideoModal, setShowVideoModal] = useState(!compteVendeur.catalogue_debloque);
+  const [showVideoModal, setShowVideoModal] = useState(!compteVendeur?.catalogue_debloque);
 
   return (
     <div className="min-h-screen bg-slate-50 pb-20">
