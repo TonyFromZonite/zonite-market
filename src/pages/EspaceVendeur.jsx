@@ -149,23 +149,6 @@ export default function EspaceVendeur() {
     );
   }
 
-  // Auto-initialize first-login modal based on account state
-  useEffect(() => {
-    if (!compteVendeur || activeModal) return;
-
-    // Seller created by admin: KYC is auto-validated, show video modal if not watched
-    if (compteVendeur.created_by && compteVendeur.statut_kyc === "valide" && !compteVendeur.video_vue) {
-      setActiveModal('video');
-    } 
-    // Self-registered seller: KYC status is pending, show KYC modal
-    else if (!compteVendeur.created_by && compteVendeur.statut_kyc === "en_attente") {
-      setActiveModal('kyc');
-    }
-    // KYC approved but video not watched yet
-    else if (compteVendeur.statut_kyc === "valide" && !compteVendeur.video_vue) {
-      setActiveModal('video');
-    }
-  }, [compteVendeur, activeModal]);
   const commandesEnAttente = (commandes || []).filter(c => ["en_attente_validation_admin", "validee_admin", "attribuee_livreur"].includes(c.statut)).length;
   const commandesReussies = (commandes || []).filter(c => c.statut === "livree").length;
   const commandesEchouees = (commandes || []).filter(c => ["echec_livraison", "annulee"].includes(c.statut)).length;
