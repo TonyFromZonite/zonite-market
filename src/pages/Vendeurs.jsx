@@ -112,6 +112,31 @@ function ListeVendeurs() {
     }
   };
 
+  const changerRole = async () => {
+    if (!vendeurRoleEdite) return;
+    setEnCours(true);
+    try {
+      const users = await base44.entities.User.filter({ email: vendeurRoleEdite.email });
+      if (users.length === 0) {
+        toast({ title: "Utilisateur non trouvé", variant: "destructive", duration: 5000 });
+        setEnCours(false);
+        return;
+      }
+      await base44.functions.invoke('changeUserRole', {
+        user_id: users[0].id,
+        new_role: nouveauRoleVendeur
+      });
+      await adminApi.createJournalAudit({ action: "Rôle utilisateur changé", module: "vendeur", details: `Rôle de ${vendeurRoleEdite.nom_complet} changé en ${nouveauRoleVendeur}`, entite_id: vendeurRoleEdite.id });
+      toast({ title: "Rôle changé avec succès", duration: 5000 });
+      queryClient.invalidateQueries({ queryKey: ["vendeurs"] });
+      setDialogRoleOuvert(false);
+    } catch (error) {
+      toast({ title: "Erreur", description: error.message, variant: "destructive", duration: 5000 });
+    } finally {
+      setEnCours(false);
+    }
+  };
+
   const vendeursFiltres = vendeurs.filter((v) => `${v.nom_complet} ${v.email} ${v.telephone}`.toLowerCase().includes(recherche.toLowerCase()));
 
   if (isLoading) return <div className="space-y-3">{Array(5).fill(0).map((_, i) => <Skeleton key={i} className="h-12 rounded-lg" />)}</div>;
