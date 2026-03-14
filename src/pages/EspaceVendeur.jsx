@@ -288,7 +288,7 @@ export default function EspaceVendeur() {
 
         {/* Actions rapides */}
         <div className="grid grid-cols-2 gap-3 mb-5">
-          {canAccessFeature(compteVendeur.seller_status, "sales") ? (
+          {canAccessFeature(compteVendeur.seller_status, "sales", compteVendeur.training_completed) ? (
             <Link to={createPageUrl("NouvelleCommandeVendeur")}>
               <div className="bg-[#1a1f5e] text-white rounded-2xl p-4 flex items-center gap-3 hover:bg-[#141952] transition-colors">
                 <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
@@ -301,19 +301,19 @@ export default function EspaceVendeur() {
               </div>
             </Link>
           ) : (
-           <button onClick={() => shouldShowTrainingModal(compteVendeur.seller_status, compteVendeur.training_completed) ? null : setRestrictionMessage("Accès non autorisé pour le moment")}>
-             <div className="bg-slate-300 text-slate-500 rounded-2xl p-4 flex items-center gap-3 cursor-not-allowed opacity-60">
-               <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
-                 <Plus className="w-5 h-5" />
-               </div>
-               <div>
-                 <p className="font-bold text-sm">Nouvelle</p>
-                 <p className="text-xs">commande</p>
-               </div>
-             </div>
-           </button>
+            <button disabled className="cursor-not-allowed">
+              <div className="bg-slate-300 text-slate-500 rounded-2xl p-4 flex items-center gap-3 opacity-60">
+                <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                  <Plus className="w-5 h-5" />
+                </div>
+                <div>
+                  <p className="font-bold text-sm">Nouvelle</p>
+                  <p className="text-xs">commande</p>
+                </div>
+              </div>
+            </button>
           )}
-          {canAccessFeature(compteVendeur.seller_status, "catalog") ? (
+          {canAccessFeature(compteVendeur.seller_status, "catalog", compteVendeur.training_completed) ? (
             <Link to={createPageUrl("CatalogueVendeur")}>
               <div className="bg-[#F5C518] text-[#1a1f5e] rounded-2xl p-4 flex items-center gap-3 hover:bg-[#e0b010] transition-colors">
                 <div className="w-10 h-10 bg-[#1a1f5e]/10 rounded-xl flex items-center justify-center">
