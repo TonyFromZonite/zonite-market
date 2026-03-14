@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { getVendeurSession, clearAllSessions } from "@/components/useSessionGuard";
 import { LOGO_URL as LOGO } from "@/components/constants";
+import NotificationCenterVendeur from "@/components/NotificationCenterVendeur";
 
 const STATUTS = {
   en_attente_validation_admin: { label: "En attente", couleur: "bg-yellow-100 text-yellow-800" },
@@ -169,14 +170,7 @@ export default function EspaceVendeur() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Link to={createPageUrl("NotificationsVendeur")} className="relative">
-              <Bell className="w-6 h-6 text-white" />
-              {notifsNonLues > 0 && (
-                <span className="absolute -top-1 -right-1 w-4 h-4 bg-[#F5C518] rounded-full text-[10px] font-bold text-[#1a1f5e] flex items-center justify-center">
-                  {notifsNonLues}
-                </span>
-              )}
-            </Link>
+            <NotificationCenterVendeur />
           </div>
         </div>
         {/* Solde */}
