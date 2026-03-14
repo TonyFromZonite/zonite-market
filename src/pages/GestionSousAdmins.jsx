@@ -99,12 +99,10 @@ export default function GestionSousAdmins() {
         data.mot_de_passe_hash = response.data.hashedPassword;
       }
       if (editing) {
-        await adminApi.updateSousAdmin(editing.id, data);
-      } else {
-        await adminApi.createSousAdmin(data);
-        // Inviter l'utilisateur
-        try { await base44.users.inviteUser(form.email, "user"); } catch (_) {}
-      }
+         await adminApi.updateSousAdmin(editing.id, data);
+       } else {
+         await adminApi.createSousAdmin(data);
+       }
       queryClient.invalidateQueries({ queryKey: ["sous_admins"] });
       setDialogOuvert(false);
     } catch (err) {

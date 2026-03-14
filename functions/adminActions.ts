@@ -95,20 +95,11 @@ Deno.serve(async (req) => {
            });
 
            // NOUVEAU : Créer immédiatement l'utilisateur Base44 avec rôle vendeur (statut actif)
-           let userCreated = false;
-           try {
-             await base44.users.inviteUser(email, 'user');
-             userCreated = true;
-             console.log(`✅ Utilisateur Base44 créé pour ${email}`);
-           } catch (userError) {
-             console.error('❌ Erreur création utilisateur Base44:', userError.message);
-           }
-
            const adminUser = await base44.auth.me().catch(() => null);
            await db.JournalAudit.create({ 
              action: 'Vendeur créé par admin (immédiatement actif)', 
              module: 'vendeur', 
-             details: `Vendeur ${nom_complet} (${email}) créé par ${adminUser?.email || 'admin'} - Statut: ACTIF${userCreated ? ' - Utilisateur Base44 créé' : ''}`, 
+             details: `Vendeur ${nom_complet} (${email}) créé par ${adminUser?.email || 'admin'} - Statut: ACTIF`, 
              utilisateur: adminUser?.email || 'system', 
              entite_id: seller.id 
            });
@@ -124,7 +115,7 @@ Deno.serve(async (req) => {
              console.error('Email send failed:', e.message);
            }
 
-           return Response.json({ success: true, seller_id: seller.id, email, status: 'actif', user_created: userCreated });
+           return Response.json({ success: true, seller_id: seller.id, email, status: 'actif' });
          } catch (error) {
            console.error('Erreur création vendeur:', error);
            return Response.json({ error: error.message }, { status: 500 });
@@ -165,6 +156,21 @@ Deno.serve(async (req) => {
       }
       case 'createSousAdmin': {
         const result = await db.SousAdmin.create(payload.data);
+
+        // Envoyer email avec identifiants de connexion
+        const { email, nom_complet, mot_de_passe } = payload.data;
+        if (email && nom_complet && mot_de_passe) {
+          try {
+            await base44.integrations.Core.SendEmail({
+              to: email,
+              subject: '🔐 Accès ZONITE Administrateur - Vos identifiants de connexion',
+              body: `Bonjour ${nom_complet},\n\n🔐 Vous avez été nommé sous-administrateur de ZONITE.\n\nVoici vos identifiants de connexion :\n\n📧 Email : ${email}\n🔑 Mot de passe : ${mot_de_passe}\n\n⚠️ Pour votre sécurité, changez ce mot de passe dès votre première connexion.\n\n🔗 Lien de connexion : ${Deno.env.get('APP_URL') || 'https://zonite.app'}\n\nBienvenue dans l'équipe !\n\nL'équipe ZONITE`
+            });
+          } catch (e) {
+            console.error('Email send failed:', e.message);
+          }
+        }
+
         return Response.json({ success: true, result });
       }
       case 'deleteSousAdmin': {

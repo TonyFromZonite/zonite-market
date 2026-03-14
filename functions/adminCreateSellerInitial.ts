@@ -22,11 +22,18 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Un compte vendeur existe déjà avec cet email' }, { status: 400 });
     }
 
-    try {
-      await base44.users.inviteUser(email, 'user');
-    } catch (inviteError) {
-      if (!inviteError.message.includes('already exists')) {
-        console.error('Invite error:', inviteError.message);
+    // Créer l'utilisateur dans Base44 s'il n'existe pas
+    const usersExistants = await base44.asServiceRole.entities.User.filter({ email });
+    if (usersExistants.length === 0) {
+      try {
+        await base44.asServiceRole.entities.User.create({
+          email,
+          full_name: nom_complet,
+          role: 'user'
+        });
+      } catch (userError) {
+        console.error('Erreur création utilisateur:', userError.message);
+        return Response.json({ error: 'Erreur lors de la création du compte utilisateur' }, { status: 500 });
       }
     }
 
@@ -40,12 +47,13 @@ Deno.serve(async (req) => {
       quartier: quartier || '',
       numero_mobile_money: numero_mobile_money || '',
       operateur_mobile_money: operateur_mobile_money || 'orange_money',
-      statut_kyc: 'en_attente',
-      statut: 'en_attente_kyc',
+      statut_kyc: 'valide',
+      statut: 'actif',
+      email_verified: true,
       mot_de_passe_hash: hashedPassword,
-      video_vue: false,
-      conditions_acceptees: false,
-      catalogue_debloque: false,
+      video_vue: true,
+      conditions_acceptees: true,
+      catalogue_debloque: true,
       solde_commission: 0,
       total_commissions_gagnees: 0,
       total_commissions_payees: 0,
@@ -64,7 +72,7 @@ Deno.serve(async (req) => {
 
     return Response.json({
       success: true,
-      message: 'Compte vendeur créé - KYC en attente de validation',
+      message: 'Compte vendeur créé et activé (KYC validé, email vérifié)',
       compte_id: compteVendeur.id,
       nom_complet,
       email,

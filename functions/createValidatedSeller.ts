@@ -24,6 +24,25 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Un compte vendeur existe déjà avec cet email' }, { status: 400 });
     }
 
+    // Vérifier si l'utilisateur existe déjà dans Base44
+    const usersExistants = await base44.asServiceRole.entities.User.filter({ email });
+    
+    // Créer l'utilisateur dans Base44 s'il n'existe pas
+    if (usersExistants.length === 0) {
+      try {
+        console.log('📝 Création de l\'utilisateur Base44...');
+        await base44.asServiceRole.entities.User.create({
+          email,
+          full_name: nom_complet,
+          role: 'user'
+        });
+        console.log('✅ Utilisateur Base44 créé');
+      } catch (userError) {
+        console.error('Erreur création utilisateur:', userError.message);
+        return Response.json({ error: 'Erreur lors de la création du compte utilisateur' }, { status: 500 });
+      }
+    }
+
     // Hacher le mot de passe (async pour éviter CPU timeout)
     const hashedPassword = await bcrypt.hash(mot_de_passe, 10);
 
@@ -41,6 +60,7 @@ Deno.serve(async (req) => {
       mot_de_passe_hash: hashedPassword,
       statut_kyc: 'valide',
       statut: 'actif',
+      email_verified: true,
       video_vue: true,
       conditions_acceptees: true,
       catalogue_debloque: true,
