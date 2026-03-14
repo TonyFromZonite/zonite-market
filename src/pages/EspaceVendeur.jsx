@@ -171,26 +171,6 @@ export default function EspaceVendeur() {
       </div>
     );
   }
-
-  // Vidéo non vue
-  if (!compteVendeur.catalogue_debloque) {
-    return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-        <Link to={createPageUrl("VideoFormation")}>
-          <div className="bg-white rounded-2xl p-6 max-w-sm w-full text-center shadow-lg cursor-pointer hover:shadow-xl transition-shadow">
-            <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-3xl">🎬</span>
-            </div>
-            <h2 className="text-lg font-bold text-slate-900 mb-2">Formation obligatoire</h2>
-            <p className="text-sm text-slate-500 mb-4">Regardez la vidéo de présentation ZONITE pour déverrouiller le catalogue produits.</p>
-            <Button className="w-full bg-[#F5C518] hover:bg-[#e0b010] text-[#1a1f5e] font-bold">
-              Commencer la formation →
-            </Button>
-          </div>
-        </Link>
-      </div>
-    );
-  }
   const commandesEnAttente = commandes.filter(c => ["en_attente_validation_admin", "validee_admin", "attribuee_livreur"].includes(c.statut)).length;
   const commandesReussies = commandes.filter(c => c.statut === "livree").length;
   const commandesEchouees = commandes.filter(c => ["echec_livraison", "annulee"].includes(c.statut)).length;
