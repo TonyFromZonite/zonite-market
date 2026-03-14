@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ShoppingCart, Loader2, AlertCircle } from "lucide-react";
+import SelecteurLocalisation from "./SelecteurLocalisation";
 
 export default function FormulaireVente({ produits, vendeurs, livraisons, onSubmit, enCours }) {
   const [donnees, setDonnees] = useState({
@@ -23,6 +24,16 @@ export default function FormulaireVente({ produits, vendeurs, livraisons, onSubm
     client_telephone: "",
     client_adresse: "",
     notes: "",
+    ville: "",
+    zone: "",
+    variation: "",
+  });
+
+  const [localisation, setLocalisation] = useState({
+    ville: "",
+    zone: "",
+    variation: "",
+    stockDisponible: 0
   });
 
   const [erreur, setErreur] = useState("");
@@ -66,19 +77,30 @@ export default function FormulaireVente({ produits, vendeurs, livraisons, onSubm
     }
   };
 
+  const handleLocalisationChange = (loc) => {
+    setLocalisation(loc);
+    setDonnees(prev => ({
+      ...prev,
+      ville: loc.ville,
+      zone: loc.zone,
+      variation: loc.variation
+    }));
+    setErreur("");
+  };
+
   const valider = () => {
     if (!donnees.produit_id) return setErreur("Sélectionnez un produit");
+    if (!localisation.ville) return setErreur("Sélectionnez une ville");
+    if (!localisation.zone) return setErreur("Sélectionnez une zone");
+    if (!localisation.variation) return setErreur("Sélectionnez une variation (taille/couleur)");
     if (!donnees.vendeur_id) return setErreur("Sélectionnez un vendeur");
     if (!qte || qte <= 0) return setErreur("La quantité doit être positive");
     if (!prixUnit || prixUnit <= 0) return setErreur("Le prix unitaire doit être positif");
     if (produitSelectionne && prixUnit < prixGros) {
       return setErreur(`Le prix de vente (${prixUnit} FCFA) doit être ≥ au prix de gros (${prixGros} FCFA)`);
     }
-    const stockDispo = produitSelectionne 
-      ? Math.max(0, (produitSelectionne.stock_global || 0) - (produitSelectionne.stock_reserve || 0))
-      : 0;
-    if (produitSelectionne && qte > stockDispo) {
-      return setErreur(`Stock insuffisant (${stockDispo} disponibles)`);
+    if (qte > localisation.stockDisponible) {
+      return setErreur(`Stock insuffisant pour cette variation (${localisation.stockDisponible} disponibles)`);
     }
     onSubmit({
       ...donnees,
@@ -92,6 +114,9 @@ export default function FormulaireVente({ produits, vendeurs, livraisons, onSubm
       produitSelectionne,
       vendeurSelectionne,
       livraisonSelectionnee,
+      ville: localisation.ville,
+      zone: localisation.zone,
+      variation: localisation.variation,
     });
   };
 
@@ -106,7 +131,7 @@ export default function FormulaireVente({ produits, vendeurs, livraisons, onSubm
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <div className="space-y-5">
         {/* Produit */}
         <div className="space-y-2">
           <Label>Produit *</Label>
@@ -115,24 +140,31 @@ export default function FormulaireVente({ produits, vendeurs, livraisons, onSubm
               <SelectValue placeholder="Choisir un produit" />
             </SelectTrigger>
             <SelectContent>
-              {produits.filter(p => p.statut === "actif").map((p) => {
-                const stockDispo = Math.max(0, (p.stock_global || 0) - (p.stock_reserve || 0));
-                return (
-                  <SelectItem key={p.id} value={p.id} disabled={stockDispo === 0}>
-                    {p.nom} – Stock: {stockDispo}{stockDispo === 0 ? " (rupture)" : ""}
-                  </SelectItem>
-                );
-              })}
+              {produits.filter(p => p.statut === "actif").map((p) => (
+                <SelectItem key={p.id} value={p.id}>
+                  {p.nom}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
           {produitSelectionne && (
             <p className="text-xs text-slate-500">
-              Prix de gros: {formater(produitSelectionne.prix_gros)} | Stock disponible: {Math.max(0, (produitSelectionne.stock_global || 0) - (produitSelectionne.stock_reserve || 0))}
+              Prix de gros: {formater(produitSelectionne.prix_gros)}
             </p>
           )}
         </div>
 
-        {/* Vendeur */}
+        {/* Sélecteur Localisation */}
+        <SelecteurLocalisation
+          produit={produitSelectionne}
+          value={localisation}
+          onChange={handleLocalisationChange}
+          disabled={enCours}
+        />
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+      {/* Vendeur */}
         <div className="space-y-2">
           <Label>Vendeur *</Label>
           <Select value={donnees.vendeur_id} onValueChange={(v) => modifier("vendeur_id", v)}>
