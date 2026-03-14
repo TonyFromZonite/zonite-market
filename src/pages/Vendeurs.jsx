@@ -262,6 +262,33 @@ function ListeVendeurs() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Dialog Changement Rôle */}
+      <Dialog open={dialogRoleOuvert} onOpenChange={setDialogRoleOuvert}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>Modifier le rôle - {vendeurRoleEdite?.nom_complet}</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <p className="text-sm text-slate-600 mb-2">Rôle actuel: <span className="font-bold">{vendeurRoleEdite?.role || 'user'}</span></p>
+              <Label>Nouveau rôle</Label>
+              <Select value={nouveauRoleVendeur} onValueChange={setNouveauRoleVendeur}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="user">Vendeur (user)</SelectItem>
+                  <SelectItem value="admin">Administrateur (admin)</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-slate-500 mt-2">Cela changera le rôle de l'utilisateur correspondant dans le système.</p>
+            </div>
+          </div>
+          <div className="flex gap-2 justify-end pt-2">
+            <Button variant="outline" onClick={() => setDialogRoleOuvert(false)}>Annuler</Button>
+            <Button onClick={changerRole} disabled={enCours} className="bg-blue-600 hover:bg-blue-700">
+              {enCours ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : "Changer le rôle"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
