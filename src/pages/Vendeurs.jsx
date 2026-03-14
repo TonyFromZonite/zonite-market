@@ -379,7 +379,13 @@ function CommissionsTab() {
   const [enCours, setEnCours] = useState(false);
   const queryClient = useQueryClient();
 
-  const { data: vendeurs = [], isLoading: chargementVendeurs } = useQuery({ queryKey: ["vendeurs"], queryFn: () => base44.entities.Seller.list() });
+  const { data: vendeurs = [], isLoading: chargementVendeurs } = useQuery({ 
+    queryKey: ["vendeurs"], 
+    queryFn: async () => {
+      const res = await base44.functions.invoke('getAllVendeurs', {});
+      return res.data;
+    }
+  });
   const { data: paiements = [], isLoading: chargementPaiements } = useQuery({ queryKey: ["paiements_commissions"], queryFn: () => base44.entities.PaiementCommission.list("-created_date", 100) });
 
   const ouvrirPaiement = (vendeur) => { setVendeurPaiement(vendeur); setMontantPaiement(vendeur.solde_commission || 0); setMethodePaiement("especes"); setNotesPaiement(""); setDialogPaiement(true); };
