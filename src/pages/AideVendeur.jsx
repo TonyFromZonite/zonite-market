@@ -67,7 +67,7 @@ export default function AideVendeur() {
     if (!form.sujet || !form.categorie || !form.message) return;
     setEnCours(true);
     await vendeurApi.createTicketSupport({
-      vendeur_email: compteVendeur.user_email,
+      vendeur_email: compteVendeur.email,
       vendeur_nom: compteVendeur.nom_complet,
       sujet: form.sujet,
       categorie: form.categorie,
