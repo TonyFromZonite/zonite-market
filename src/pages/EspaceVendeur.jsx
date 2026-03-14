@@ -283,7 +283,7 @@ export default function EspaceVendeur() {
               <span className="text-xs text-blue-600">Voir tout →</span>
             </Link>
           </div>
-          {commandes.length === 0 ? (
+          {(commandes || []).length === 0 ? (
             <div className="p-8 text-center text-slate-400 text-sm">
               <ShoppingBag className="w-8 h-8 mx-auto mb-2 opacity-40" />
               Aucune commande pour l'instant
