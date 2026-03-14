@@ -56,9 +56,9 @@ Deno.serve(async (req) => {
         return Response.json({ success: true, result });
       }
 
-      // ─── COMPTE VENDEUR ──────────────────────────────────────────────────────
+      // ─── COMPTE VENDEUR (migré vers Seller) ─────────────────────────────────
       case 'updateCompteVendeur': {
-        const result = await db.CompteVendeur.update(payload.compteId, payload.data);
+        const result = await db.Seller.update(payload.compteId, payload.data);
         return Response.json({ success: true, result });
       }
 

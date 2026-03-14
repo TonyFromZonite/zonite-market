@@ -24,12 +24,12 @@ export default function PaiementsVendeurs() {
   const marquerPaye = async (demande) => {
     await adminApi.updateDemandePaiement(demande.id, { statut: "paye" });
 
-    const comptes = await base44.entities.CompteVendeur.filter({ user_email: demande.vendeur_email });
-    if (comptes.length > 0) {
-      const compte = comptes[0];
-      await adminApi.updateCompteVendeur(compte.id, {
-        solde_commission: Math.max(0, (compte.solde_commission || 0) - demande.montant),
-        total_commissions_payees: (compte.total_commissions_payees || 0) + demande.montant,
+    const sellers = await base44.entities.Seller.filter({ email: demande.vendeur_email });
+    if (sellers.length > 0) {
+      const seller = sellers[0];
+      await base44.asServiceRole.entities.Seller.update(seller.id, {
+        solde_commission: Math.max(0, (seller.solde_commission || 0) - demande.montant),
+        total_commissions_payees: (seller.total_commissions_payees || 0) + demande.montant,
       });
     }
 
