@@ -66,13 +66,13 @@ function DashboardSousAdmin({ sousAdmin }) {
       {/* Stats commandes */}
       {(sousAdmin.permissions || []).includes("CommandesVendeurs") && (
         <div>
-          <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">Aperçu Commandes</p>
+          <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-2 sm:mb-3">Aperçu Commandes</p>
           {chargCmd ? (
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              {Array(4).fill(0).map((_, i) => <Skeleton key={i} className="h-24 rounded-xl" />)}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
+              {Array(4).fill(0).map((_, i) => <Skeleton key={i} className="h-20 sm:h-24 rounded-xl" />)}
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
               <CarteStatistique titre="Aujourd'hui" valeur={cmdAujourdhui} icone={ShoppingCart} couleur="bleu" />
               <CarteStatistique titre="En attente" valeur={cmdAttente} icone={ShoppingCart} couleur="orange" />
               <CarteStatistique titre="En livraison" valeur={cmdEnLivraison} icone={ShoppingCart} couleur="violet" />
@@ -85,8 +85,8 @@ function DashboardSousAdmin({ sousAdmin }) {
       {/* Accès rapides aux modules autorisés */}
       {modules.length > 0 && (
         <div>
-          <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">Mes Modules</p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-2 sm:mb-3">Mes Modules</p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
             {modules.map((m) => (
               <Link key={m.page} to={createPageUrl(m.page)}>
                 <div className="bg-white rounded-xl border border-slate-200 p-4 hover:border-[#1a1f5e]/30 hover:shadow-md transition-all cursor-pointer">
@@ -192,9 +192,9 @@ function DashboardAdmin() {
 
   if (enChargement) {
     return (
-      <div className="space-y-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {Array(8).fill(0).map((_, i) => <Skeleton key={i} className="h-28 rounded-xl" />)}
+      <div className="space-y-4 sm:space-y-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
+          {Array(8).fill(0).map((_, i) => <Skeleton key={i} className="h-24 sm:h-28 rounded-xl" />)}
         </div>
       </div>
     );
@@ -228,8 +228,8 @@ function DashboardAdmin() {
 
       {/* Ventes Directes */}
       <div>
-        <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">Ventes Directes (Admin)</p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-2 sm:mb-3">Ventes Directes (Admin)</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
           <CarteStatistique titre="Chiffre d'Affaires Total" valeur={formaterMontant(chiffreAffaires)} icone={DollarSign} couleur="bleu" />
           <CarteStatistique titre="Profit Net" valeur={formaterMontant(profitNet)} icone={TrendingUp} couleur="vert" />
           <CarteStatistique titre="Commissions à Payer" valeur={formaterMontant(commissionsAPayer)} icone={Wallet} couleur="orange" />
@@ -239,8 +239,8 @@ function DashboardAdmin() {
 
       {/* Application Vendeurs */}
       <div>
-        <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">Application Vendeurs</p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-2 sm:mb-3">Application Vendeurs</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
           <CarteStatistique titre="Commandes Vendeurs Aujourd'hui" valeur={commandesVendeursAujourdhui} icone={ShoppingCart} couleur="indigo" />
           <CarteStatistique titre="Total Commandes Vendeurs" valeur={commandesArray.length} icone={Package} couleur="jaune" />
           <CarteStatistique titre="Stock Critique" valeur={stockCritique} icone={AlertTriangle} couleur={stockCritique > 0 ? "rouge" : "vert"} />
@@ -248,12 +248,12 @@ function DashboardAdmin() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         <GraphiqueVentes ventes={ventesArray} />
         <StockCritique produits={produitsArray} />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         <TopProduits produits={produitsArray} />
         <TopVendeurs vendeurs={vendeursArray} />
       </div>
