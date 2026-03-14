@@ -51,8 +51,8 @@ export default function AideVendeur() {
   useEffect(() => {
     const charger = async () => {
       const u = await base44.auth.me();
-      const comptes = await base44.entities.CompteVendeur.filter({ user_email: u.email });
-      if (comptes.length > 0) setCompteVendeur(comptes[0]);
+      const sellers = await base44.entities.Seller.filter({ email: u.email });
+      if (sellers.length > 0) setCompteVendeur(sellers[0]);
     };
     charger();
   }, []);
