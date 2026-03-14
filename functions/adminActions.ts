@@ -91,7 +91,8 @@ Deno.serve(async (req) => {
              nombre_ventes: 0, chiffre_affaires_genere: 0, ventes_reussies: 0, ventes_echouees: 0,
              date_embauche: new Date().toISOString().split('T')[0]
            });
-           await db.JournalAudit.create({ action: 'Vendeur créé par admin', module: 'vendeur', details: `Vendeur ${nom_complet} (${email}) créé`, utilisateur: user.email, entite_id: seller.id });
+           const adminUser = await base44.auth.me().catch(() => null);
+           await db.JournalAudit.create({ action: 'Vendeur créé par admin', module: 'vendeur', details: `Vendeur ${nom_complet} (${email}) créé`, utilisateur: adminUser?.email || 'system', entite_id: seller.id });
            return Response.json({ success: true, seller_id: seller.id, email, status: 'en_attente_kyc' });
          } catch (error) {
            console.error('Erreur création vendeur:', error);
