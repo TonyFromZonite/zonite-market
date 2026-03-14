@@ -114,6 +114,17 @@ export default function InscriptionVendeur() {
       });
 
       if (response.data?.success) {
+        // Envoyer notification aux admins pour nouveau KYC
+        try {
+          await base44.functions.invoke('notifierNouveauKYC', {
+            seller_id: response.data.seller_id,
+            seller_nom: form.nom_complet,
+            seller_email: form.email,
+          });
+        } catch (notifError) {
+          console.error('Erreur notification KYC:', notifError);
+          // Ne pas bloquer l'inscription si la notification échoue
+        }
         setSucces(true);
       } else {
         setErreur(response.data?.error || "Erreur lors de la soumission. Veuillez réessayer.");
