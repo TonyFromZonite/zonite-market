@@ -87,7 +87,12 @@ export default function Layout({ children, currentPageName }) {
   };
 
   // Pages vendeur : interface mobile standalone, sans sidebar admin
-  if (PAGES_VENDEUR.includes(currentPageName) || vendeurSession) {
+  if (PAGES_VENDEUR.includes(currentPageName)) {
+    return <>{children}</>;
+  }
+
+  // Si session vendeur ET pas connecté en tant qu'admin/sous-admin
+  if (vendeurSession && !adminSession && !sousAdmin) {
     return <>{children}</>;
   }
 
