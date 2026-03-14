@@ -35,8 +35,9 @@ Deno.serve(async (req) => {
       mot_de_passe_hash: passwordHash,
       nom_complet: nom_complet || email.split('@')[0],
       telephone: telephone || '',
-      statut_kyc: 'en_attente',
-      statut: 'en_attente_kyc',
+      statut_kyc: 'valide',
+      statut: 'actif',
+      email_verified: true,
     });
 
     return Response.json({ success: true, seller_id: seller.id });

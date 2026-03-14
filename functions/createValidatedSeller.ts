@@ -41,6 +41,7 @@ Deno.serve(async (req) => {
       mot_de_passe_hash: hashedPassword,
       statut_kyc: 'valide',
       statut: 'actif',
+      email_verified: true,
       video_vue: true,
       conditions_acceptees: true,
       catalogue_debloque: true,
