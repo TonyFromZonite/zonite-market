@@ -99,7 +99,7 @@ Deno.serve(async (req) => {
            await db.JournalAudit.create({ 
              action: 'Vendeur créé par admin (immédiatement actif)', 
              module: 'vendeur', 
-             details: `Vendeur ${nom_complet} (${email}) créé par ${adminUser?.email || 'admin'} - Statut: ACTIF${userCreated ? ' - Utilisateur Base44 créé' : ''}`, 
+             details: `Vendeur ${nom_complet} (${email}) créé par ${adminUser?.email || 'admin'} - Statut: ACTIF`, 
              utilisateur: adminUser?.email || 'system', 
              entite_id: seller.id 
            });
