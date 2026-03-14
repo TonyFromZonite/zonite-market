@@ -20,9 +20,13 @@ export const STATUS_LABELS = {
 };
 
 /**
- * Check if seller can access a feature based on their status
+ * Check if seller can access a feature based on their status and training completion
+ * @param {string} sellerStatus - The seller's current status
+ * @param {string} feature - The feature to check access for
+ * @param {boolean} trainingCompleted - Whether seller has completed training
+ * @returns {boolean} - True if seller can access the feature
  */
-export const canAccessFeature = (sellerStatus, feature) => {
+export const canAccessFeature = (sellerStatus, feature, trainingCompleted = false) => {
   const accessMap = {
     dashboard: {
       [SELLER_STATUSES.PENDING_VERIFICATION]: false,
@@ -61,7 +65,16 @@ export const canAccessFeature = (sellerStatus, feature) => {
     },
   };
 
-  return accessMap[feature]?.[sellerStatus] ?? false;
+  let canAccess = accessMap[feature]?.[sellerStatus] ?? false;
+
+  // If training is required but not completed, block catalog/sales access
+  if (sellerStatus === SELLER_STATUSES.KYC_APPROVED_TRAINING_REQUIRED && !trainingCompleted) {
+    if (["catalog", "sales"].includes(feature)) {
+      canAccess = false;
+    }
+  }
+
+  return canAccess;
 };
 
 /**
