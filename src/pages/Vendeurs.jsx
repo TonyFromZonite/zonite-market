@@ -95,10 +95,18 @@ function ListeVendeurs() {
   };
 
   const supprimer = async (vendeur) => {
-    if (!confirm(`Supprimer le vendeur "${vendeur.nom_complet}" ?`)) return;
-    await adminApi.deleteVendeur(vendeur.id);
-    await adminApi.createJournalAudit({ action: "Vendeur supprimé", module: "vendeur", details: `Vendeur ${vendeur.nom_complet} supprimé`, entite_id: vendeur.id });
-    queryClient.invalidateQueries({ queryKey: ["vendeurs"] });
+    if (!confirm(`Supprimer le vendeur "${vendeur.nom_complet}" ? Cette action supprimera aussi son compte utilisateur.`)) return;
+    try {
+      await base44.functions.invoke('deleteSellerAndUser', {
+        seller_id: vendeur.id,
+        seller_email: vendeur.email
+      });
+      await adminApi.createJournalAudit({ action: "Vendeur supprimé", module: "vendeur", details: `Vendeur ${vendeur.nom_complet} et compte utilisateur supprimés`, entite_id: vendeur.id });
+      toast({ title: "Vendeur supprimé avec succès", duration: 5000 });
+      queryClient.invalidateQueries({ queryKey: ["vendeurs"] });
+    } catch (error) {
+      toast({ title: "Erreur", description: error.message, variant: "destructive", duration: 5000 });
+    }
   };
 
   const vendeursFiltres = vendeurs.filter((v) => `${v.nom_complet} ${v.email} ${v.telephone}`.toLowerCase().includes(recherche.toLowerCase()));
