@@ -36,7 +36,7 @@ export default function NouvelleVente() {
     const vendeur = donnees.vendeurSelectionne;
     const livraison = donnees.livraisonSelectionnee;
 
-    // 1. Créer la vente via backend
+    // 1. Créer la vente via backend avec localisation et variation
     await base44.functions.invoke('createVente', {
       produit_id: donnees.produit_id,
       produit_nom: produit.nom,
@@ -58,27 +58,55 @@ export default function NouvelleVente() {
       client_telephone: donnees.client_telephone,
       client_adresse: donnees.client_adresse,
       notes: donnees.notes,
+      ville: donnees.ville,
+      zone: donnees.zone,
+      variation: donnees.variation,
     });
 
-    // 2. Diminuer le stock global (pas le stock réservé car vente directe admin)
-    const ancienStock = produit.stock_global || 0;
-    const nouveauStock = ancienStock - donnees.quantite;
-    const stockDispo = Math.max(0, nouveauStock - (produit.stock_reserve || 0));
+    // 2. Décrémenter le stock de la variation spécifique dans la zone
+    const produitActuel = await base44.asServiceRole.entities.Produit.get(produit.id);
+    const stocksLoc = produitActuel.stocks_par_localisation || [];
+    
+    const updatedStocks = stocksLoc.map(loc => {
+      if (loc.ville === donnees.ville && loc.zone === donnees.zone) {
+        return {
+          ...loc,
+          variations_stock: (loc.variations_stock || []).map(v => {
+            if (v.attributs === donnees.variation) {
+              return {
+                ...v,
+                quantite: Math.max(0, (v.quantite || 0) - donnees.quantite)
+              };
+            }
+            return v;
+          })
+        };
+      }
+      return loc;
+    });
+
+    // Recalculer stock_global
+    const nouveauStockGlobal = updatedStocks.reduce((total, loc) => {
+      const stockLoc = (loc.variations_stock || []).reduce((s, v) => s + (v.quantite || 0), 0);
+      return total + stockLoc;
+    }, 0);
+
     await adminApi.updateProduit(produit.id, {
-      stock_global: nouveauStock,
+      stocks_par_localisation: updatedStocks,
+      stock_global: nouveauStockGlobal,
       total_vendu: (produit.total_vendu || 0) + donnees.quantite,
-      statut: stockDispo <= 0 ? "rupture" : "actif",
+      statut: nouveauStockGlobal <= 0 ? "rupture" : "actif",
     });
 
-    // 3. Mouvement stock via backend
+    // 3. Mouvement stock via backend avec détails localisation
     await base44.functions.invoke('createMouvementStock', {
       produit_id: produit.id,
       produit_nom: produit.nom,
       type_mouvement: "sortie",
       quantite: donnees.quantite,
-      stock_avant: ancienStock,
-      stock_apres: nouveauStock,
-      raison: "Vente enregistrée",
+      stock_avant: produitActuel.stock_global || 0,
+      stock_apres: nouveauStockGlobal,
+      raison: `Vente - ${donnees.ville}/${donnees.zone} - ${donnees.variation}`,
     });
 
     // 4. Mettre à jour le seller (vendeur)
@@ -89,11 +117,11 @@ export default function NouvelleVente() {
       chiffre_affaires_genere: (vendeur.chiffre_affaires_genere || 0) + donnees.montantTotal,
     });
 
-    // 5. Journal d'audit via backend
+    // 5. Journal d'audit via backend avec localisation
     await base44.functions.invoke('createAudit', {
       action: "Nouvelle vente enregistrée",
       module: "vente",
-      details: `Vente de ${donnees.quantite}x ${produit.nom} par ${vendeur.nom_complet} – Total: ${donnees.montantTotal} FCFA`,
+      details: `Vente de ${donnees.quantite}x ${produit.nom} (${donnees.variation}) à ${donnees.ville}/${donnees.zone} par ${vendeur.nom_complet} – Total: ${donnees.montantTotal} FCFA`,
       entite_id: donnees.produit_id,
     });
 

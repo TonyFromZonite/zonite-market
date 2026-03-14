@@ -293,6 +293,7 @@ export default function FormulaireVente({ produits, vendeurs, livraisons, onSubm
           </div>
         </div>
       </div>
+      </div>
 
       {/* Bouton validation */}
       <Button
