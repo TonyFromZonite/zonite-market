@@ -218,8 +218,8 @@ export default function EspaceVendeur() {
         </div>
       )}
 
-      {/* Training Required modal */}
-      {compteVendeur.seller_status === SELLER_STATUSES.KYC_APPROVED_TRAINING_REQUIRED && (
+      {/* Training Required modal - show if training not completed */}
+      {shouldShowTrainingModal(compteVendeur.seller_status, compteVendeur.training_completed) && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl p-6 max-w-sm w-full text-center shadow-lg">
             <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
