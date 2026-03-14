@@ -269,8 +269,8 @@ export default function FormulaireVente({ produits, vendeurs, livraisons, onSubm
         />
         </div>
 
-        {/* Récapitulatif financier */}
-      <div className="bg-slate-50 rounded-xl p-5 border border-slate-200">
+          {/* Récapitulatif financier */}
+        <div className="bg-slate-50 rounded-xl p-5 border border-slate-200">
         <h3 className="text-sm font-semibold text-slate-900 mb-3">Récapitulatif Financier</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
           <div>
