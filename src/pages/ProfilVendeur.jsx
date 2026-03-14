@@ -94,8 +94,8 @@ export default function ProfilVendeur() {
           </div>
           <div>
             <p className="font-bold text-lg">{compteVendeur?.nom_complet || "Vendeur"}</p>
-            <Badge className={`text-xs border-0 mt-1 ${compteVendeur?.seller_status === "active_seller" ? "bg-emerald-500 text-white" : "bg-yellow-500 text-white"}`}>
-              {compteVendeur?.seller_status === "active_seller" ? "✓ Compte actif" : "En attente"}
+            <Badge className={`text-xs border-0 mt-1 ${compteVendeur?.statut === "actif" ? "bg-emerald-500 text-white" : "bg-yellow-500 text-white"}`}>
+              {compteVendeur?.statut === "actif" ? "✓ Compte actif" : "En attente"}
             </Badge>
           </div>
         </div>
@@ -145,7 +145,7 @@ export default function ProfilVendeur() {
           <div className="space-y-2 text-sm">
             {[
               { label: "KYC", val: compteVendeur?.statut_kyc === "valide" ? "✓ Validé" : compteVendeur?.statut_kyc === "rejete" ? "✗ Rejeté" : "En attente", ok: compteVendeur?.statut_kyc === "valide" },
-              { label: "Formation", val: compteVendeur?.training_completed ? "✓ Complétée" : "Non complétée", ok: compteVendeur?.training_completed },
+              { label: "Formation", val: compteVendeur?.video_vue ? "✓ Complétée" : "Non complétée", ok: compteVendeur?.video_vue },
               { label: "Catalogue", val: compteVendeur?.catalogue_debloque ? "✓ Débloqué" : "Verrouillé", ok: compteVendeur?.catalogue_debloque },
             ].map(({ label, val, ok }) => (
               <div key={label} className="flex items-center justify-between">

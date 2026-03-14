@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2, Loader2, Search, Wallet, DollarSign, AlertCircle, CheckCircle2, XCircle, Eye, Clock, UserCog } from "lucide-react";
+import { Plus, Pencil, Trash2, Loader2, Search, Wallet, DollarSign, AlertCircle, CheckCircle2, XCircle, Eye, Clock } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -37,9 +37,6 @@ function ListeVendeurs() {
   const [vendeurEdite, setVendeurEdite] = useState(null);
   const [form, setForm] = useState(initVendeur);
   const [enCours, setEnCours] = useState(false);
-  const [dialogRoleOuvert, setDialogRoleOuvert] = useState(false);
-  const [vendeurRoleEdite, setVendeurRoleEdite] = useState(null);
-  const [nouveauRoleVendeur, setNouveauRoleVendeur] = useState("user");
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -98,43 +95,10 @@ function ListeVendeurs() {
   };
 
   const supprimer = async (vendeur) => {
-    if (!confirm(`Supprimer le vendeur "${vendeur.nom_complet}" ? Cette action supprimera aussi son compte utilisateur.`)) return;
-    try {
-      await base44.functions.invoke('deleteSellerAndUser', {
-        seller_id: vendeur.id,
-        seller_email: vendeur.email
-      });
-      await adminApi.createJournalAudit({ action: "Vendeur supprimé", module: "vendeur", details: `Vendeur ${vendeur.nom_complet} et compte utilisateur supprimés`, entite_id: vendeur.id });
-      toast({ title: "Vendeur supprimé avec succès", duration: 5000 });
-      queryClient.invalidateQueries({ queryKey: ["vendeurs"] });
-    } catch (error) {
-      toast({ title: "Erreur", description: error.message, variant: "destructive", duration: 5000 });
-    }
-  };
-
-  const changerRole = async () => {
-    if (!vendeurRoleEdite) return;
-    setEnCours(true);
-    try {
-      const users = await base44.entities.User.filter({ email: vendeurRoleEdite.email });
-      if (users.length === 0) {
-        toast({ title: "Utilisateur non trouvé", variant: "destructive", duration: 5000 });
-        setEnCours(false);
-        return;
-      }
-      await base44.functions.invoke('changeUserRole', {
-        user_id: users[0].id,
-        new_role: nouveauRoleVendeur
-      });
-      await adminApi.createJournalAudit({ action: "Rôle utilisateur changé", module: "vendeur", details: `Rôle de ${vendeurRoleEdite.nom_complet} changé en ${nouveauRoleVendeur}`, entite_id: vendeurRoleEdite.id });
-      toast({ title: "Rôle changé avec succès", duration: 5000 });
-      queryClient.invalidateQueries({ queryKey: ["vendeurs"] });
-      setDialogRoleOuvert(false);
-    } catch (error) {
-      toast({ title: "Erreur", description: error.message, variant: "destructive", duration: 5000 });
-    } finally {
-      setEnCours(false);
-    }
+    if (!confirm(`Supprimer le vendeur "${vendeur.nom_complet}" ?`)) return;
+    await adminApi.deleteVendeur(vendeur.id);
+    await adminApi.createJournalAudit({ action: "Vendeur supprimé", module: "vendeur", details: `Vendeur ${vendeur.nom_complet} supprimé`, entite_id: vendeur.id });
+    queryClient.invalidateQueries({ queryKey: ["vendeurs"] });
   };
 
   const vendeursFiltres = vendeurs.filter((v) => `${v.nom_complet} ${v.email} ${v.telephone}`.toLowerCase().includes(recherche.toLowerCase()));
@@ -191,7 +155,6 @@ function ListeVendeurs() {
                   <TableCell>
                     <div className="flex gap-1">
                       <Button variant="ghost" size="icon" onClick={() => ouvrir(v)}><Pencil className="w-4 h-4 text-slate-500" /></Button>
-                      <Button variant="ghost" size="icon" onClick={() => { setVendeurRoleEdite(v); setNouveauRoleVendeur("user"); setDialogRoleOuvert(true); }}><UserCog className="w-4 h-4 text-blue-500" /></Button>
                       <Button variant="ghost" size="icon" onClick={() => supprimer(v)}><Trash2 className="w-4 h-4 text-red-500" /></Button>
                     </div>
                   </TableCell>
@@ -260,33 +223,6 @@ function ListeVendeurs() {
               {enCours ? <Loader2 className="w-4 h-4 animate-spin" /> : vendeurEdite ? "Enregistrer" : "Créer"}
             </Button>
           </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Dialog Changement Rôle */}
-      <Dialog open={dialogRoleOuvert} onOpenChange={setDialogRoleOuvert}>
-        <DialogContent className="max-w-md">
-          <DialogHeader><DialogTitle>Modifier le rôle - {vendeurRoleEdite?.nom_complet}</DialogTitle></DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <p className="text-sm text-slate-600 mb-2">Rôle actuel: <span className="font-bold">{vendeurRoleEdite?.role || 'user'}</span></p>
-              <Label>Nouveau rôle</Label>
-              <Select value={nouveauRoleVendeur} onValueChange={setNouveauRoleVendeur}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="user">Vendeur (user)</SelectItem>
-                  <SelectItem value="admin">Administrateur (admin)</SelectItem>
-                </SelectContent>
-              </Select>
-              <p className="text-xs text-slate-500 mt-2">Cela changera le rôle de l'utilisateur correspondant dans le système.</p>
-            </div>
-          </div>
-          <div className="flex gap-2 justify-end pt-2">
-            <Button variant="outline" onClick={() => setDialogRoleOuvert(false)}>Annuler</Button>
-            <Button onClick={changerRole} disabled={enCours} className="bg-blue-600 hover:bg-blue-700">
-              {enCours ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : "Changer le rôle"}
-            </Button>
-          </div>
         </DialogContent>
       </Dialog>
     </div>

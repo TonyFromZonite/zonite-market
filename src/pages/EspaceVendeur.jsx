@@ -60,44 +60,19 @@ export default function EspaceVendeur() {
           return;
         }
         
-        setUtilisateur({ email: session.email });
-        
-        // If session already has seller data from login, use it directly
-        if (session.id && session.nom_complet) {
-          setCompteVendeur(session);
-          
-          // Subscribe to real-time updates by ID
-          const unsubscribe = base44.entities.Seller.subscribe((event) => {
-            if (event.id === session.id) {
-              setCompteVendeur(event.data);
-            }
-          });
-          
-          setChargement(false);
-          return unsubscribe;
-        }
-        
-        // Otherwise, fetch from database
         const emailVendeur = session.email;
+        setUtilisateur({ email: emailVendeur });
         const sellers = await base44.entities.Seller.filter({ email: emailVendeur });
         if (sellers.length > 0) {
           setCompteVendeur(sellers[0]);
-          
-          // Subscribe to real-time seller updates
-          const unsubscribe = base44.entities.Seller.subscribe((event) => {
-            if (event.data?.email === emailVendeur) {
-              setCompteVendeur(event.data);
-            }
-          });
-          
-          setChargement(false);
-          return unsubscribe;
         } else {
           window.location.href = createPageUrl("Connexion");
         }
       } catch (error) {
         console.error('Erreur chargement espace vendeur:', error);
         window.location.href = createPageUrl("Connexion");
+      } finally {
+        setChargement(false);
       }
     };
     charger();
@@ -292,26 +267,26 @@ export default function EspaceVendeur() {
       </div>
 
       {/* Stats cards */}
-      <div className="px-3 sm:px-4 -mt-5">
-        <div className="grid grid-cols-2 gap-2 sm:gap-3 mb-4 sm:mb-5">
+      <div className="px-4 -mt-5">
+        <div className="grid grid-cols-2 gap-3 mb-5">
           {[
             { label: "En attente", val: commandesEnAttente, icone: Clock, couleur: "text-yellow-600", bg: "bg-yellow-50" },
             { label: "En livraison", val: commandesEnLivraison, icone: Truck, couleur: "text-purple-600", bg: "bg-purple-50" },
             { label: "Réussies", val: commandesReussies, icone: CheckCircle2, couleur: "text-emerald-600", bg: "bg-emerald-50" },
             { label: "Échouées", val: commandesEchouees, icone: XCircle, couleur: "text-red-600", bg: "bg-red-50" },
           ].map(({ label, val, icone: Icone, couleur, bg }) => (
-            <div key={label} className="bg-white rounded-2xl p-3 sm:p-4 shadow-sm">
-              <div className={`w-7 h-7 sm:w-8 sm:h-8 ${bg} rounded-xl flex items-center justify-center mb-2`}>
-                <Icone className={`w-3 h-3 sm:w-4 sm:h-4 ${couleur}`} />
+            <div key={label} className="bg-white rounded-2xl p-4 shadow-sm">
+              <div className={`w-8 h-8 ${bg} rounded-xl flex items-center justify-center mb-2`}>
+                <Icone className={`w-4 h-4 ${couleur}`} />
               </div>
-              <p className="text-lg sm:text-2xl font-bold text-slate-900">{val}</p>
+              <p className="text-2xl font-bold text-slate-900">{val}</p>
               <p className="text-xs text-slate-500">{label}</p>
             </div>
           ))}
         </div>
 
         {/* Actions rapides */}
-        <div className="grid grid-cols-2 gap-2 sm:gap-3 mb-4 sm:mb-5">
+        <div className="grid grid-cols-2 gap-3 mb-5">
           {canAccessFeature(compteVendeur.seller_status, "sales", compteVendeur.training_completed) ? (
             <Link to={createPageUrl("NouvelleCommandeVendeur")}>
               <div className="bg-[#1a1f5e] text-white rounded-2xl p-4 flex items-center gap-3 hover:bg-[#141952] transition-colors">
@@ -366,8 +341,8 @@ export default function EspaceVendeur() {
 
         {/* Commandes récentes */}
         <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
-          <div className="flex items-center justify-between p-3 sm:p-4 border-b border-slate-100">
-            <h3 className="font-semibold text-slate-900 text-xs sm:text-sm">Commandes récentes</h3>
+          <div className="flex items-center justify-between p-4 border-b border-slate-100">
+            <h3 className="font-semibold text-slate-900 text-sm">Commandes récentes</h3>
             <Link to={createPageUrl("MesCommandesVendeur")}>
               <span className="text-xs text-blue-600">Voir tout →</span>
             </Link>
@@ -379,16 +354,16 @@ export default function EspaceVendeur() {
             </div>
           ) : (
             commandes.slice(0, 5).map((c) => (
-              <div key={c.id} className="flex items-center justify-between p-2 sm:p-4 border-b border-slate-50 last:border-0 gap-2">
+              <div key={c.id} className="flex items-center justify-between p-4 border-b border-slate-50 last:border-0">
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-xs sm:text-sm text-slate-900 truncate">{c.produit_nom}</p>
-                  <p className="text-[10px] sm:text-xs text-slate-500 truncate">{c.client_nom} • {c.client_ville}</p>
+                  <p className="font-medium text-sm text-slate-900 truncate">{c.produit_nom}</p>
+                  <p className="text-xs text-slate-500">{c.client_nom} • {c.client_ville}</p>
                 </div>
-                <div className="text-right ml-2 flex-shrink-0 whitespace-nowrap">
-                  <Badge className={`${STATUTS[c.statut]?.couleur} text-[10px] sm:text-xs border-0`}>
+                <div className="text-right ml-3 flex-shrink-0">
+                  <Badge className={`${STATUTS[c.statut]?.couleur} text-xs border-0`}>
                     {STATUTS[c.statut]?.label}
                   </Badge>
-                  <p className="text-[10px] sm:text-xs text-emerald-600 font-bold mt-1">+{formater(c.commission_vendeur)}</p>
+                  <p className="text-xs text-emerald-600 font-bold mt-1">+{formater(c.commission_vendeur)}</p>
                 </div>
               </div>
             ))

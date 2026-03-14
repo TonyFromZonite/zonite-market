@@ -68,7 +68,6 @@ export default function Connexion() {
         userType: 'vendeur'
       });
       if (response.data.success) {
-        console.log("✅ Login success:", response.data.session);
         sessionStorage.setItem("vendeur_session", JSON.stringify(response.data.session));
         window.location.href = createPageUrl("EspaceVendeur");
       } else if (response.data.pendingApproval) {
@@ -144,7 +143,7 @@ export default function Connexion() {
 
   return (
     <div
-      className="min-h-screen bg-gradient-to-br from-[#0d1240] via-[#1a1f5e] to-[#2d34a5] flex flex-col items-center justify-between px-4 sm:px-5 relative overflow-hidden"
+      className="min-h-screen bg-gradient-to-br from-[#0d1240] via-[#1a1f5e] to-[#2d34a5] flex flex-col items-center justify-between px-5 relative overflow-hidden"
       style={{ paddingTop: "max(2.5rem, env(safe-area-inset-top, 0px))", paddingBottom: "max(2rem, env(safe-area-inset-bottom, 0px))" }}
     >
       {/* Décorations */}
@@ -152,32 +151,32 @@ export default function Connexion() {
       <div className="absolute bottom-24 left-0 w-56 h-56 bg-[#F5C518]/10 rounded-full translate-y-1/2 -translate-x-1/2 pointer-events-none" />
 
       {/* Logo + Titre */}
-      <div className="w-full flex flex-col items-center mt-2 mb-5 sm:mt-3 sm:mb-6 md:mt-4 md:mb-8 relative z-10 px-2 sm:px-3">
-        <div className="w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-3xl bg-white shadow-2xl flex items-center justify-center mb-2 md:mb-3 overflow-hidden border-4 border-[#F5C518]/40">
+      <div className="w-full flex flex-col items-center mt-3 mb-6 md:mt-4 md:mb-8 relative z-10 px-3">
+        <div className="w-16 h-16 md:w-20 md:h-20 rounded-3xl bg-white shadow-2xl flex items-center justify-center mb-2 md:mb-3 overflow-hidden border-4 border-[#F5C518]/40">
           <img src={LOGO} alt="Logo" className="w-full h-full object-contain p-0.5" />
         </div>
-        <h1 className="text-lg sm:text-xl md:text-2xl font-black text-white tracking-tight text-center leading-tight">
+        <h1 className="text-xl md:text-2xl font-black text-white tracking-tight text-center leading-tight">
           {nomApp.split(" ").map((w, i) =>
             i > 0 ? <span key={i} className="text-[#F5C518]"> {w}</span> : w
           )}
         </h1>
-        <p className="text-slate-300 text-xs sm:text-sm mt-1 sm:mt-2 md:mt-1.5 text-center max-w-xs leading-relaxed px-2">
+        <p className="text-slate-300 text-xs md:text-sm mt-2 md:mt-1.5 text-center max-w-xs leading-relaxed px-3">
           {messageAccueil}
         </p>
       </div>
 
       {/* Sélecteur de mode */}
-      <div className="w-full max-w-sm relative z-10 mb-3 sm:mb-4 md:mb-6 px-2 sm:px-3">
+      <div className="w-full max-w-sm relative z-10 mb-4 md:mb-6 px-3">
         <div className="bg-white/10 backdrop-blur rounded-2xl p-1 flex border border-white/15">
           <button
             onClick={() => changerMode(MODE_VENDEUR)}
-            className={`flex-1 py-1.5 sm:py-2 md:py-2.5 rounded-xl text-xs md:text-sm font-bold transition-all ${mode === MODE_VENDEUR ? "bg-[#F5C518] text-[#1a1f5e] shadow" : "text-slate-300 hover:text-white"}`}
+            className={`flex-1 py-2 md:py-2.5 rounded-xl text-xs md:text-sm font-bold transition-all ${mode === MODE_VENDEUR ? "bg-[#F5C518] text-[#1a1f5e] shadow" : "text-slate-300 hover:text-white"}`}
           >
             👤 Espace Vendeur
           </button>
           <button
             onClick={() => changerMode(MODE_ADMIN)}
-            className={`flex-1 py-1.5 sm:py-2 md:py-2.5 rounded-xl text-xs md:text-sm font-bold transition-all ${mode === MODE_ADMIN ? "bg-white text-[#1a1f5e] shadow" : "text-slate-300 hover:text-white"}`}
+            className={`flex-1 py-2 md:py-2.5 rounded-xl text-xs md:text-sm font-bold transition-all ${mode === MODE_ADMIN ? "bg-white text-[#1a1f5e] shadow" : "text-slate-300 hover:text-white"}`}
           >
             🔐 Espace Admin
           </button>
@@ -185,8 +184,8 @@ export default function Connexion() {
       </div>
 
       {/* Formulaire */}
-      <div className="w-full max-w-sm relative z-10 flex-1 flex flex-col justify-center px-2 sm:px-3">
-        <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-4 sm:p-5 md:p-6 border border-white/20 shadow-2xl">
+      <div className="w-full max-w-sm relative z-10 flex-1 flex flex-col justify-center px-3">
+        <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-5 md:p-6 border border-white/20 shadow-2xl">
 
           {/* MODE VENDEUR */}
           {mode === MODE_VENDEUR && !modeMdpOublie && (
@@ -228,7 +227,7 @@ export default function Connexion() {
                   </div>
                 )}
 
-                <Button type="submit" disabled={chargement} className="w-full h-10 sm:h-11 md:h-12 bg-[#F5C518] hover:bg-[#e0b010] text-[#1a1f5e] font-black text-xs sm:text-sm md:text-base rounded-xl shadow-lg shadow-[#F5C518]/20 transition-all active:scale-95">
+                <Button type="submit" disabled={chargement} className="w-full h-11 md:h-12 bg-[#F5C518] hover:bg-[#e0b010] text-[#1a1f5e] font-black text-sm md:text-base rounded-xl shadow-lg shadow-[#F5C518]/20 transition-all active:scale-95">
                   {chargement ? "Vérification..." : "Se connecter →"}
                 </Button>
               </form>
@@ -276,8 +275,8 @@ export default function Connexion() {
                       <p className="text-red-300 text-xs">{erreur}</p>
                     </div>
                   )}
-                  <Button type="submit" disabled={chargementOublie} className="w-full h-10 sm:h-11 md:h-12 bg-white hover:bg-slate-100 text-[#1a1f5e] font-black text-xs sm:text-sm md:text-base rounded-xl transition-all active:scale-95">
-                   {chargementOublie ? "Envoi en cours..." : "Recevoir un nouveau mot de passe"}
+                  <Button type="submit" disabled={chargementOublie} className="w-full h-11 md:h-12 bg-white hover:bg-slate-100 text-[#1a1f5e] font-black text-sm md:text-base rounded-xl transition-all active:scale-95">
+                    {chargementOublie ? "Envoi en cours..." : "Recevoir un nouveau mot de passe"}
                   </Button>
                 </form>
               )}
@@ -322,7 +321,7 @@ export default function Connexion() {
                     <p className="text-red-300 text-xs">{erreur}</p>
                   </div>
                 )}
-                <Button type="submit" disabled={chargement} className="w-full h-10 sm:h-11 md:h-12 bg-white hover:bg-slate-100 text-[#1a1f5e] font-black text-xs sm:text-sm md:text-base rounded-xl transition-all active:scale-95">
+                <Button type="submit" disabled={chargement} className="w-full h-11 md:h-12 bg-white hover:bg-slate-100 text-[#1a1f5e] font-black text-sm md:text-base rounded-xl transition-all active:scale-95">
                   {chargement ? "Vérification..." : "Accéder au panneau admin →"}
                 </Button>
               </form>
@@ -333,19 +332,19 @@ export default function Connexion() {
       </div>
 
       {/* Réseaux sociaux */}
-      <div className="relative z-10 flex flex-col items-center gap-2 sm:gap-3 md:gap-4 mt-4 sm:mt-5 md:mt-8 px-2 sm:px-3">
-        <p className="text-slate-400 text-xs sm:text-sm">Suivez-nous sur</p>
-        <div className="flex items-center gap-2 sm:gap-3">
+      <div className="relative z-10 flex flex-col items-center gap-3 md:gap-4 mt-5 md:mt-8 px-3">
+        <p className="text-slate-400 text-xs md:text-sm">Suivez-nous sur</p>
+        <div className="flex items-center gap-2 md:gap-3">
           <a href={lienFacebook} target="_blank" rel="noopener noreferrer"
-            className="flex items-center gap-1.5 sm:gap-2 bg-white/10 hover:bg-[#1877F2]/30 border border-white/20 rounded-2xl px-2.5 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2 text-white text-xs font-medium transition-all active:scale-95">
-            <Facebook className="w-3 h-3 md:w-4 md:h-4 text-[#1877F2]" /> <span className="hidden sm:inline text-xs md:text-sm">Facebook</span>
+            className="flex items-center gap-2 bg-white/10 hover:bg-[#1877F2]/30 border border-white/20 rounded-2xl px-3 md:px-4 py-1.5 md:py-2 text-white text-xs md:text-sm font-medium transition-all active:scale-95">
+            <Facebook className="w-3 h-3 md:w-4 md:h-4 text-[#1877F2]" /> <span className="hidden sm:inline">Facebook</span>
           </a>
           <a href={lienTiktok} target="_blank" rel="noopener noreferrer"
-            className="flex items-center gap-1.5 sm:gap-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-2xl px-2.5 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2 text-white text-xs font-medium transition-all active:scale-95">
-            <TikTokIcon size={14} /> <span className="hidden sm:inline text-xs md:text-sm">TikTok</span>
+            className="flex items-center gap-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-2xl px-3 md:px-4 py-1.5 md:py-2 text-white text-xs md:text-sm font-medium transition-all active:scale-95">
+            <TikTokIcon size={14} /> <span className="hidden sm:inline">TikTok</span>
           </a>
         </div>
-        <p className="text-slate-500 text-[10px] sm:text-xs">© {new Date().getFullYear()} ZONITE — Tous droits réservés</p>
+        <p className="text-slate-500 text-[10px] md:text-xs">© {new Date().getFullYear()} ZONITE — Tous droits réservés</p>
       </div>
     </div>
   );
