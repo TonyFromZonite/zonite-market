@@ -127,7 +127,22 @@ export default function EspaceVendeur() {
     );
   }
 
-  // Compte rejeté KYC
+  // Block access based on seller status
+  if (!canAccessFeature(compteVendeur.seller_status, "dashboard")) {
+    if (compteVendeur.seller_status === SELLER_STATUSES.PENDING_VERIFICATION) {
+      return (
+        <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full text-center shadow-lg">
+            <AlertCircle className="w-12 h-12 text-yellow-500 mx-auto mb-3" />
+            <h2 className="text-lg font-bold text-slate-900 mb-2">Email à vérifier</h2>
+            <p className="text-sm text-slate-500">Veuillez vérifier votre email pour continuer l'inscription.</p>
+          </div>
+        </div>
+      );
+    }
+  }
+
+  // KYC rejected
   if (compteVendeur.statut_kyc === "rejete") {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
