@@ -95,15 +95,6 @@ Deno.serve(async (req) => {
            });
 
            // NOUVEAU : Créer immédiatement l'utilisateur Base44 avec rôle vendeur (statut actif)
-           let userCreated = false;
-           try {
-             await base44.users.inviteUser(email, 'user');
-             userCreated = true;
-             console.log(`✅ Utilisateur Base44 créé pour ${email}`);
-           } catch (userError) {
-             console.error('❌ Erreur création utilisateur Base44:', userError.message);
-           }
-
            const adminUser = await base44.auth.me().catch(() => null);
            await db.JournalAudit.create({ 
              action: 'Vendeur créé par admin (immédiatement actif)', 
