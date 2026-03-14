@@ -179,6 +179,18 @@ export default function EspaceVendeur() {
   // Modal vidéo si catalogue non déverrouillé
   const [showVideoModal, setShowVideoModal] = useState(!compteVendeur?.catalogue_debloque);
 
+  // État de chargement si données critiques manquent
+  if (!compteVendeur || !soldeAffiche) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin"></div>
+          <p className="text-slate-500 text-sm">Chargement...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 pb-20">
       {/* Modal Formation si catalogue non déverrouillé */}
