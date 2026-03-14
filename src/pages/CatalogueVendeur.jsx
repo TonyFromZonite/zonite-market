@@ -56,7 +56,8 @@ export default function CatalogueVendeur() {
         ) : (
           <div className="grid grid-cols-1 gap-4">
             {produitsFiltres.map(p => {
-              const stockOk = (p.stock_global || 0) > 0;
+              const stockDispo = Math.max(0, (p.stock_global || 0) - (p.stock_reserve || 0));
+              const stockOk = stockDispo > 0;
               return (
                 <div key={p.id} className="bg-white rounded-2xl shadow-sm overflow-hidden">
                   <div className="flex">
