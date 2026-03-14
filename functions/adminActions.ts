@@ -94,12 +94,49 @@ Deno.serve(async (req) => {
              date_embauche: new Date().toISOString().split('T')[0]
            });
 
-           // NOUVEAU : Créer immédiatement l'utilisateur Base44 avec rôle vendeur (statut actif)
+           // NOUVEAU : Créer immédiatement l'utilisateur Base44 avec rôle vendeur
            const adminUser = await base44.auth.me().catch(() => null);
+           let userCreatedInBase44 = false;
+           let base44UserId = null;
+
+           try {
+             // Vérifier si l'utilisateur existe déjà dans base44.users
+             const existingUsers = await db.User.filter({ email });
+
+             if (existingUsers.length === 0) {
+               // Créer l'utilisateur dans base44.users avec rôle 'user'
+               const newUser = await db.User.create({
+                 email,
+                 full_name: nom_complet,
+                 role: 'user'
+               });
+               base44UserId = newUser.id;
+               userCreatedInBase44 = true;
+               console.log(`✅ Utilisateur Base44 créé: ${email} (ID: ${base44UserId})`);
+             } else {
+               base44UserId = existingUsers[0].id;
+               console.log(`ℹ️ Utilisateur Base44 existant: ${email} (ID: ${base44UserId})`);
+             }
+           } catch (userError) {
+             console.error(`⚠️ Erreur création/recherche utilisateur Base44 pour ${email}:`, userError.message);
+           }
+
+           // Ajouter l'ID Base44 au seller pour synchronisation
+           try {
+             if (base44UserId) {
+               await db.Seller.update(seller.id, {
+                 user_id_base44: base44UserId
+               });
+             }
+           } catch (syncError) {
+             console.error(`⚠️ Erreur mise à jour seller avec user_id_base44:`, syncError.message);
+           }
+
+           // Créer l'audit avec plus de détails
            await db.JournalAudit.create({ 
              action: 'Vendeur créé par admin (immédiatement actif)', 
              module: 'vendeur', 
-             details: `Vendeur ${nom_complet} (${email}) créé par ${adminUser?.email || 'admin'} - Statut: ACTIF`, 
+             details: `Vendeur ${nom_complet} (${email}) créé par ${adminUser?.email || 'admin'} - Statut: ACTIF - Utilisateur Base44: ${userCreatedInBase44 ? 'CRÉÉ' : 'EXISTANT'} (ID: ${base44UserId})`, 
              utilisateur: adminUser?.email || 'system', 
              entite_id: seller.id 
            });
