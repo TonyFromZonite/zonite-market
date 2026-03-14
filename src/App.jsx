@@ -10,6 +10,7 @@ import SystemIntegrity from './pages/SystemIntegrity';
 import GestionZones from './pages/GestionZones';
 import GestionCoursiers from './pages/GestionCoursiers';
 import DataConsistency from './pages/DataConsistency';
+import AuditSysteme from './pages/AuditSysteme';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -90,6 +91,14 @@ const AuthenticatedApp = () => {
         element={
           <LayoutWrapper currentPageName="DataConsistency">
             <DataConsistency />
+          </LayoutWrapper>
+        }
+      />
+      <Route
+        path="/AuditSysteme"
+        element={
+          <LayoutWrapper currentPageName="AuditSysteme">
+            <AuditSysteme />
           </LayoutWrapper>
         }
       />

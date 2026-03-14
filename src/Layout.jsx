@@ -33,6 +33,7 @@ const MENUS_ADMIN = [
   { nom: "Coursiers",            page: "GestionCoursiers",        icone: Truck },
   { nom: "Support Vendeurs",     page: "SupportAdmin",            icone: MessageSquare },
   { nom: "Journal d'Audit",      page: "JournalAudit",            icone: Shield },
+  { nom: "Audit Système",        page: "AuditSysteme",            icone: Shield },
   { nom: "Intégrité Système",    page: "SystemIntegrity",         icone: Shield },
   { nom: "Cohérence Données",    page: "DataConsistency",         icone: Shield },
   { nom: "Permissions Admin",    page: "GestionPermissionsAdmin", icone: Shield },
