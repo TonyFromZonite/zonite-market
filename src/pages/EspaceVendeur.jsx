@@ -13,7 +13,6 @@ import {
   Clock, CheckCircle2, XCircle, Truck, Plus,
   AlertCircle, Eye
 } from "lucide-react";
-import { useState, useEffect } from "react";
 import { getVendeurSession, clearAllSessions } from "@/components/useSessionGuard";
 import { LOGO_URL as LOGO } from "@/components/constants";
 import NotificationCenterVendeur from "@/components/NotificationCenterVendeur";
