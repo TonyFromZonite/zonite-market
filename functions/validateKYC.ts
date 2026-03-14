@@ -43,7 +43,18 @@ Deno.serve(async (req) => {
         entite_id: seller_id,
       }).catch(() => {});
 
-      // Notification
+      // Notification via le nouveau système
+      await base44.asServiceRole.entities.Notification.create({
+        destinataire_email: seller.email,
+        destinataire_role: 'vendeur',
+        type: 'kyc_valide',
+        titre: '✅ KYC Validé !',
+        message: 'Félicitations ! Votre dossier KYC a été approuvé. Vous pouvez maintenant accéder à toutes les fonctionnalités.',
+        lien: '/EspaceVendeur',
+        priorite: 'importante',
+      }).catch(() => {});
+      
+      // Ancienne notification (rétrocompatibilité)
       await base44.asServiceRole.entities.NotificationVendeur.create({
         vendeur_email: seller.email,
         titre: '✅ KYC Validé !',
@@ -80,7 +91,18 @@ Deno.serve(async (req) => {
         entite_id: seller_id,
       }).catch(() => {});
 
-      // Notification
+      // Notification via le nouveau système
+      await base44.asServiceRole.entities.Notification.create({
+        destinataire_email: seller.email,
+        destinataire_role: 'vendeur',
+        type: 'kyc_rejete',
+        titre: '❌ KYC Rejeté',
+        message: `Votre dossier KYC a été rejeté. Motif: ${notes || 'Veuillez contacter le support pour plus de détails.'}`,
+        lien: '/ProfilVendeur',
+        priorite: 'urgente',
+      }).catch(() => {});
+      
+      // Ancienne notification (rétrocompatibilité)
       await base44.asServiceRole.entities.NotificationVendeur.create({
         vendeur_email: seller.email,
         titre: '❌ KYC Rejeté',
