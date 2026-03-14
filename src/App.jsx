@@ -1,8 +1,7 @@
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
-import { pagesConfig } from './pages.config'
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
@@ -13,14 +12,31 @@ import DataConsistency from './pages/DataConsistency';
 import AuditSysteme from './pages/AuditSysteme';
 import AuditComptes from './pages/AuditComptes';
 import AuditComplet from './pages/AuditComplet';
-
-const { Pages, Layout, mainPage } = pagesConfig;
-const mainPageKey = mainPage ?? Object.keys(Pages)[0];
-const MainPage = mainPageKey ? Pages[mainPageKey] : <></>;
-
-const LayoutWrapper = ({ children, currentPageName }) => Layout ?
-  <Layout currentPageName={currentPageName}>{children}</Layout>
-  : <>{children}</>;
+import Connexion from './pages/Connexion';
+import TableauDeBord from './pages/TableauDeBord';
+import NouvelleVente from './pages/NouvelleVente';
+import Commandes from './pages/Commandes';
+import GestionCommandes from './pages/GestionCommandes';
+import CommandesVendeurs from './pages/CommandesVendeurs';
+import Produits from './pages/Produits';
+import Vendeurs from './pages/Vendeurs';
+import SupportAdmin from './pages/SupportAdmin';
+import JournalAudit from './pages/JournalAudit';
+import GestionPermissionsAdmin from './pages/GestionPermissionsAdmin';
+import GestionSousAdmins from './pages/GestionSousAdmins';
+import ConfigurationApp from './pages/ConfigurationApp';
+import EspaceVendeur from './pages/EspaceVendeur';
+import InscriptionVendeur from './pages/InscriptionVendeur';
+import VideoFormation from './pages/VideoFormation';
+import CatalogueVendeur from './pages/CatalogueVendeur';
+import NouvelleCommandeVendeur from './pages/NouvelleCommandeVendeur';
+import MesCommandesVendeur from './pages/MesCommandesVendeur';
+import ProfilVendeur from './pages/ProfilVendeur';
+import DemandePaiement from './pages/DemandePaiement';
+import NotificationsVendeur from './pages/NotificationsVendeur';
+import AideVendeur from './pages/AideVendeur';
+import EspaceSousAdmin from './pages/EspaceSousAdmin';
+import Layout from './layout';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
