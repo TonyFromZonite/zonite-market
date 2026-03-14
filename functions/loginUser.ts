@@ -90,7 +90,14 @@ Deno.serve(async (req) => {
     if (userType === 'vendeur' && email && password) {
       const result = await authenticateSeller(base44, email, password);
       if (result.success) {
-        return Response.json({ success: true, session: result.seller }, { status: 200 });
+        return Response.json({ 
+          success: true, 
+          session: { 
+            ...result.seller, 
+            role: 'vendeur',
+            email: result.seller.email 
+          } 
+        }, { status: 200 });
       }
       return Response.json(result, { status: 400 });
     }
