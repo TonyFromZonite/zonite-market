@@ -9,6 +9,7 @@ import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import SystemIntegrity from './pages/SystemIntegrity';
 import GestionZones from './pages/GestionZones';
 import GestionCoursiers from './pages/GestionCoursiers';
+import DataConsistency from './pages/DataConsistency';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -81,6 +82,14 @@ const AuthenticatedApp = () => {
         element={
           <LayoutWrapper currentPageName="GestionCoursiers">
             <GestionCoursiers />
+          </LayoutWrapper>
+        }
+      />
+      <Route
+        path="/DataConsistency"
+        element={
+          <LayoutWrapper currentPageName="DataConsistency">
+            <DataConsistency />
           </LayoutWrapper>
         }
       />
