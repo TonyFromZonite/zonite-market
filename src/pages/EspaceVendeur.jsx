@@ -176,7 +176,28 @@ export default function EspaceVendeur() {
   const commandesEchouees = commandes.filter(c => ["echec_livraison", "annulee"].includes(c.statut)).length;
   const commandesEnLivraison = commandes.filter(c => c.statut === "en_livraison").length;
 
+  // Modal vidéo si catalogue non déverrouillé
+  const [showVideoModal, setShowVideoModal] = useState(!compteVendeur.catalogue_debloque);
+
   return (
+    <div className="min-h-screen bg-slate-50 pb-20">
+      {/* Modal Formation si catalogue non déverrouillé */}
+      {showVideoModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full text-center shadow-lg">
+            <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <span className="text-3xl">🎬</span>
+            </div>
+            <h2 className="text-lg font-bold text-slate-900 mb-2">Formation obligatoire</h2>
+            <p className="text-sm text-slate-500 mb-4">Regardez la vidéo de présentation ZONITE pour déverrouiller le catalogue produits.</p>
+            <Link to={createPageUrl("VideoFormation")}>
+              <Button className="w-full bg-[#F5C518] hover:bg-[#e0b010] text-[#1a1f5e] font-bold">
+                Commencer la formation →
+              </Button>
+            </Link>
+          </div>
+        </div>
+      )}
     <div className="min-h-screen bg-slate-50 pb-20">
       {/* Header */}
       <div className="bg-[#1a1f5e] text-white px-4 pt-6 pb-10" style={{ paddingTop: "max(1.5rem, env(safe-area-inset-top, 0px))" }}>
