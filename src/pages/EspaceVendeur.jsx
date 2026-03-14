@@ -32,7 +32,7 @@ export default function EspaceVendeur() {
   const [utilisateur, setUtilisateur] = useState(null);
   const [compteVendeur, setCompteVendeur] = useState(null);
   const [chargement, setChargement] = useState(true);
-  const [dialogKYC, setDialogKYC] = useState(false);
+  const [activeModal, setActiveModal] = useState(null); // 'kyc' | 'video' | null
   const [enCours, setEnCours] = useState(false);
   const queryClient = useQueryClient();
 
