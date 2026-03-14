@@ -88,7 +88,7 @@ export default function Layout({ children, currentPageName }) {
 
   // Pages vendeur : interface mobile standalone, sans sidebar admin
   if (PAGES_VENDEUR.includes(currentPageName) || vendeurSession) {
-    return <div className="min-h-screen bg-slate-50">{children}</div>;
+    return <>{children}</>;
   }
 
   const getBadge = (page) => {
