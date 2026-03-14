@@ -75,12 +75,12 @@ Deno.serve(async (req) => {
       throw new Error('Échec de la création du vendeur');
     }
 
-    // NOUVEAU : Créer immédiatement l'utilisateur Base44 avec rôle "vendeur"
+    // Créer immédiatement l'utilisateur Base44 avec rôle "Seller"
     let userCreated = false;
     try {
-      await base44.users.inviteUser(email, 'vendeur');
+      await base44.users.inviteUser(email, 'Seller');
       userCreated = true;
-      console.log(`✅ Utilisateur Base44 créé pour ${email}`);
+      console.log(`✅ Utilisateur Base44 créé pour ${email} avec rôle Seller`);
     } catch (userError) {
       console.error('❌ Erreur création utilisateur Base44:', userError.message);
       // Ne pas bloquer si l'invitation échoue
