@@ -73,9 +73,15 @@ Deno.serve(async (req) => {
       }
       case 'createVendeurInitial': {
          const { nom_complet, email, telephone, ville, quartier, mot_de_passe, numero_mobile_money, operateur_mobile_money = 'orange_money', taux_commission = 10 } = payload.data || payload;
-         if (!nom_complet || !email || !mot_de_passe) {
-           return Response.json({ error: 'Données manquantes: nom_complet, email, mot_de_passe requis' }, { status: 400 });
+         if (!nom_complet || !email) {
+           return Response.json({ error: 'Données manquantes: nom_complet et email requis' }, { status: 400 });
          }
+
+         // Générer mot de passe si non fourni
+         const mdp = mot_de_passe || (() => {
+           const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789@#!';
+           return Array.from({ length: 10 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+         })();
          try {
            // Vérifier doublon Seller
            const existingSellers = await db.Seller.filter({ email });
