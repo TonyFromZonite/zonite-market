@@ -61,9 +61,9 @@ Deno.serve(async (req) => {
     const verificationCode = String(Math.floor(100000 + Math.random() * 900000));
     const codeExpiryTime = new Date(Date.now() + 15 * 60 * 1000).toISOString();
 
-    // STEP 2: Create Seller (user_id will be linked on first login)
+    // ÉTAPE 2 : Créer le Seller lié au user_id
     const sellerData = {
-      user_id: user_id, // Will be null if user doesn't exist yet
+      user_id: user_id, // Lié immédiatement si le compte Base44 a été créé
       email,
       nom_complet,
       telephone: telephone || '',
