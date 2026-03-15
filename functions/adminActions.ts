@@ -95,8 +95,13 @@ Deno.serve(async (req) => {
            let user_id = null;
            try {
              await base44.users.inviteUser(email, 'user');
-             const usersCheck = await base44.asServiceRole.entities.User.filter({ email });
-             user_id = usersCheck[0]?.id || null;
+             await new Promise(r => setTimeout(r, 2000));
+             for (let i = 0; i < 3; i++) {
+               const usersCheck = await base44.asServiceRole.entities.User.filter({ email });
+               user_id = usersCheck[0]?.id || null;
+               if (user_id) break;
+               await new Promise(r => setTimeout(r, 1500));
+             }
              console.log(`✅ Compte Base44 créé pour ${email}, user_id: ${user_id}`);
            } catch (userError) {
              console.warn(`⚠️ Impossible de créer le compte Base44 pour ${email}:`, userError.message);
@@ -203,9 +208,14 @@ Deno.serve(async (req) => {
         const mdpClair = mot_de_passe_clair || 'Zonite2024!'; // fallback si non fourni
         try {
           await base44.users.inviteUser(email, 'sous_admin');
-          const usersCheck = await base44.asServiceRole.entities.User.filter({ email });
-          user_id = usersCheck[0]?.id || null;
-          console.log(`✅ Compte Base44 sous_admin créé pour ${email}`);
+          await new Promise(r => setTimeout(r, 2000));
+          for (let i = 0; i < 3; i++) {
+            const usersCheck = await base44.asServiceRole.entities.User.filter({ email });
+            user_id = usersCheck[0]?.id || null;
+            if (user_id) break;
+            await new Promise(r => setTimeout(r, 1500));
+          }
+          console.log(`✅ Compte Base44 sous_admin créé pour ${email}, user_id: ${user_id}`);
         } catch (userError) {
           console.warn(`⚠️ Impossible de créer le compte Base44 pour ${email}:`, userError.message);
         }
