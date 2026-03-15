@@ -62,8 +62,10 @@ Deno.serve(async (req) => {
       mot_de_passe_hash: hashedPassword,
       statut_kyc: 'en_attente',
       statut: 'en_attente_kyc',
+      seller_status: 'pending_verification', // NEW: Proper status engine
       video_vue: false,
-      conditions_acceptees: true,
+      training_completed: false,
+      conditions_acceptees: false,
       catalogue_debloque: false,
       date_embauche: new Date().toISOString().split('T')[0],
       email_verified: false,
@@ -74,6 +76,8 @@ Deno.serve(async (req) => {
       total_commissions_payees: 0,
       nombre_ventes: 0,
       chiffre_affaires_genere: 0,
+      ventes_reussies: 0,
+      ventes_echouees: 0,
     };
 
     const sellerCree = await base44.asServiceRole.entities.Seller.create(dataSeller);
