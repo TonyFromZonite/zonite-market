@@ -95,18 +95,30 @@ Deno.serve(async (req) => {
       reference_vente: commande.id,
     });
 
-    // 5️⃣ Créer notification (non-bloquante)
+    // 5️⃣ Notifications (non-bloquantes)
     try {
+      // Notification au vendeur
       await base44.asServiceRole.entities.NotificationVendeur.create({
         vendeur_email,
-        titre: "Commande envoyée !",
-        message: `Votre commande de ${quantite}x ${produit_nom} pour ${client_nom} a été transmise à l'équipe ZONITE.`,
+        titre: "✅ Commande envoyée !",
+        message: `Votre commande de ${quantite}x ${produit_nom} pour ${client_nom} a été transmise à l'équipe ZONITE. En attente de validation.`,
         type: "succes",
         importante: false,
       });
+      // Notifications aux admins
+      const admins = await base44.asServiceRole.entities.User.filter({ role: 'admin' });
+      for (const admin of admins) {
+        await base44.asServiceRole.entities.NotificationVendeur.create({
+          vendeur_email: admin.email,
+          titre: '🛒 Nouvelle commande à valider',
+          message: `${vendeur_nom} a passé une commande de ${quantite}x ${produit_nom} pour le client ${client_nom}.`,
+          type: 'info',
+          importante: false,
+          lien: '/CommandesVendeurs'
+        });
+      }
     } catch (notifErr) {
       console.error('Notification creation failed (non-blocking):', notifErr.message);
-      // Continuer - la commande est créée
     }
 
     // 6️⃣ Audit log
