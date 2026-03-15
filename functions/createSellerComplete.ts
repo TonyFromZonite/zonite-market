@@ -46,28 +46,20 @@ Deno.serve(async (req) => {
       }, { status: 400 });
     }
 
-    // Check duplicates in Base44 Users
+    // STEP 1: Check if Base44 user exists (also checks for duplicates)
+    // Note: Base44 auto-creates users on first login for seller role
+    let user_id = null;
+    
     const existingUsers = await base44.asServiceRole.entities.User.filter({ email });
     if (existingUsers.length > 0) {
+      // User already exists - this is a duplicate
       return Response.json({ 
         error: 'Un utilisateur existe déjà avec cet email' 
       }, { status: 400 });
     }
-
-    // STEP 1: Check if Base44 user exists or will be auto-created
-    // Note: Base44 auto-creates users on first login for seller role
-    let user_id = null;
     
-    // Try to find existing user
-    const existingUsers = await base44.asServiceRole.entities.User.filter({ email });
-    if (existingUsers.length > 0) {
-      user_id = existingUsers[0].id;
-      console.log(`ℹ️ Base44 user already exists: ${email}`);
-    } else {
-      // User will be auto-created on first login
-      // For now, we'll create Seller without user_id and repair it later
-      console.log(`ℹ️ Base44 user will be auto-created on first login: ${email}`);
-    }
+    // User will be auto-created on first login
+    console.log(`ℹ️ Base44 user will be auto-created on first login: ${email}`);
 
     // STEP 2: Determine status based on auto_valider_kyc
     const seller_status = auto_valider_kyc ? 'kyc_approved_training_required' : 'kyc_required';

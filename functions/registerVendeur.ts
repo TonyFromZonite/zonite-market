@@ -38,26 +38,20 @@ Deno.serve(async (req) => {
       }, { status: 409 });
     }
 
-    // Check duplicates in Base44 Users
-    const existingUsers = await base44.asServiceRole.entities.User.filter({ email });
-    if (existingUsers.length > 0) {
-      return Response.json({ 
-        error: 'Cet email est déjà utilisé dans le système' 
-      }, { status: 409 });
-    }
-
-    // STEP 1: Check if Base44 user exists
+    // STEP 1: Check if Base44 user exists (also checks for duplicates)
     // Note: Base44 auto-creates users on first login
     let user_id = null;
     
     const existingUsers = await base44.asServiceRole.entities.User.filter({ email });
     if (existingUsers.length > 0) {
-      user_id = existingUsers[0].id;
-      console.log(`ℹ️ Base44 user already exists: ${email}`);
-    } else {
-      // User will be auto-created on first login
-      console.log(`ℹ️ Base44 user will be auto-created on first login: ${email}`);
+      // User already exists - this is a duplicate
+      return Response.json({ 
+        error: 'Cet email est déjà utilisé dans le système' 
+      }, { status: 409 });
     }
+    
+    // User will be auto-created on first login
+    console.log(`ℹ️ Base44 user will be auto-created on first login: ${email}`);
 
     // STEP 2: Generate verification code
     const verificationCode = String(Math.floor(100000 + Math.random() * 900000));
