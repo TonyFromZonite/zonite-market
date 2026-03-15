@@ -49,18 +49,18 @@ Deno.serve(async (req) => {
     // Notification in-app
     await base44.asServiceRole.entities.NotificationVendeur.create({
       vendeur_email: seller.email,
-      titre: '🎉 KYC Validé - Compte Activé !',
-      message: 'Félicitations ! Votre dossier KYC a été validé. Vous pouvez maintenant accéder au catalogue complet et commencer à vendre.',
+      titre: '🎉 KYC Validé - Formation requise',
+      message: 'Félicitations ! Votre dossier KYC a été validé. Vous devez maintenant regarder la vidéo de formation obligatoire pour débloquer le catalogue.',
       type: 'succes',
       importante: true,
-      lien: '/EspaceVendeur'
+      lien: '/VideoFormation'
     }).catch(() => {});
 
     // Email
     base44.integrations.Core.SendEmail({
       to: seller.email,
-      subject: '🎉 KYC Validé - Bienvenue chez ZONITE !',
-      body: `Bonjour ${seller.nom_complet},\n\nExcellente nouvelle ! 🎉\n\nVotre dossier KYC a été validé par notre équipe.\n\nVotre compte vendeur est maintenant ACTIF.\n\nVous pouvez :\n✅ Accéder au catalogue complet\n✅ Passer des commandes\n✅ Gagner des commissions\n\nConnectez-vous dès maintenant pour découvrir nos produits.\n\nBon courage et excellentes ventes !\n\nL'équipe ZONITE`
+      subject: '🎉 KYC Validé - Formation obligatoire',
+      body: `Bonjour ${seller.nom_complet},\n\nExcellente nouvelle ! 🎉\n\nVotre dossier KYC a été validé par notre équipe.\n\n📹 PROCHAINE ÉTAPE : Formation obligatoire\n\nVous devez regarder et valider la vidéo de formation pour débloquer l'accès au catalogue complet.\n\nConnectez-vous et allez à la section Formation.\n\n✅ Une fois la formation validée :\n✅ Accès au catalogue complet\n✅ Possibilité de passer des commandes\n✅ Possibilité de gagner des commissions\n\nBon courage et excellentes ventes !\n\nL'équipe ZONITE`
     }).catch(e => console.warn('Email failed:', e.message));
 
     // Journal d'audit
