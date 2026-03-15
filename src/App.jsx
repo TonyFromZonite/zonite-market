@@ -8,8 +8,6 @@ import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import GestionZones from './pages/GestionZones';
 import GestionCoursiers from './pages/GestionCoursiers';
-import AuditSysteme from './pages/AuditSysteme';
-import AuditComptes from './pages/AuditComptes';
 import AuditComplet from './pages/AuditComplet';
 import ResoumissionKYC from './pages/ResoumissionKYC';
 
