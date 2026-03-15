@@ -127,14 +127,18 @@ Deno.serve(async (req) => {
         }
         const result = await db.Seller.update(compteId, {
           video_vue: true,
+          training_completed: true,
           conditions_acceptees: true,
           catalogue_debloque: true,
+          seller_status: 'active_seller', // ✅ Transition finale : vendeur pleinement actif
+          statut: 'actif',
         });
         await db.NotificationVendeur.create({
           vendeur_email,
-          titre: "Catalogue débloqué !",
-          message: "Félicitations ! Vous avez accès au catalogue ZONITE.",
+          titre: "🎉 Catalogue débloqué !",
+          message: "Félicitations ! Vous avez terminé votre formation. Vous avez maintenant accès complet au catalogue ZONITE.",
           type: "succes",
+          importante: true,
         });
         return Response.json({ success: true, result });
       }
