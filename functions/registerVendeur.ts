@@ -108,7 +108,10 @@ Deno.serve(async (req) => {
     } catch (sellerError) {
       // ROLLBACK : supprimer le compte Base44 créé
       console.error(`❌ Seller creation failed, rolling back User ${user_id}:`, sellerError.message);
-      try { await base44.asServiceRole.entities.User.delete(user_id); } catch (_) {}
+        // Note: User.delete peut ne pas fonctionner en service role — on log l'orphelin
+      try { await base44.asServiceRole.entities.User.delete(user_id); } catch (_) {
+        console.warn(`⚠️ Rollback partiel: User ${user_id} non supprimé — orphelin potentiel`);
+      }
       return Response.json({ error: `Erreur création profil vendeur: ${sellerError.message}` }, { status: 500 });
     }
 
