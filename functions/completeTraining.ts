@@ -61,6 +61,7 @@ Deno.serve(async (req) => {
     }
 
     // TRANSITION: kyc_approved_training_required → active_seller
+    validateStatusTransition(seller.seller_status, 'active_seller');
     await base44.asServiceRole.entities.Seller.update(seller.id, {
       training_completed: true,
       video_vue: true,
