@@ -1,4 +1,19 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+
+// Composant helper pour 2 colonnes sur desktop, 1 sur mobile
+function ResponsiveRow({ children }) {
+  const [isWide, setIsWide] = useState(window.innerWidth >= 1024);
+  useEffect(() => {
+    const handler = () => setIsWide(window.innerWidth >= 1024);
+    window.addEventListener("resize", handler);
+    return () => window.removeEventListener("resize", handler);
+  }, []);
+  return (
+    <div style={{ display: "grid", gridTemplateColumns: isWide ? "1fr 1fr" : "1fr", gap: 16 }}>
+      {children}
+    </div>
+  );
+}
 import { base44 } from "@/api/base44Client";
 import { useCachedQuery } from "@/components/CacheManager";
 import {
