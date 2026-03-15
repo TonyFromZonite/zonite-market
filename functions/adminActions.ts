@@ -72,59 +72,81 @@ Deno.serve(async (req) => {
         return Response.json({ success: true, result });
       }
       case 'createVendeurInitial': {
-         const { nom_complet, email, telephone, ville, quartier, mot_de_passe, numero_mobile_money, operateur_mobile_money = 'orange_money' } = payload.data || payload;
+         const { nom_complet, email, telephone, ville, quartier, mot_de_passe, numero_mobile_money, operateur_mobile_money = 'orange_money', taux_commission = 10 } = payload.data || payload;
          if (!nom_complet || !email || !mot_de_passe) {
            return Response.json({ error: 'Données manquantes: nom_complet, email, mot_de_passe requis' }, { status: 400 });
          }
          try {
+           // Vérifier doublon Seller
            const existingSellers = await db.Seller.filter({ email });
            if (existingSellers.length > 0) {
              return Response.json({ error: `Un vendeur existe déjà avec l'email ${email}` }, { status: 409 });
            }
+           // Vérifier doublon User Base44
+           const existingUsers = await db.User.filter({ email });
+           if (existingUsers.length > 0) {
+             return Response.json({ error: `Un compte utilisateur existe déjà avec l'email ${email}` }, { status: 409 });
+           }
+
            const hashedPassword = await bcrypt.hash(mot_de_passe, 10);
+
+           // ÉTAPE 1 : Créer le compte User Base44 avec le mot de passe fourni par l'admin
+           let user_id = null;
+           try {
+             const newUser = await base44.users.createUser({ email, password: mot_de_passe, role: 'user' });
+             user_id = newUser?.id || null;
+             console.log(`✅ Compte Base44 créé pour ${email}, user_id: ${user_id}`);
+           } catch (userError) {
+             console.warn(`⚠️ Impossible de créer le compte Base44 pour ${email}:`, userError.message);
+             // On continue : le compte sera lié à la première connexion
+           }
+
+           // ÉTAPE 2 : Créer le Seller avec seller_status correct
            const seller = await db.Seller.create({
+             user_id,
              email, nom_complet, telephone: telephone || '', ville: ville || '', quartier: quartier || '',
              numero_mobile_money: numero_mobile_money || '', operateur_mobile_money,
-             mot_de_passe_hash: hashedPassword, 
-             statut_kyc: 'valide',  // NOUVEAU : Admin-created sellers are immediately valid
-             statut: 'actif',       // NOUVEAU : Statut actif immédiatement
-             video_vue: false, conditions_acceptees: true, catalogue_debloque: false,  // NOUVEAU : conditions_acceptees = true
-             taux_commission: 10, solde_commission: 0, total_commissions_gagnees: 0, total_commissions_payees: 0,
+             mot_de_passe_hash: hashedPassword,
+             photo_identite_url: '', photo_identite_verso_url: '', selfie_url: '',
+             statut_kyc: 'valide',
+             seller_status: 'kyc_approved_training_required', // doit regarder vidéo avant d'être actif
+             statut: 'actif',
+             email_verified: true,
+             video_vue: false, training_completed: false, conditions_acceptees: false, catalogue_debloque: false,
+             taux_commission, solde_commission: 0, total_commissions_gagnees: 0, total_commissions_payees: 0,
              nombre_ventes: 0, chiffre_affaires_genere: 0, ventes_reussies: 0, ventes_echouees: 0,
+             created_by: (await base44.auth.me().catch(() => null))?.email || 'admin',
              date_embauche: new Date().toISOString().split('T')[0]
            });
 
-           // NOUVEAU : Créer immédiatement l'utilisateur Base44 avec rôle vendeur (statut actif)
-           let userCreated = false;
-           try {
-             await base44.users.inviteUser(email, 'user');
-             userCreated = true;
-             console.log(`✅ Utilisateur Base44 créé pour ${email}`);
-           } catch (userError) {
-             console.error('❌ Erreur création utilisateur Base44:', userError.message);
-           }
+           // ÉTAPE 3 : Notification in-app au vendeur
+           await db.NotificationVendeur.create({
+             vendeur_email: email,
+             titre: '🎉 Bienvenue chez ZONITE !',
+             message: 'Votre compte a été créé par notre équipe. Regardez la vidéo de formation obligatoire pour accéder au catalogue.',
+             type: 'succes',
+             importante: true
+           }).catch(() => {});
 
-           const adminUser = await base44.auth.me().catch(() => null);
-           await db.JournalAudit.create({ 
-             action: 'Vendeur créé par admin (immédiatement actif)', 
-             module: 'vendeur', 
-             details: `Vendeur ${nom_complet} (${email}) créé par ${adminUser?.email || 'admin'} - Statut: ACTIF${userCreated ? ' - Utilisateur Base44 créé' : ''}`, 
-             utilisateur: adminUser?.email || 'system', 
-             entite_id: seller.id 
-           });
+           // ÉTAPE 4 : Envoyer email avec les VRAIS identifiants (pas un lien d'invitation)
+           const appUrl = Deno.env.get('APP_URL') || 'https://votre-app.base44.com';
+           await base44.integrations.Core.SendEmail({
+             to: email,
+             subject: '🎉 Votre compte ZONITE a été créé',
+             body: `Bonjour ${nom_complet},\n\n🎉 Bienvenue chez ZONITE !\n\nVotre compte vendeur a été créé par notre équipe.\n\n━━━━━━━━━━━━━━━━━━━━\n📧 Email : ${email}\n🔐 Mot de passe : ${mot_de_passe}\n━━━━━━━━━━━━━━━━━━━━\n\n🔗 Connectez-vous ici : ${appUrl}\n\n📹 ÉTAPE OBLIGATOIRE : Regardez la vidéo de formation pour débloquer l'accès au catalogue.\n\n⚠️ Pour votre sécurité, changez ce mot de passe dès la première connexion.\n\nBonne vente !\nL'équipe ZONITE`
+           }).catch(e => console.warn('Email failed:', e.message));
 
-           // NOUVEAU : Envoyer email avec identifiants immédiatement
-           try {
-             await base44.integrations.Core.SendEmail({
-               to: email,
-               subject: '🎉 Votre compte ZONITE a été créé - Identifiants de connexion',
-               body: `Bonjour ${nom_complet},\n\n🎉 Bienvenue chez ZONITE !\n\nVotre compte vendeur a été créé par notre équipe et est immédiatement actif.\n\n📧 Email : ${email}\n🔐 Mot de passe : ${mot_de_passe}\n\n⚠️ Pour votre sécurité, changez ce mot de passe dès votre première connexion.\n\n📹 Prochaine étape : Regardez la vidéo de formation pour accéder à votre catalogue de produits.\n\nBon courage et bonne vente !\n\nL'équipe ZONITE`
-             });
-           } catch (e) {
-             console.error('Email send failed:', e.message);
-           }
+           // ÉTAPE 5 : Audit log
+           await db.JournalAudit.create({
+             action: 'Vendeur créé par admin',
+             module: 'vendeur',
+             details: `Vendeur ${nom_complet} (${email}) créé - KYC auto-validé - En attente formation`,
+             utilisateur: (await base44.auth.me().catch(() => null))?.email || 'admin',
+             entite_id: seller.id,
+             donnees_apres: JSON.stringify({ seller_id: seller.id, user_id, email, seller_status: 'kyc_approved_training_required' })
+           }).catch(() => {});
 
-           return Response.json({ success: true, seller_id: seller.id, email, status: 'actif', user_created: userCreated });
+           return Response.json({ success: true, seller_id: seller.id, user_id, email, seller_status: 'kyc_approved_training_required' });
          } catch (error) {
            console.error('Erreur création vendeur:', error);
            return Response.json({ error: error.message }, { status: 500 });
@@ -164,8 +186,48 @@ Deno.serve(async (req) => {
         return Response.json({ success: true, result });
       }
       case 'createSousAdmin': {
-        const result = await db.SousAdmin.create(payload.data);
-        return Response.json({ success: true, result });
+        const { nom_complet, nom_role, username, email, mot_de_passe_hash, permissions, statut, notes, mot_de_passe_clair } = payload.data;
+        if (!email || !nom_complet) {
+          return Response.json({ error: 'nom_complet et email requis' }, { status: 400 });
+        }
+        // Vérifier doublon User
+        const existingUsers = await db.User.filter({ email });
+        if (existingUsers.length > 0) {
+          return Response.json({ error: `Un compte utilisateur existe déjà avec l'email ${email}` }, { status: 409 });
+        }
+
+        // ÉTAPE 1 : Créer le compte User Base44 avec rôle sous_admin
+        let user_id = null;
+        const mdpClair = mot_de_passe_clair || 'Zonite2024!'; // fallback si non fourni
+        try {
+          const newUser = await base44.users.createUser({ email, password: mdpClair, role: 'sous_admin' });
+          user_id = newUser?.id || null;
+          console.log(`✅ Compte Base44 sous_admin créé pour ${email}`);
+        } catch (userError) {
+          console.warn(`⚠️ Impossible de créer le compte Base44 pour ${email}:`, userError.message);
+        }
+
+        // ÉTAPE 2 : Créer l'entité SousAdmin
+        const result = await db.SousAdmin.create({ nom_complet, nom_role, username, email, mot_de_passe_hash, permissions: permissions || [], statut: statut || 'actif', notes: notes || '' });
+
+        // ÉTAPE 3 : Envoyer email avec les VRAIS identifiants (pas un lien d'invitation)
+        const appUrl = Deno.env.get('APP_URL') || 'https://votre-app.base44.com';
+        await base44.integrations.Core.SendEmail({
+          to: email,
+          subject: '🔑 Votre accès administrateur ZONITE',
+          body: `Bonjour ${nom_complet},\n\nVotre compte administrateur ZONITE a été créé.\n\n━━━━━━━━━━━━━━━━━━━━\n📧 Email : ${email}\n🔐 Mot de passe : ${mdpClair}\n👤 Rôle : ${nom_role}\n━━━━━━━━━━━━━━━━━━━━\n\n🔗 Connectez-vous ici : ${appUrl}\n\nModules auxquels vous avez accès :\n${(permissions || []).join(', ') || 'Aucun module configuré'}\n\n⚠️ Changez votre mot de passe dès la première connexion.\n\nCordialement,\nL'équipe ZONITE`
+        }).catch(e => console.warn('Email sous-admin failed:', e.message));
+
+        // ÉTAPE 4 : Audit log
+        await db.JournalAudit.create({
+          action: 'Sous-admin créé',
+          module: 'systeme',
+          details: `Sous-admin ${nom_complet} (${email}) - Rôle: ${nom_role} - Modules: ${(permissions || []).join(', ')}`,
+          utilisateur: (await base44.auth.me().catch(() => null))?.email || 'admin',
+          entite_id: result.id
+        }).catch(() => {});
+
+        return Response.json({ success: true, result, user_id });
       }
       case 'deleteSousAdmin': {
         await db.SousAdmin.delete(payload.sousAdminId);
