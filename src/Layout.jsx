@@ -4,13 +4,19 @@ import AdminHeader from "@/components/admin/AdminHeader";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import { getVendeurSession } from "@/components/useSessionGuard";
 
-// Pages vendeur : interface mobile standalone, PAS de sidebar admin
-const PAGES_VENDEUR = [
+// Pages sans layout admin (vendeur, publiques, auth)
+const PAGES_SANS_LAYOUT_ADMIN = new Set([
+  // Auth
+  "Connexion",
+  // Vendeur (mobile standalone)
   "EspaceVendeur", "InscriptionVendeur", "VideoFormation", "CatalogueVendeur",
   "NouvelleCommandeVendeur", "MesCommandesVendeur", "ProfilVendeur",
-  "DemandePaiement", "NotificationsVendeur", "Candidature", "AideVendeur",
-  "Connexion", "EspaceSousAdmin",
-];
+  "DemandePaiement", "NotificationsVendeur", "AideVendeur",
+  // Intermédiaires
+  "EnAttenteValidation", "ResoumissionKYC",
+  // Sous-admin (a son propre layout)
+  "EspaceSousAdmin",
+]);
 
 export default function Layout({ children, currentPageName }) {
   const [sidebarOuverte, setSidebarOuverte] = useState(false);
