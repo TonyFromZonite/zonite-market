@@ -45,12 +45,25 @@ Deno.serve(async (req) => {
           return Response.json({ error: 'Accès refusé: compte non autorisé' }, { status: 403 });
         }
         const result = await db.DemandePaiementVendeur.create(data);
+        // Notification au vendeur
         await db.NotificationVendeur.create({
           vendeur_email,
-          titre: "Demande de paiement envoyée",
-          message: `Votre demande de paiement de ${Math.round(data.montant || 0).toLocaleString('fr-FR')} FCFA a été transmise à l'équipe ZONITE.`,
+          titre: "💰 Demande de paiement envoyée",
+          message: `Votre demande de paiement de ${Math.round(data.montant || 0).toLocaleString('fr-FR')} FCFA a été transmise. Vous serez notifié dès traitement.`,
           type: "paiement",
         });
+        // Notifications aux admins
+        const admins = await db.User.filter({ role: 'admin' });
+        for (const admin of admins) {
+          await db.NotificationVendeur.create({
+            vendeur_email: admin.email,
+            titre: '💰 Nouvelle demande de paiement',
+            message: `${compteAuth.nom_complet} demande un paiement de ${Math.round(data.montant || 0).toLocaleString('fr-FR')} FCFA sur ${data.operateur} (${data.numero_mobile_money}).`,
+            type: 'paiement',
+            importante: true,
+            lien: '/Vendeurs'
+          });
+        }
         return Response.json({ success: true, result });
       }
 
