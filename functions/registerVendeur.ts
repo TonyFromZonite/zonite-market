@@ -98,7 +98,7 @@ Deno.serve(async (req) => {
       chiffre_affaires_genere: 0,
       ventes_reussies: 0,
       ventes_echouees: 0,
-      created_by: null, // Self-registered
+      created_by: null // Self-registered
     };
 
     let seller;

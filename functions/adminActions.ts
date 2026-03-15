@@ -1,6 +1,18 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 import bcrypt from 'npm:bcryptjs@2.4.3';
 
+const createProduitWithErrorHandling = async (db, data) => {
+  const cleanData = { ...data };
+  delete cleanData.total_vendu; // Retirer ce champ si fourni accidentellement
+  if (!cleanData.stocks_par_localisation) {
+    cleanData.stocks_par_localisation = [];
+  }
+  if (!cleanData.variations_definition) {
+    cleanData.variations_definition = [];
+  }
+  return await db.Produit.create(cleanData);
+};
+
 /**
  * Fonction centrale pour toutes les opérations admin nécessitant le service role.
  * action: nom de l'opération
@@ -349,8 +361,13 @@ Deno.serve(async (req) => {
 
       // ─── PRODUIT (create) ─────────────────────────────────────────────────────
       case 'createProduit': {
-        const result = await db.Produit.create(payload.data);
-        return Response.json({ success: true, result });
+        try {
+          const result = await createProduitWithErrorHandling(db, payload.data);
+          return Response.json({ success: true, result });
+        } catch (error) {
+          console.error('Erreur création produit:', error.message);
+          return Response.json({ error: 'Erreur création produit: ' + error.message }, { status: 500 });
+        }
       }
 
       // ─── PRODUIT (delete) ─────────────────────────────────────────────────────
