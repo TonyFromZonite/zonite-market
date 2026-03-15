@@ -1,78 +1,94 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 
+/**
+ * EMAIL VERIFICATION (NEW ARCHITECTURE)
+ * Verifies email code and transitions seller from pending_verification → kyc_required
+ */
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const body = await req.json();
-    const { email, verification_code } = body;
+    const { email, code } = await req.json();
 
-    if (!email || !verification_code) {
-      return Response.json({ error: 'Email et code requis' }, { status: 400 });
+    if (!email || !code) {
+      return Response.json({ 
+        error: 'Email et code requis' 
+      }, { status: 400 });
     }
 
-    // Récupérer le vendeur
+    console.log(`📧 Verifying email for: ${email}`);
+
+    // Get seller
     const sellers = await base44.asServiceRole.entities.Seller.filter({ email });
     if (sellers.length === 0) {
-      return Response.json({ error: 'Compte non trouvé' }, { status: 404 });
+      return Response.json({ 
+        error: 'Aucun compte trouvé avec cet email' 
+      }, { status: 404 });
     }
 
     const seller = sellers[0];
 
-    // Vérifier le code et l'expiration
-    if (!seller.verification_code || seller.verification_code !== verification_code) {
-      return Response.json({ error: 'Code incorrect' }, { status: 400 });
+    // Check if already verified
+    if (seller.email_verified) {
+      return Response.json({ 
+        success: true,
+        message: 'Email déjà vérifié',
+        seller_status: seller.seller_status
+      });
     }
 
-    if (seller.verification_code_expiry && new Date(seller.verification_code_expiry) < new Date()) {
-      return Response.json({ error: 'Code expiré. Demandez un nouveau code.' }, { status: 400 });
+    // Verify code
+    if (seller.verification_code !== code) {
+      return Response.json({ 
+        error: 'Code de vérification incorrect' 
+      }, { status: 400 });
     }
 
-    // Marquer comme vérifié, transition to kyc_required, et créer l'utilisateur Base44
-    let userCreated = false;
-    
-    // Créer l'utilisateur Base44 avec rôle 'user' - MUST happen first
-    try {
-      await base44.users.inviteUser(email, 'user');
-      userCreated = true;
-      console.log(`✅ Utilisateur Base44 créé pour ${email}`);
-    } catch (userError) {
-      if (!userError.message.includes('already exists')) {
-        console.error('❌ Erreur création utilisateur Base44:', userError.message);
-        throw userError;
-      }
-      userCreated = true;
-      console.log(`ℹ️ Utilisateur Base44 existe déjà pour ${email}`);
+    // Check expiry
+    const now = new Date();
+    const expiry = new Date(seller.verification_code_expiry);
+    if (now > expiry) {
+      return Response.json({ 
+        error: 'Code expiré. Demandez un nouveau code.' 
+      }, { status: 400 });
     }
 
-    // Update seller: mark email verified and transition status
+    // TRANSITION: pending_verification → kyc_required
     await base44.asServiceRole.entities.Seller.update(seller.id, {
       email_verified: true,
       verification_code: null,
       verification_code_expiry: null,
-      seller_status: 'kyc_required', // Transition: pending_verification → kyc_required
-      statut_kyc: 'en_attente',
-      statut: 'en_attente_kyc'
+      seller_status: 'kyc_required'
     });
 
-    // Notification
-    try {
-      await base44.integrations.Core.SendEmail({
-        to: email,
-        subject: '✅ Email vérifié - ZONITE',
-        body: `Bonjour ${seller.nom_complet},\n\nVotre email a été vérifié avec succès ! 🎉\n\nVous pouvez maintenant vous connecter à votre compte ZONITE.\n\nBon courage !\nL'équipe ZONITE`
-      });
-    } catch (e) {
-      console.error('Email send failed:', e.message);
-    }
+    console.log(`✅ Email verified for ${email}, status → kyc_required`);
 
-    return Response.json({ 
-      success: true, 
+    // Send notification
+    await base44.asServiceRole.entities.NotificationVendeur.create({
+      vendeur_email: email,
+      titre: '✅ Email vérifié',
+      message: 'Votre email a été vérifié avec succès. Veuillez soumettre votre dossier KYC pour continuer.',
+      type: 'succes',
+      importante: true
+    }).catch(() => {});
+
+    // Audit log
+    await base44.asServiceRole.entities.JournalAudit.create({
+      action: 'Email vérifié',
+      module: 'vendeur',
+      details: `Email vérifié pour ${seller.nom_complet} (${email})`,
+      utilisateur: email,
+      entite_id: seller.id
+    }).catch(() => {});
+
+    return Response.json({
+      success: true,
       message: 'Email vérifié avec succès',
-      user_created: userCreated
+      seller_status: 'kyc_required',
+      next_step: 'Soumettez votre dossier KYC'
     });
 
   } catch (error) {
-    console.error('Error:', error);
+    console.error('❌ Email verification error:', error);
     return Response.json({ error: error.message }, { status: 500 });
   }
 });

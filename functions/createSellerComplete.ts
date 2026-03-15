@@ -1,9 +1,11 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
-import bcrypt from 'npm:bcryptjs@2.4.3';
 
 /**
- * CRÉATION COMPLÈTE D'UN VENDEUR
- * Workflow automatisé: Seller → Notification → Email → Audit
+ * ADMIN-CREATED SELLER WORKFLOW (NEW ARCHITECTURE)
+ * 1. Create Base44 user FIRST
+ * 2. Create Seller linked to Base44 user
+ * 3. Set proper status based on auto_valider_kyc
+ * 4. Send credentials + next steps email
  */
 Deno.serve(async (req) => {
   try {
@@ -34,39 +36,51 @@ Deno.serve(async (req) => {
       }, { status: 400 });
     }
 
-    // Vérifier duplicata
-    const existing = await base44.asServiceRole.entities.Seller.filter({ email });
-    if (existing.length > 0) {
+    console.log(`📝 Admin creating seller: ${email}, auto_validate: ${auto_valider_kyc}`);
+
+    // Check duplicates in Seller
+    const existingSellers = await base44.asServiceRole.entities.Seller.filter({ email });
+    if (existingSellers.length > 0) {
       return Response.json({ 
         error: 'Un vendeur existe déjà avec cet email' 
       }, { status: 400 });
     }
 
-    console.log(`📝 Création vendeur par admin: ${email}`);
+    // Check duplicates in Base44 Users
+    const existingUsers = await base44.asServiceRole.entities.User.filter({ email });
+    if (existingUsers.length > 0) {
+      return Response.json({ 
+        error: 'Un utilisateur existe déjà avec cet email' 
+      }, { status: 400 });
+    }
 
-    // Hasher mot de passe
-    const passwordHash = await bcrypt.hash(mot_de_passe, 10);
+    // STEP 1: Create Base44 user FIRST
+    let base44User;
+    try {
+      await base44.users.inviteUser(email, 'user');
+      console.log(`✅ Base44 user created: ${email}`);
+      
+      // Fetch the created user to get user_id
+      const users = await base44.asServiceRole.entities.User.filter({ email });
+      if (users.length === 0) {
+        throw new Error('Failed to retrieve created Base44 user');
+      }
+      base44User = users[0];
+    } catch (inviteErr) {
+      console.error('❌ Base44 user creation failed:', inviteErr.message);
+      return Response.json({ 
+        error: 'Erreur lors de la création du compte utilisateur' 
+      }, { status: 500 });
+    }
 
-    // Status transitions based on auto_valider_kyc
-    // If auto-validate: pending_verification → kyc_required → kyc_pending → kyc_approved_training_required (with training auto-marked)
-    // If not: pending_verification → kyc_required → kyc_pending
+    // STEP 2: Determine status based on auto_valider_kyc
     const seller_status = auto_valider_kyc ? 'kyc_approved_training_required' : 'kyc_required';
     const statut_kyc = auto_valider_kyc ? 'valide' : 'en_attente';
     const statut = auto_valider_kyc ? 'actif' : 'en_attente_kyc';
 
-    // Create Base44 user FIRST
-    try {
-      await base44.users.inviteUser(email, 'user');
-      console.log(`✅ Base44 user créé: ${email}`);
-    } catch (inviteErr) {
-      if (!inviteErr.message.includes('already exists')) {
-        throw inviteErr;
-      }
-      console.log(`ℹ️ Base44 user existe déjà: ${email}`);
-    }
-
-    // Créer le Seller
+    // STEP 3: Create Seller linked to Base44 user
     const seller = await base44.asServiceRole.entities.Seller.create({
+      user_id: base44User.id, // CRITICAL: Link to Base44 user
       email,
       nom_complet,
       telephone: telephone || '',
@@ -74,10 +88,12 @@ Deno.serve(async (req) => {
       quartier: quartier || '',
       numero_mobile_money: numero_mobile_money || '',
       operateur_mobile_money: operateur_mobile_money || '',
-      mot_de_passe_hash: passwordHash,
-      statut_kyc: statut_kyc,
+      photo_identite_url: '',
+      photo_identite_verso_url: '',
+      selfie_url: '',
+      statut_kyc,
       statut,
-      seller_status: seller_status, // NEW: Use proper status engine
+      seller_status,
       created_by: user.email, // Track who created this seller
       taux_commission: taux_commission || 0,
       solde_commission: 0,
@@ -97,11 +113,11 @@ Deno.serve(async (req) => {
       date_embauche: new Date().toISOString().split('T')[0]
     });
 
-    console.log(`✅ Seller créé: ${seller.id}`);
+    console.log(`✅ Seller created: ${seller.id}, linked to user_id: ${base44User.id}`);
 
-    // Notification in-app
+    // STEP 4: Send notification
     const messageNotif = auto_valider_kyc
-      ? '🎉 Votre compte vendeur a été créé et activé. Vous pouvez commencer à vendre !'
+      ? '🎉 Votre compte vendeur a été créé et activé. Regardez la vidéo de formation pour débloquer le catalogue.'
       : '📋 Votre compte vendeur a été créé. Complétez votre KYC pour débloquer le catalogue.';
 
     await base44.asServiceRole.entities.NotificationVendeur.create({
@@ -112,7 +128,7 @@ Deno.serve(async (req) => {
       importante: true
     }).catch(() => {});
 
-    // Email avec identifiants
+    // STEP 5: Send email with credentials
     const messageEmail = auto_valider_kyc
       ? `Bonjour ${nom_complet},\n\nBienvenue chez ZONITE ! 🚀\n\nVotre compte vendeur est créé et votre KYC a été validé.\n\n📧 Email : ${email}\n🔐 Mot de passe : ${mot_de_passe}\n\n⚠️ PROCHAINE ÉTAPE : Regardez la vidéo de formation obligatoire pour débloquer le catalogue.\n\n⚠️ Changez votre mot de passe dès la première connexion.\n\nBonne vente !\nL'équipe ZONITE`
       : `Bonjour ${nom_complet},\n\nVotre compte vendeur a été créé par nos administrateurs.\n\n📧 Email : ${email}\n🔐 Mot de passe : ${mot_de_passe}\n\n📋 ÉTAPE 1 : Soumettre votre dossier KYC pour validation\n📹 ÉTAPE 2 : Regarder la vidéo de formation\n🛍️ ÉTAPE 3 : Accès au catalogue\n\n⚠️ Changez votre mot de passe dès la première connexion.\n\nCordialement,\nL'équipe ZONITE`;
@@ -123,7 +139,7 @@ Deno.serve(async (req) => {
       body: messageEmail
     }).catch(e => console.warn('Email failed:', e.message));
 
-    // Journal d'audit
+    // STEP 6: Audit log
     await base44.asServiceRole.entities.JournalAudit.create({
       action: auto_valider_kyc ? 'Vendeur créé et activé' : 'Vendeur créé',
       module: 'vendeur',
@@ -132,9 +148,11 @@ Deno.serve(async (req) => {
       entite_id: seller.id,
       donnees_apres: JSON.stringify({
         seller_id: seller.id,
+        user_id: base44User.id,
         email,
         statut,
-        statut_kyc: statut_kyc
+        statut_kyc,
+        seller_status
       })
     }).catch(() => {});
 
@@ -142,13 +160,15 @@ Deno.serve(async (req) => {
       success: true,
       message: 'Vendeur créé avec succès',
       seller_id: seller.id,
+      user_id: base44User.id,
       email: seller.email,
       statut: seller.statut,
-      statut_kyc: seller.statut_kyc
+      statut_kyc: seller.statut_kyc,
+      seller_status: seller.seller_status
     });
 
   } catch (error) {
-    console.error('❌ Erreur:', error);
+    console.error('❌ Error creating seller:', error);
     return Response.json({ error: error.message }, { status: 500 });
   }
 });
