@@ -1,5 +1,20 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 
+const TRANSITIONS_AUTORISEES = {
+  'pending_verification': ['kyc_required'],
+  'kyc_required': ['kyc_pending'],
+  'kyc_pending': ['kyc_approved_training_required', 'kyc_required'],
+  'kyc_approved_training_required': ['active_seller'],
+  'active_seller': []
+};
+
+function validateStatusTransition(actuel, nouveau) {
+  const autorisees = TRANSITIONS_AUTORISEES[actuel] || [];
+  if (!autorisees.includes(nouveau)) {
+    throw new Error(`Transition interdite: ${actuel} → ${nouveau}`);
+  }
+}
+
 /**
  * KYC VALIDATION BY ADMIN (NEW ARCHITECTURE)
  * Transitions seller:
