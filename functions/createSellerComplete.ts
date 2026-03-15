@@ -54,23 +54,19 @@ Deno.serve(async (req) => {
       }, { status: 400 });
     }
 
-    // STEP 1: Create Base44 user FIRST
-    let base44User;
-    try {
-      await base44.users.inviteUser(email, 'user');
-      console.log(`✅ Base44 user created: ${email}`);
-      
-      // Fetch the created user to get user_id
-      const users = await base44.asServiceRole.entities.User.filter({ email });
-      if (users.length === 0) {
-        throw new Error('Failed to retrieve created Base44 user');
-      }
-      base44User = users[0];
-    } catch (inviteErr) {
-      console.error('❌ Base44 user creation failed:', inviteErr.message);
-      return Response.json({ 
-        error: 'Erreur lors de la création du compte utilisateur' 
-      }, { status: 500 });
+    // STEP 1: Check if Base44 user exists or will be auto-created
+    // Note: Base44 auto-creates users on first login for seller role
+    let user_id = null;
+    
+    // Try to find existing user
+    const existingUsers = await base44.asServiceRole.entities.User.filter({ email });
+    if (existingUsers.length > 0) {
+      user_id = existingUsers[0].id;
+      console.log(`ℹ️ Base44 user already exists: ${email}`);
+    } else {
+      // User will be auto-created on first login
+      // For now, we'll create Seller without user_id and repair it later
+      console.log(`ℹ️ Base44 user will be auto-created on first login: ${email}`);
     }
 
     // STEP 2: Determine status based on auto_valider_kyc
@@ -78,9 +74,9 @@ Deno.serve(async (req) => {
     const statut_kyc = auto_valider_kyc ? 'valide' : 'en_attente';
     const statut = auto_valider_kyc ? 'actif' : 'en_attente_kyc';
 
-    // STEP 3: Create Seller linked to Base44 user
+    // STEP 2: Create Seller (with or without user_id)
     const seller = await base44.asServiceRole.entities.Seller.create({
-      user_id: base44User.id, // CRITICAL: Link to Base44 user
+      user_id: user_id, // Will be null if user doesn't exist yet
       email,
       nom_complet,
       telephone: telephone || '',
@@ -113,7 +109,7 @@ Deno.serve(async (req) => {
       date_embauche: new Date().toISOString().split('T')[0]
     });
 
-    console.log(`✅ Seller created: ${seller.id}, linked to user_id: ${base44User.id}`);
+    console.log(`✅ Seller created: ${seller.id}, user_id: ${user_id || 'will be linked on first login'}`);
 
     // STEP 4: Send notification
     const messageNotif = auto_valider_kyc
@@ -148,7 +144,7 @@ Deno.serve(async (req) => {
       entite_id: seller.id,
       donnees_apres: JSON.stringify({
         seller_id: seller.id,
-        user_id: base44User.id,
+        user_id: user_id,
         email,
         statut,
         statut_kyc,
@@ -160,7 +156,7 @@ Deno.serve(async (req) => {
       success: true,
       message: 'Vendeur créé avec succès',
       seller_id: seller.id,
-      user_id: base44User.id,
+      user_id: user_id,
       email: seller.email,
       statut: seller.statut,
       statut_kyc: seller.statut_kyc,

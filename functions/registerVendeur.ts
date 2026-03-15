@@ -46,32 +46,26 @@ Deno.serve(async (req) => {
       }, { status: 409 });
     }
 
-    // STEP 1: Create Base44 user FIRST
-    let base44User;
-    try {
-      await base44.users.inviteUser(email, 'user');
-      console.log(`✅ Base44 user created: ${email}`);
-      
-      // Fetch the created user to get user_id
-      const users = await base44.asServiceRole.entities.User.filter({ email });
-      if (users.length === 0) {
-        throw new Error('Failed to retrieve created Base44 user');
-      }
-      base44User = users[0];
-    } catch (inviteErr) {
-      console.error('❌ Base44 user creation failed:', inviteErr.message);
-      return Response.json({ 
-        error: 'Erreur lors de la création du compte utilisateur' 
-      }, { status: 500 });
+    // STEP 1: Check if Base44 user exists
+    // Note: Base44 auto-creates users on first login
+    let user_id = null;
+    
+    const existingUsers = await base44.asServiceRole.entities.User.filter({ email });
+    if (existingUsers.length > 0) {
+      user_id = existingUsers[0].id;
+      console.log(`ℹ️ Base44 user already exists: ${email}`);
+    } else {
+      // User will be auto-created on first login
+      console.log(`ℹ️ Base44 user will be auto-created on first login: ${email}`);
     }
 
     // STEP 2: Generate verification code
     const verificationCode = String(Math.floor(100000 + Math.random() * 900000));
     const codeExpiryTime = new Date(Date.now() + 15 * 60 * 1000).toISOString();
 
-    // STEP 3: Create Seller linked to Base44 user
+    // STEP 2: Create Seller (user_id will be linked on first login)
     const sellerData = {
-      user_id: base44User.id, // CRITICAL: Link to Base44 user
+      user_id: user_id, // Will be null if user doesn't exist yet
       email,
       nom_complet,
       telephone: telephone || '',
@@ -104,7 +98,7 @@ Deno.serve(async (req) => {
     };
 
     const seller = await base44.asServiceRole.entities.Seller.create(sellerData);
-    console.log(`✅ Seller created: ${seller.id}, linked to user_id: ${base44User.id}`);
+    console.log(`✅ Seller created: ${seller.id}, user_id: ${user_id || 'will be linked on first login'}`);
 
     // STEP 4: Send verification email
     try {
@@ -127,7 +121,7 @@ Deno.serve(async (req) => {
       entite_id: seller.id,
       donnees_apres: JSON.stringify({
         seller_id: seller.id,
-        user_id: base44User.id,
+        user_id: user_id,
         email,
         seller_status: 'pending_verification'
       })
@@ -136,7 +130,7 @@ Deno.serve(async (req) => {
     return Response.json({ 
       success: true, 
       seller_id: seller.id,
-      user_id: base44User.id,
+      user_id: user_id,
       email, 
       status: 'pending_verification',
       message: 'Code de vérification envoyé par email'
