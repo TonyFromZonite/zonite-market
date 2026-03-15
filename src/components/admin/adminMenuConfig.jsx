@@ -1,7 +1,7 @@
 import {
   LayoutDashboard, ShoppingCart, Package, Users, Truck,
   ClipboardList, Shield, MessageSquare, UserCog, Settings,
-  Database, ScrollText, FileCheck, Wallet, MapPin, Bike
+  Database, ScrollText, FileCheck, MapPin, Bike
 } from "lucide-react";
 
 /**
