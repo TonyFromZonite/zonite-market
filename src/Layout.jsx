@@ -41,8 +41,8 @@ export default function Layout({ children, currentPageName }) {
     chargerBadges();
   }, [currentPageName]);
 
-  // Pages vendeur : rendu sans layout admin
-  if (PAGES_VENDEUR.includes(currentPageName) || vendeurSession) {
+  // Pas de layout admin pour ces pages
+  if (PAGES_SANS_LAYOUT_ADMIN.has(currentPageName) || vendeurSession) {
     return <>{children}</>;
   }
 
