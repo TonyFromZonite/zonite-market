@@ -110,7 +110,7 @@ export const ADMIN_MENU = [
   },
   {
     id: "audit_complet",
-    label: "Audit Complet",
+    label: "Audit & Intégrité",
     icon: Database,
     page: "AuditComplet",
     roles: ["admin"],
