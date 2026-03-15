@@ -46,22 +46,25 @@ Deno.serve(async (req) => {
       }, { status: 409 });
     }
 
-    // ÉTAPE 1 : Créer immédiatement le compte User Base44 avec le mot de passe fourni
+    // ÉTAPE 1 : Créer le compte User Base44 EN PREMIER — si ça échoue, on s'arrête
     let user_id = null;
+    let newUser = null;
     try {
-      const newUser = await base44.users.createUser({ email, password: mot_de_passe, role: 'user' });
+      newUser = await base44.users.createUser({ email, password: mot_de_passe, role: 'user' });
       user_id = newUser?.id || null;
+      if (!user_id) throw new Error('user_id null après createUser');
       console.log(`✅ Compte Base44 créé pour ${email}, user_id: ${user_id}`);
     } catch (userError) {
-      console.warn(`⚠️ Impossible de créer le compte Base44 pour ${email}:`, userError.message);
-      // On continue même si la création Base44 échoue
+      console.error(`❌ Impossible de créer le compte Base44 pour ${email}:`, userError.message);
+      return Response.json({ error: `Impossible de créer le compte: ${userError.message}` }, { status: 500 });
     }
 
     // STEP 2: Generate verification code
     const verificationCode = String(Math.floor(100000 + Math.random() * 900000));
     const codeExpiryTime = new Date(Date.now() + 15 * 60 * 1000).toISOString();
 
-    // ÉTAPE 2 : Créer le Seller lié au user_id
+    // ÉTAPE 2 : Créer le Seller — si ça échoue, supprimer le User créé (rollback)
+    let seller = null;
     const sellerData = {
       user_id: user_id, // Lié immédiatement si le compte Base44 a été créé
       email,
