@@ -27,22 +27,32 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Code expiré. Demandez un nouveau code.' }, { status: 400 });
     }
 
-    // Marquer comme vérifié et créer l'utilisateur Base44
-    await base44.asServiceRole.entities.Seller.update(seller.id, {
-      email_verified: true,
-      verification_code: null,
-      verification_code_expiry: null,
-    });
-
-    // Créer l'utilisateur Base44 avec rôle 'user'
+    // Marquer comme vérifié, transition to kyc_required, et créer l'utilisateur Base44
     let userCreated = false;
+    
+    // Créer l'utilisateur Base44 avec rôle 'user' - MUST happen first
     try {
       await base44.users.inviteUser(email, 'user');
       userCreated = true;
       console.log(`✅ Utilisateur Base44 créé pour ${email}`);
     } catch (userError) {
-      console.error('❌ Erreur création utilisateur Base44:', userError.message);
+      if (!userError.message.includes('already exists')) {
+        console.error('❌ Erreur création utilisateur Base44:', userError.message);
+        throw userError;
+      }
+      userCreated = true;
+      console.log(`ℹ️ Utilisateur Base44 existe déjà pour ${email}`);
     }
+
+    // Update seller: mark email verified and transition status
+    await base44.asServiceRole.entities.Seller.update(seller.id, {
+      email_verified: true,
+      verification_code: null,
+      verification_code_expiry: null,
+      seller_status: 'kyc_required', // Transition: pending_verification → kyc_required
+      statut_kyc: 'en_attente',
+      statut: 'en_attente_kyc'
+    });
 
     // Notification
     try {
