@@ -109,7 +109,7 @@ Deno.serve(async (req) => {
 
            // ÉTAPE 2 : Créer le Seller avec seller_status correct
            const seller = await db.Seller.create({
-             user_id,
+              user_id: user_id || 'pending',
              email, nom_complet, telephone: telephone || '', ville: ville || '', quartier: quartier || '',
              numero_mobile_money: numero_mobile_money || '', operateur_mobile_money,
              mot_de_passe_hash: hashedPassword,
