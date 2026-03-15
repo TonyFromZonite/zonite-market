@@ -105,7 +105,7 @@ export default function Layout({ children, currentPageName }) {
       )}
 
       {/* Sidebar */}
-      <aside className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-[#1a1f5e] text-white transform transition-transform duration-300 ease-in-out flex flex-col ${menuOuvert ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}>
+      <aside className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-[#1a1f5e] text-white transform transition-transform duration-300 ease-in-out flex flex-col max-h-screen ${menuOuvert ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}>
         {/* Logo */}
         <div className="h-16 flex items-center px-4 border-b border-white/10 flex-shrink-0">
           <div className="flex items-center gap-2">
@@ -137,7 +137,7 @@ export default function Layout({ children, currentPageName }) {
         )}
 
         {/* Navigation */}
-        <nav className="flex-1 py-3 px-2 space-y-0.5 overflow-y-auto">
+        <nav className="flex-1 py-3 px-2 space-y-0.5 overflow-y-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
           {menuItems.map((item) => {
             const estActif = currentPageName === item.page;
             const Icone = item.icone;
@@ -211,7 +211,7 @@ export default function Layout({ children, currentPageName }) {
         </header>
 
         {/* Page */}
-        <main className="flex-1 p-4 lg:p-6 overflow-auto">
+        <main className="flex-1 p-4 lg:p-6 overflow-auto bg-slate-50">
           {children}
         </main>
       </div>
