@@ -43,9 +43,14 @@ Deno.serve(async (req) => {
       livraison_incluse, client_nom, client_telephone, client_ville, client_quartier, client_adresse, notes
     } = await req.json();
 
-    // ✅ Vérification d'identité : vendeur_email doit correspondre à l'utilisateur connecté
-    if (vendeur_email !== user.email) {
-      return Response.json({ error: 'Forbidden: vendeur_email does not match authenticated user' }, { status: 403 });
+    // ✅ Vérification d'identité : récupérer le Seller via user_id (pas email)
+    const sellers = await base44.asServiceRole.entities.Seller.filter({ user_id: user.id });
+    if (sellers.length === 0) {
+      return Response.json({ error: 'Forbidden: aucun compte vendeur lié à cet utilisateur' }, { status: 403 });
+    }
+    const sellerVerif = sellers[0];
+    if (sellerVerif.id !== vendeur_id) {
+      return Response.json({ error: 'Forbidden: vendeur_id ne correspond pas au compte connecté' }, { status: 403 });
     }
 
     // Validation
