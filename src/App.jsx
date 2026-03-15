@@ -64,14 +64,6 @@ const AuthenticatedApp = () => {
         />
       ))}
       <Route
-        path="/SystemIntegrity"
-        element={
-          <LayoutWrapper currentPageName="SystemIntegrity">
-            <SystemIntegrity />
-          </LayoutWrapper>
-        }
-      />
-      <Route
         path="/GestionZones"
         element={
           <LayoutWrapper currentPageName="GestionZones">
