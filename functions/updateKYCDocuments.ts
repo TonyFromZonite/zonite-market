@@ -59,10 +59,22 @@ Deno.serve(async (req) => {
       importante: true
     }).catch(() => {});
 
-    // Notify admin (via email)
+    // Notifier les admins via NotificationVendeur (affichée dans le tableau de bord admin)
+    const admins = await base44.asServiceRole.entities.User.filter({ role: 'admin' });
+    for (const admin of admins) {
+      await base44.asServiceRole.entities.NotificationVendeur.create({
+        vendeur_email: admin.email,
+        titre: '📋 Nouveau KYC à valider',
+        message: `${seller.nom_complet} (${email}) a soumis son dossier KYC. Cliquez pour valider.`,
+        type: 'alerte',
+        importante: true,
+        lien: '/GestionKYC'
+      }).catch(() => {});
+    }
+    // Email admin
     base44.integrations.Core.SendEmail({
-      to: 'admin@zonite.cm',
-      subject: '🆕 Nouveau dossier KYC à valider',
+      to: admins[0]?.email || 'admin@zonite.cm',
+      subject: '🆕 Nouveau dossier KYC à valider - ZONITE',
       body: `Un nouveau dossier KYC a été soumis par ${seller.nom_complet} (${email}).\n\nConnectez-vous au tableau de bord pour le valider.`
     }).catch(() => {});
 
