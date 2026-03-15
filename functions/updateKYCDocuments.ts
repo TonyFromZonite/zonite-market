@@ -1,68 +1,89 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 
 /**
- * UPDATE KYC DOCUMENTS FOR EXISTING SELLER
- * Receives KYC documents and transitions status to kyc_pending
+ * KYC DOCUMENT SUBMISSION (NEW ARCHITECTURE)
+ * Transitions seller from kyc_required → kyc_pending
  */
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const body = await req.json();
-    const { email, photo_identite_url, photo_identite_verso_url, selfie_url } = body;
+    const {
+      email,
+      photo_identite_url,
+      photo_identite_verso_url,
+      selfie_url
+    } = await req.json();
 
     if (!email || !photo_identite_url || !selfie_url) {
-      return Response.json({
-        error: 'Email, photo_identite_url, et selfie_url sont requis'
+      return Response.json({ 
+        error: 'Email, photo d\'identité et selfie requis' 
       }, { status: 400 });
     }
 
-    // Récupérer le seller existant
+    console.log(`📋 KYC submission for: ${email}`);
+
+    // Get seller
     const sellers = await base44.asServiceRole.entities.Seller.filter({ email });
     if (sellers.length === 0) {
-      return Response.json({ error: 'Seller non trouvé' }, { status: 404 });
+      return Response.json({ 
+        error: 'Vendeur non trouvé' 
+      }, { status: 404 });
     }
 
     const seller = sellers[0];
 
-    // Vérifier que le vendeur n'a pas déjà soumis de KYC
-    if (seller.seller_status && ['kyc_pending', 'kyc_approved_training_required', 'active_seller'].includes(seller.seller_status)) {
-      return Response.json({
-        error: 'Vous avez déjà soumis votre dossier KYC. Veuillez attendre la validation par notre équipe.'
+    // Prevent re-submission if already pending or approved
+    if (['kyc_pending', 'kyc_approved_training_required', 'active_seller'].includes(seller.seller_status)) {
+      return Response.json({ 
+        error: 'KYC déjà soumis ou validé' 
       }, { status: 400 });
     }
 
-    // Mettre à jour avec les documents KYC et transition to kyc_pending
-    const updates = {
+    // TRANSITION: kyc_required → kyc_pending
+    await base44.asServiceRole.entities.Seller.update(seller.id, {
       photo_identite_url,
       photo_identite_verso_url: photo_identite_verso_url || '',
       selfie_url,
-      statut_kyc: 'en_attente', // Maintenant en attente de validation
-      seller_status: 'kyc_pending', // NEW: Proper status transition
-      conditions_acceptees: true
-    };
+      statut_kyc: 'en_attente',
+      seller_status: 'kyc_pending'
+    });
 
-    const updatedSeller = await base44.asServiceRole.entities.Seller.update(seller.id, updates);
+    console.log(`✅ KYC submitted for ${email}, status → kyc_pending`);
+
+    // Send notification to seller
+    await base44.asServiceRole.entities.NotificationVendeur.create({
+      vendeur_email: email,
+      titre: '📋 KYC soumis',
+      message: 'Votre dossier KYC a été soumis avec succès. Vous recevrez une notification une fois validé par nos équipes.',
+      type: 'info',
+      importante: true
+    }).catch(() => {});
+
+    // Notify admin (via email)
+    base44.integrations.Core.SendEmail({
+      to: 'admin@zonite.cm',
+      subject: '🆕 Nouveau dossier KYC à valider',
+      body: `Un nouveau dossier KYC a été soumis par ${seller.nom_complet} (${email}).\n\nConnectez-vous au tableau de bord pour le valider.`
+    }).catch(() => {});
 
     // Audit log
     await base44.asServiceRole.entities.JournalAudit.create({
-      action: 'Soumission KYC',
+      action: 'KYC soumis',
       module: 'vendeur',
       details: `Dossier KYC soumis par ${seller.nom_complet} (${email})`,
       utilisateur: email,
-      entite_id: seller.id,
-      donnees_apres: JSON.stringify({
-        seller_status: 'kyc_pending',
-        statut_kyc: 'en_attente'
-      })
+      entite_id: seller.id
     }).catch(() => {});
 
     return Response.json({
       success: true,
-      seller_id: seller.id,
-      message: 'Dossier KYC soumis avec succès. Veuillez attendre la validation par notre équipe.'
+      message: 'Dossier KYC soumis avec succès',
+      seller_status: 'kyc_pending',
+      next_step: 'En attente de validation par l\'équipe ZONITE'
     });
+
   } catch (error) {
-    console.error('Error updating KYC documents:', error);
+    console.error('❌ KYC submission error:', error);
     return Response.json({ error: error.message }, { status: 500 });
   }
 });

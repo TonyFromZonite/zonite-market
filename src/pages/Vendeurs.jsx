@@ -98,14 +98,13 @@ function ListeVendeurs() {
   };
 
   const supprimer = async (vendeur) => {
-    if (!confirm(`Supprimer le vendeur "${vendeur.nom_complet}" ? Cette action supprimera aussi son compte utilisateur.`)) return;
+    if (!confirm(`Supprimer le vendeur "${vendeur.nom_complet}" ? Cette action supprimera aussi son compte utilisateur et toutes ses données.`)) return;
     try {
-      await base44.functions.invoke('deleteSellerAndUser', {
+      await base44.functions.invoke('deleteSellerComplete', {
         seller_id: vendeur.id,
         seller_email: vendeur.email
       });
-      await adminApi.createJournalAudit({ action: "Vendeur supprimé", module: "vendeur", details: `Vendeur ${vendeur.nom_complet} et compte utilisateur supprimés`, entite_id: vendeur.id });
-      toast({ title: "Vendeur supprimé avec succès", duration: 5000 });
+      toast({ title: "Vendeur supprimé avec succès", description: "Toutes les données ont été supprimées", duration: 5000 });
       queryClient.invalidateQueries({ queryKey: ["vendeurs"] });
     } catch (error) {
       toast({ title: "Erreur", description: error.message, variant: "destructive", duration: 5000 });
