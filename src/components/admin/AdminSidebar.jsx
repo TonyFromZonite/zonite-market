@@ -6,7 +6,7 @@ import { getMenuVisible } from "./adminMenuConfig";
 import { getAdminSession, getSousAdminSession, clearAllSessions } from "@/components/useSessionGuard";
 import { createPageUrl } from "@/utils";
 
-export default function AdminSidebar({ isOpen, onClose, badges = {} }) {
+export default function AdminSidebar({ isOpen, onClose, badges = {}, isDesktop = false }) {
   const location = useLocation();
   const sousAdmin = getSousAdminSession();
   const adminSession = getAdminSession();
@@ -22,60 +22,92 @@ export default function AdminSidebar({ isOpen, onClose, badges = {} }) {
 
   const currentPage = location.pathname.replace("/", "");
 
+  // Sur desktop on est toujours visible, sur mobile on utilise l'overlay
+  const sidebarStyle = isDesktop
+    ? {
+        width: 256,
+        height: "100vh",
+        background: "#1a1f5e",
+        color: "white",
+        display: "flex",
+        flexDirection: "column",
+        flexShrink: 0,
+      }
+    : {
+        position: "fixed",
+        top: 0,
+        left: 0,
+        bottom: 0,
+        width: 256,
+        height: "100vh",
+        background: "#1a1f5e",
+        color: "white",
+        display: "flex",
+        flexDirection: "column",
+        zIndex: 200,
+        transform: isOpen ? "translateX(0)" : "translateX(-100%)",
+        transition: "transform 0.3s ease",
+      };
+
   return (
     <>
       {/* Overlay mobile */}
-      {isOpen && (
+      {!isDesktop && isOpen && (
         <div
-          className="fixed inset-0 bg-black/40 z-40 lg:hidden"
+          style={{
+            position: "fixed", inset: 0,
+            background: "rgba(0,0,0,0.45)",
+            zIndex: 199,
+          }}
           onClick={onClose}
         />
       )}
 
-      {/* Sidebar */}
-      <aside
-        className={`
-          fixed lg:static inset-y-0 left-0 z-50
-          w-64 flex-shrink-0
-          bg-[#1a1f5e] text-white flex flex-col
-          transform transition-transform duration-300 ease-in-out
-          ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
-        `}
-        style={{ height: "100vh" }}
-      >
+      <aside style={sidebarStyle}>
         {/* Logo */}
-        <div className="h-16 flex items-center px-4 border-b border-white/10 flex-shrink-0">
+        <div style={{
+          height: 64, display: "flex", alignItems: "center",
+          padding: "0 16px", borderBottom: "1px solid rgba(255,255,255,0.1)",
+          flexShrink: 0,
+        }}>
           <img
             src={LOGO}
             alt="Zonite"
-            className="h-9 w-9 rounded-lg object-contain bg-white p-0.5 flex-shrink-0"
+            style={{ height: 36, width: 36, borderRadius: 8, background: "white", padding: 2, objectFit: "contain", flexShrink: 0 }}
           />
-          <div className="ml-2">
-            <span className="text-base font-bold tracking-tight leading-none">ZONITE</span>
-            <span className="block text-[10px] font-medium text-yellow-400 tracking-widest leading-none">
+          <div style={{ marginLeft: 10 }}>
+            <div style={{ fontWeight: 700, fontSize: 15, lineHeight: 1 }}>ZONITE</div>
+            <div style={{ fontSize: 10, color: "#F5C518", fontWeight: 600, letterSpacing: 2, marginTop: 2 }}>
               {sousAdmin ? sousAdmin.nom_role.toUpperCase() : "GESTION"}
-            </span>
+            </div>
           </div>
-          <button
-            className="ml-auto lg:hidden text-white/60 hover:text-white"
-            onClick={onClose}
-          >
-            <X className="w-5 h-5" />
-          </button>
+          {!isDesktop && (
+            <button
+              onClick={onClose}
+              style={{ marginLeft: "auto", color: "rgba(255,255,255,0.6)", background: "none", border: "none", cursor: "pointer" }}
+            >
+              <X size={20} />
+            </button>
+          )}
         </div>
 
         {/* Bandeau identité */}
         {(adminSession || sousAdmin) && (
-          <div className="px-3 py-2 bg-[#F5C518]/10 border-b border-white/10 flex-shrink-0">
-            <p className="text-[10px] text-yellow-300 font-semibold">Connecté en tant que :</p>
-            <p className="text-xs text-white font-medium truncate">
+          <div style={{
+            padding: "8px 12px",
+            background: "rgba(245,197,24,0.1)",
+            borderBottom: "1px solid rgba(255,255,255,0.1)",
+            flexShrink: 0,
+          }}>
+            <div style={{ fontSize: 10, color: "#F5C518", fontWeight: 600 }}>Connecté en tant que :</div>
+            <div style={{ fontSize: 12, color: "white", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
               {sousAdmin ? sousAdmin.nom_complet : "Administrateur Principal"}
-            </p>
+            </div>
           </div>
         )}
 
         {/* Navigation */}
-        <nav className="flex-1 py-3 px-2 space-y-0.5 overflow-y-auto">
+        <nav style={{ flex: 1, overflowY: "auto", padding: "8px" }}>
           {menuItems.map((item) => {
             const estActif = currentPage === item.page || location.pathname === `/${item.page}`;
             const Icon = item.icon;
@@ -86,37 +118,55 @@ export default function AdminSidebar({ isOpen, onClose, badges = {} }) {
                 key={item.id}
                 to={`/${item.page}`}
                 onClick={onClose}
-                className={`
-                  flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium
-                  transition-all duration-150 group relative
-                  ${estActif
-                    ? "bg-[#F5C518] text-[#1a1f5e] font-bold shadow-md"
-                    : "text-slate-300 hover:bg-white/10 hover:text-white"
-                  }
-                `}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                  padding: "9px 12px",
+                  borderRadius: 8,
+                  fontSize: 13,
+                  fontWeight: estActif ? 700 : 500,
+                  marginBottom: 2,
+                  textDecoration: "none",
+                  background: estActif ? "#F5C518" : "transparent",
+                  color: estActif ? "#1a1f5e" : "#CBD5E1",
+                  transition: "background 0.15s, color 0.15s",
+                }}
+                onMouseEnter={e => { if (!estActif) { e.currentTarget.style.background = "rgba(255,255,255,0.08)"; e.currentTarget.style.color = "white"; }}}
+                onMouseLeave={e => { if (!estActif) { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#CBD5E1"; }}}
               >
-                <Icon className={`w-4 h-4 flex-shrink-0 ${estActif ? "text-[#1a1f5e]" : "text-slate-400 group-hover:text-slate-200"}`} />
-                <span className="flex-1 truncate">{item.label}</span>
+                <Icon size={16} style={{ flexShrink: 0, color: estActif ? "#1a1f5e" : "#94A3B8" }} />
+                <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.label}</span>
                 {badge > 0 && (
-                  <span className="w-5 h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center flex-shrink-0">
+                  <span style={{
+                    minWidth: 20, height: 20, background: "#ef4444", color: "white",
+                    fontSize: 10, fontWeight: 700, borderRadius: 10,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    padding: "0 4px", flexShrink: 0,
+                  }}>
                     {badge > 9 ? "9+" : badge}
                   </span>
                 )}
-                {estActif && badge === 0 && (
-                  <ChevronRight className="w-3 h-3 ml-auto flex-shrink-0" />
-                )}
+                {estActif && badge === 0 && <ChevronRight size={12} style={{ flexShrink: 0 }} />}
               </Link>
             );
           })}
         </nav>
 
         {/* Déconnexion */}
-        <div className="p-2 border-t border-white/10 flex-shrink-0">
+        <div style={{ padding: 8, borderTop: "1px solid rgba(255,255,255,0.1)", flexShrink: 0 }}>
           <button
             onClick={deconnexion}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:bg-white/10 hover:text-white transition-all w-full"
+            style={{
+              display: "flex", alignItems: "center", gap: 10,
+              padding: "9px 12px", borderRadius: 8, width: "100%",
+              background: "none", border: "none", cursor: "pointer",
+              color: "#94A3B8", fontSize: 13, fontWeight: 500,
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,0.08)"; e.currentTarget.style.color = "white"; }}
+            onMouseLeave={e => { e.currentTarget.style.background = "none"; e.currentTarget.style.color = "#94A3B8"; }}
           >
-            <LogOut className="w-4 h-4" />
+            <LogOut size={16} />
             <span>Déconnexion</span>
           </button>
         </div>
