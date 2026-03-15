@@ -79,6 +79,18 @@ body {
   background: #64748b;
 }
 
+/* Scrollbar pour sidebar */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 4px;
+}
+.scrollbar-thumb-white\/20::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+}
+.scrollbar-track-transparent::-webkit-scrollbar-track {
+  background: transparent;
+}
+
 /* Animations */
 @keyframes slideIn {
   from { opacity: 0; transform: translateY(8px); }
