@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
+import bcrypt from 'npm:bcryptjs@2.4.3';
 
 /**
  * ADMIN-CREATED SELLER WORKFLOW (NEW ARCHITECTURE)
