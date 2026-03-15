@@ -32,8 +32,8 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // ✅ Seuls les vendeurs peuvent créer des commandes via cette fonction
-    if (user.role !== 'vendeur') {
+    // ✅ Seuls les vendeurs (role = 'user') peuvent créer des commandes via cette fonction
+    if (user.role !== 'user') {
       return Response.json({ error: 'Forbidden: vendeur role required' }, { status: 403 });
     }
 
