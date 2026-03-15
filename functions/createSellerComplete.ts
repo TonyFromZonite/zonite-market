@@ -133,8 +133,8 @@ Deno.serve(async (req) => {
     // ÉTAPE 5 : Envoyer email avec identifiants (mot de passe généré)
     const appUrl = Deno.env.get('APP_URL') || 'https://app.zonite.cm';
     const messageEmail = auto_valider_kyc
-      ? `Bonjour ${nom_complet},\n\nBienvenue chez ZONITE ! 🚀\n\nVotre compte vendeur est créé et votre KYC a été validé.\n\nEmail : ${email}\nMot de passe : ${motDePasseGenere}\n\nConnectez-vous sur : ${appUrl}\n\n⚠️ Changez votre mot de passe dès la première connexion.\n⚠️ PROCHAINE ÉTAPE : Regardez la vidéo de formation obligatoire pour débloquer le catalogue.\n\nBonne vente !\nL'équipe ZONITE`
-      : `Bonjour ${nom_complet},\n\nVotre compte vendeur a été créé par nos administrateurs.\n\nEmail : ${email}\nMot de passe : ${motDePasseGenere}\n\nConnectez-vous sur : ${appUrl}\n\n⚠️ Changez votre mot de passe dès la première connexion.\n\n📋 ÉTAPE 1 : Soumettre votre dossier KYC\n📹 ÉTAPE 2 : Regarder la vidéo de formation\n🛍️ ÉTAPE 3 : Accès au catalogue\n\nCordialement,\nL'équipe ZONITE`;
+      ? `Bonjour ${nom_complet},\n\nBienvenue chez ZONITE ! 🚀\n\nVotre compte vendeur est créé et votre KYC a été validé.\n\nEmail : ${email}\n\nVous avez reçu un email séparé pour définir votre mot de passe.\nConnectez-vous ensuite sur : ${appUrl}\n\n⚠️ PROCHAINE ÉTAPE : Regardez la vidéo de formation obligatoire pour débloquer le catalogue.\n\nBonne vente !\nL'équipe ZONITE`
+      : `Bonjour ${nom_complet},\n\nVotre compte vendeur a été créé par nos administrateurs.\n\nEmail : ${email}\n\nVous avez reçu un email séparé pour définir votre mot de passe.\nConnectez-vous ensuite sur : ${appUrl}\n\n📋 ÉTAPE 1 : Soumettre votre dossier KYC\n📹 ÉTAPE 2 : Regarder la vidéo de formation\n🛍️ ÉTAPE 3 : Accès au catalogue\n\nCordialement,\nL'équipe ZONITE`;
 
     await base44.integrations.Core.SendEmail({
       to: email,
