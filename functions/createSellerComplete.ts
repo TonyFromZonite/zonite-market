@@ -134,7 +134,7 @@ Deno.serve(async (req) => {
         seller_id: seller.id,
         email,
         statut,
-        statut_kyc: statutKyc
+        statut_kyc: statut_kyc
       })
     }).catch(() => {});
 
