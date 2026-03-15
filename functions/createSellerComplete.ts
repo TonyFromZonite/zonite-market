@@ -50,10 +50,7 @@ Deno.serve(async (req) => {
     // Générer un mot de passe sécurisé automatiquement
     const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789@#!';
     const motDePasseGenere = Array.from({ length: 10 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
-    const motDePasseHash = await (() => {
-      const bcrypt = await import('npm:bcryptjs@2.4.3');
-      return bcrypt.default.hash(motDePasseGenere, 10);
-    })();
+    const motDePasseHash = await bcrypt.hash(motDePasseGenere, 10);
 
     // ÉTAPE 1 : Créer le compte User Base44 via inviteUser (obligatoire)
     // Base44 envoie un email d'activation automatiquement.
@@ -95,6 +92,7 @@ Deno.serve(async (req) => {
         statut_kyc,
         statut,
         seller_status,
+        mot_de_passe_hash: motDePasseHash,
         created_by: user.email,
         taux_commission: taux_commission || 0,
         solde_commission: 0,
