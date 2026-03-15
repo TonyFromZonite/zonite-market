@@ -94,7 +94,7 @@ Deno.serve(async (req) => {
              return Response.json({ error: `Un compte utilisateur existe déjà avec l'email ${email}` }, { status: 409 });
            }
 
-           const hashedPassword = await bcrypt.hash(mot_de_passe, 10);
+           const hashedPassword = await bcrypt.hash(mdp, 10);
 
            // ÉTAPE 1 : Créer le compte Base44 via inviteUser (obligatoire)
            // Base44 envoie son propre email d'activation — on envoie ensuite un 2ème email ZONITE avec les identifiants.
