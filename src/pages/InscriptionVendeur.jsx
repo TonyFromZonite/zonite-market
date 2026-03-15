@@ -189,21 +189,13 @@ export default function InscriptionVendeur() {
     setErreur("");
 
     try {
-       // Soumettre les documents KYC (compte déjà créé et email vérifié)
-       // Status transitions: pending_verification -> kyc_required (on email verification) -> kyc_pending (on KYC submission)
-       const response = await base44.functions.invoke('registerVendor', {
+       // Mettre à jour le compte existant avec les documents KYC
+       // Le compte seller existe déjà depuis l'étape 1, juste mettre à jour les docs
+       const response = await base44.functions.invoke('updateKYCDocuments', {
          email: vendeurEmail,
-         nom_complet: form.nom_complet,
-         telephone: form.telephone,
-         mot_de_passe: form.mot_de_passe,
-         ville: form.ville,
-         quartier: form.quartier,
-         numero_mobile_money: form.numero_mobile_money,
-         operateur_mobile_money: form.operateur_mobile_money,
          photo_identite_url: form.photo_identite_url,
          photo_identite_verso_url: form.photo_identite_verso_url || "",
          selfie_url: form.selfie_url,
-         seller_status: "kyc_pending"
        });
 
       if (response.data?.success) {
@@ -212,7 +204,7 @@ export default function InscriptionVendeur() {
           await base44.functions.invoke('notifierNouveauKYC', {
             seller_id: response.data.seller_id,
             seller_nom: form.nom_complet,
-            seller_email: form.email,
+            seller_email: vendeurEmail,
           });
         } catch (notifError) {
           console.error('Erreur notification KYC:', notifError);
