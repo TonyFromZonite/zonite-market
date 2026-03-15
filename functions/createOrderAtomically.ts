@@ -79,18 +79,24 @@ Deno.serve(async (req) => {
       statut: "en_attente_validation_admin",
     });
 
-    // 3️⃣ Réserver le stock ATOMIQUEMENT (augmenter stock_reserve)
+    // 3️⃣ Mettre à jour stock de façon cohérente :
+    //    - stock_reserve augmente (stock réservé pour cette commande)
+    //    - stock_global diminue (le stock disponible réel est consommé)
+    const newStockGlobal = (produit[0].stock_global || 0) - quantite;
+    const newStockReserve = (produit[0].stock_reserve || 0) + quantite;
     await base44.asServiceRole.entities.Produit.update(produit_id, {
-      stock_reserve: (produit[0].stock_reserve || 0) + quantite,
+      stock_global: newStockGlobal,
+      stock_reserve: newStockReserve,
+      total_vendu: (produit[0].total_vendu || 0) + quantite,
     });
 
-    // 4️⃣ Enregistrer mouvement de stock
+    // 4️⃣ Enregistrer mouvement de stock (source de vérité)
     await base44.asServiceRole.entities.MouvementStock.create({
       produit_id, produit_nom,
       type_mouvement: "sortie",
       quantite,
       stock_avant: produit[0].stock_global || 0,
-      stock_apres: (produit[0].stock_global || 0) - quantite,
+      stock_apres: newStockGlobal,
       raison: `Réservation commande vendeur ${vendeur_nom}`,
       reference_vente: commande.id,
     });
