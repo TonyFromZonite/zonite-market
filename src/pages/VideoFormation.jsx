@@ -205,30 +205,40 @@ export default function VideoFormation() {
 
                 <Button
                    onClick={async () => {
-                      if (!accepte || !compteVendeur?.id) return;
+                      if (!accepte || !compteVendeur?.email) return;
                       setEnCours(true);
                       setErreur("");
                       try {
-                        // Update seller: mark training as completed and grant full access
-                        await base44.entities.Seller.update(compteVendeur.id, {
-                          seller_status: "active_seller",
-                          training_completed: true,
-                          video_vue: true,
-                          catalogue_debloque: true
+                        // NEW ARCHITECTURE: Use completeTraining endpoint
+                        const response = await base44.functions.invoke('completeTraining', {
+                          email: compteVendeur.email
                         });
-                        await new Promise(r => setTimeout(r, 500));
+                        
+                        if (response.data?.success) {
+                          await new Promise(r => setTimeout(r, 500));
+                          // Training completed successfully
+                        } else {
+                          throw new Error(response.data?.error || 'Erreur lors de la finalisation');
+                        }
                       } catch (err) {
                         console.error("Finalisation:", err);
-                        setErreur("Erreur lors de la finalisation. Rechargez la page.");
-                      } finally {
+                        setErreur(err.message || "Erreur lors de la finalisation. Rechargez la page.");
                         setEnCours(false);
+                        return;
                       }
+                      setEnCours(false);
                     }}
-                    disabled={!accepte || enCours || !compteVendeur?.id}
+                    disabled={!accepte || enCours || !compteVendeur?.email}
                     className="w-full bg-[#F5C518] hover:bg-[#e0b010] text-[#1a1f5e] font-bold h-12"
                   >
                     {enCours ? <Loader2 className="w-5 h-5 animate-spin" /> : "Débloquer le catalogue →"}
                   </Button>
+                  {erreur && (
+                    <div className="flex items-center gap-2 p-3 bg-red-50 rounded-lg border border-red-200">
+                      <AlertCircle className="w-4 h-4 text-red-600" />
+                      <p className="text-sm text-red-600">{erreur}</p>
+                    </div>
+                  )}
               </div>
             )}
           </>
