@@ -97,8 +97,16 @@ Deno.serve(async (req) => {
       created_by: null, // Self-registered
     };
 
-    const seller = await base44.asServiceRole.entities.Seller.create(sellerData);
-    console.log(`✅ Seller created: ${seller.id}, user_id: ${user_id || 'will be linked on first login'}`);
+    let seller;
+    try {
+      seller = await base44.asServiceRole.entities.Seller.create(sellerData);
+      console.log(`✅ Seller created: ${seller.id}, user_id: ${user_id}`);
+    } catch (sellerError) {
+      // ROLLBACK : supprimer le compte Base44 créé
+      console.error(`❌ Seller creation failed, rolling back User ${user_id}:`, sellerError.message);
+      try { await base44.asServiceRole.entities.User.delete(user_id); } catch (_) {}
+      return Response.json({ error: `Erreur création profil vendeur: ${sellerError.message}` }, { status: 500 });
+    }
 
     // STEP 4: Send verification email
     try {
