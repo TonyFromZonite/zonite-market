@@ -215,8 +215,13 @@ export default function VideoFormation() {
                         });
                         
                         if (response.data?.success) {
-                          await new Promise(r => setTimeout(r, 500));
-                          // Training completed successfully
+                          // ✅ Mettre à jour la session locale avec le nouveau statut
+                          const session = JSON.parse(sessionStorage.getItem('vendeur_session') || '{}');
+                          session.seller_status = 'active_seller';
+                          session.catalogue_debloque = true;
+                          sessionStorage.setItem('vendeur_session', JSON.stringify(session));
+                          // Rediriger après 1 seconde
+                          setTimeout(() => navigate(createPageUrl("EspaceVendeur")), 1000);
                         } else {
                           throw new Error(response.data?.error || 'Erreur lors de la finalisation');
                         }
