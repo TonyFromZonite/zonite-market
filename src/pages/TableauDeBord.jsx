@@ -48,16 +48,23 @@ function DashboardSousAdmin({ sousAdmin }) {
   ].filter((m) => (sousAdmin.permissions || []).includes(m.page));
 
   return (
-    <div className="space-y-6">
+    <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
       {/* Bandeau identité */}
-      <div className="bg-gradient-to-r from-[#1a1f5e] to-[#2d34a5] rounded-xl p-5 text-white flex items-center gap-4">
-        <div className="w-12 h-12 bg-[#F5C518] rounded-xl flex items-center justify-center flex-shrink-0">
-          <ShieldCheck className="w-6 h-6 text-[#1a1f5e]" />
+      <div style={{
+        background: "linear-gradient(to right, #1a1f5e, #2d34a5)",
+        borderRadius: 12, padding: 20, color: "white",
+        display: "flex", alignItems: "center", gap: 16,
+      }}>
+        <div style={{
+          width: 48, height: 48, background: "#F5C518", borderRadius: 12,
+          display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+        }}>
+          <ShieldCheck size={24} color="#1a1f5e" />
         </div>
         <div>
-          <p className="font-bold text-lg leading-tight">{sousAdmin.nom_complet}</p>
-          <p className="text-yellow-300 text-sm">{sousAdmin.nom_role}</p>
-          <p className="text-slate-300 text-xs mt-0.5">
+          <p style={{ fontWeight: 700, fontSize: 16, lineHeight: 1.2 }}>{sousAdmin.nom_complet}</p>
+          <p style={{ color: "#FDE68A", fontSize: 13, marginTop: 2 }}>{sousAdmin.nom_role}</p>
+          <p style={{ color: "#CBD5E1", fontSize: 11, marginTop: 2 }}>
             Accès limité à {(sousAdmin.permissions || []).length} module(s)
           </p>
         </div>
@@ -66,32 +73,29 @@ function DashboardSousAdmin({ sousAdmin }) {
       {/* Stats commandes */}
       {(sousAdmin.permissions || []).includes("CommandesVendeurs") && (
         <div>
-          <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">Aperçu Commandes</p>
-          {chargCmd ? (
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              {Array(4).fill(0).map((_, i) => <Skeleton key={i} className="h-24 rounded-xl" />)}
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <CarteStatistique titre="Aujourd'hui" valeur={cmdAujourdhui} icone={ShoppingCart} couleur="bleu" />
-              <CarteStatistique titre="En attente" valeur={cmdAttente} icone={ShoppingCart} couleur="orange" />
-              <CarteStatistique titre="En livraison" valeur={cmdEnLivraison} icone={ShoppingCart} couleur="violet" />
-              <CarteStatistique titre="Livrées" valeur={cmdLivrees} icone={ShoppingCart} couleur="vert" />
-            </div>
-          )}
+          <p style={{ fontSize: 11, fontWeight: 600, color: "#94A3B8", textTransform: "uppercase", letterSpacing: 2, marginBottom: 12 }}>Aperçu Commandes</p>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12 }}>
+            <CarteStatistique titre="Aujourd'hui" valeur={cmdAujourdhui} icone={ShoppingCart} couleur="bleu" />
+            <CarteStatistique titre="En attente" valeur={cmdAttente} icone={ShoppingCart} couleur="orange" />
+            <CarteStatistique titre="En livraison" valeur={cmdEnLivraison} icone={ShoppingCart} couleur="violet" />
+            <CarteStatistique titre="Livrées" valeur={cmdLivrees} icone={ShoppingCart} couleur="vert" />
+          </div>
         </div>
       )}
 
-      {/* Accès rapides aux modules autorisés */}
+      {/* Modules */}
       {modules.length > 0 && (
         <div>
-          <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">Mes Modules</p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          <p style={{ fontSize: 11, fontWeight: 600, color: "#94A3B8", textTransform: "uppercase", letterSpacing: 2, marginBottom: 12 }}>Mes Modules</p>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12 }}>
             {modules.map((m) => (
-              <Link key={m.page} to={createPageUrl(m.page)}>
-                <div className="bg-white rounded-xl border border-slate-200 p-4 hover:border-[#1a1f5e]/30 hover:shadow-md transition-all cursor-pointer">
-                  <span className="text-2xl block mb-2">{m.emoji}</span>
-                  <p className="font-semibold text-slate-800 text-sm">{m.label}</p>
+              <Link key={m.page} to={createPageUrl(m.page)} style={{ textDecoration: "none" }}>
+                <div style={{
+                  background: "white", borderRadius: 12, border: "1px solid #E2E8F0",
+                  padding: 16, cursor: "pointer",
+                }}>
+                  <span style={{ fontSize: 24, display: "block", marginBottom: 8 }}>{m.emoji}</span>
+                  <p style={{ fontWeight: 600, color: "#1E293B", fontSize: 13 }}>{m.label}</p>
                 </div>
               </Link>
             ))}
@@ -100,9 +104,12 @@ function DashboardSousAdmin({ sousAdmin }) {
       )}
 
       {modules.length === 0 && (
-        <div className="bg-white rounded-xl border border-slate-200 p-10 text-center">
-          <Lock className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-          <p className="text-slate-500 text-sm">Aucun module accessible. Contactez l'administrateur principal.</p>
+        <div style={{
+          background: "white", borderRadius: 12, border: "1px solid #E2E8F0",
+          padding: 40, textAlign: "center",
+        }}>
+          <Lock size={40} color="#CBD5E1" style={{ margin: "0 auto 12px" }} />
+          <p style={{ color: "#64748B", fontSize: 13 }}>Aucun module accessible. Contactez l'administrateur principal.</p>
         </div>
       )}
     </div>
