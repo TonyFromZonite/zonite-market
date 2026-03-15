@@ -114,8 +114,8 @@ Deno.serve(async (req) => {
 
     // Email avec identifiants
     const messageEmail = auto_valider_kyc
-      ? `Bonjour ${nom_complet},\n\nBienvenue chez ZONITE ! 🚀\n\nVotre compte vendeur est activé.\n\n📧 Email : ${email}\n🔐 Mot de passe : ${mot_de_passe}\n\n⚠️ Changez votre mot de passe dès la première connexion.\n\nBonne vente !\nL'équipe ZONITE`
-      : `Bonjour ${nom_complet},\n\nVotre compte vendeur a été créé.\n\n📧 Email : ${email}\n🔐 Mot de passe : ${mot_de_passe}\n\n⚠️ Complétez votre dossier KYC pour accéder au catalogue.\n\nCordialement,\nL'équipe ZONITE`;
+      ? `Bonjour ${nom_complet},\n\nBienvenue chez ZONITE ! 🚀\n\nVotre compte vendeur est créé et votre KYC a été validé.\n\n📧 Email : ${email}\n🔐 Mot de passe : ${mot_de_passe}\n\n⚠️ PROCHAINE ÉTAPE : Regardez la vidéo de formation obligatoire pour débloquer le catalogue.\n\n⚠️ Changez votre mot de passe dès la première connexion.\n\nBonne vente !\nL'équipe ZONITE`
+      : `Bonjour ${nom_complet},\n\nVotre compte vendeur a été créé par nos administrateurs.\n\n📧 Email : ${email}\n🔐 Mot de passe : ${mot_de_passe}\n\n📋 ÉTAPE 1 : Soumettre votre dossier KYC pour validation\n📹 ÉTAPE 2 : Regarder la vidéo de formation\n🛍️ ÉTAPE 3 : Accès au catalogue\n\n⚠️ Changez votre mot de passe dès la première connexion.\n\nCordialement,\nL'équipe ZONITE`;
 
     base44.integrations.Core.SendEmail({
       to: email,
