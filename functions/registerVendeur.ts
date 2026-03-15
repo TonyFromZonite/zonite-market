@@ -48,11 +48,15 @@ Deno.serve(async (req) => {
 
     // ÉTAPE 1 : Créer le compte User Base44 EN PREMIER — si ça échoue, on s'arrête
     let user_id = null;
-    let newUser = null;
     try {
-      newUser = await base44.users.createUser({ email, password: mot_de_passe, role: 'user' });
-      user_id = newUser?.id || null;
-      if (!user_id) throw new Error('user_id null après createUser');
+      const registerResult = await base44.auth.register({ email, password: mot_de_passe });
+      user_id = registerResult?.user?.id || registerResult?.id || null;
+      if (!user_id) {
+        // Fallback : chercher le user qui vient d'être créé
+        const usersCheck = await base44.asServiceRole.entities.User.filter({ email });
+        user_id = usersCheck[0]?.id || null;
+      }
+      if (!user_id) throw new Error('user_id introuvable après register');
       console.log(`✅ Compte Base44 créé pour ${email}, user_id: ${user_id}`);
     } catch (userError) {
       console.error(`❌ Impossible de créer le compte Base44 pour ${email}:`, userError.message);
