@@ -50,13 +50,16 @@ Deno.serve(async (req) => {
     const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789@#!';
     const motDePasseGenere = Array.from({ length: 10 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
 
-    // ÉTAPE 1 : Créer le compte User Base44 EN PREMIER
+    // ÉTAPE 1 : Créer le compte User Base44 EN PREMIER via inviteUser
+    // Note: Base44 ne supporte pas la création directe avec mot de passe via service role.
+    // On invite l'utilisateur (crée le compte) puis on envoie les identifiants via email séparé.
     let user_id = null;
-    let newUser = null;
     try {
-      newUser = await base44.users.createUser({ email, password: motDePasseGenere, role: 'user' });
-      user_id = newUser?.id || null;
-      if (!user_id) throw new Error('user_id null après createUser');
+      await base44.users.inviteUser(email, 'user');
+      // Récupérer l'user_id juste créé
+      const usersCheck = await base44.asServiceRole.entities.User.filter({ email });
+      user_id = usersCheck[0]?.id || null;
+      if (!user_id) throw new Error('user_id introuvable après inviteUser');
       console.log(`✅ Compte Base44 créé pour ${email}, user_id: ${user_id}`);
     } catch (userError) {
       console.error(`❌ Impossible de créer le compte Base44 pour ${email}:`, userError.message);
