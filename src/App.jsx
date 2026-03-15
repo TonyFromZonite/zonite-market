@@ -78,22 +78,6 @@ const AuthenticatedApp = () => {
         }
       />
       <Route
-        path="/AuditSysteme"
-        element={
-          <LayoutWrapper currentPageName="AuditSysteme">
-            <AuditSysteme />
-          </LayoutWrapper>
-        }
-      />
-      <Route
-        path="/AuditComptes"
-        element={
-          <LayoutWrapper currentPageName="AuditComptes">
-            <AuditComptes />
-          </LayoutWrapper>
-        }
-      />
-      <Route
         path="/AuditComplet"
         element={
           <LayoutWrapper currentPageName="AuditComplet">
