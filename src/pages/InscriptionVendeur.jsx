@@ -100,7 +100,7 @@ export default function InscriptionVendeur() {
     setErreur("");
 
     try {
-      const response = await base44.functions.invoke('registerVendor', {
+      const response = await base44.functions.invoke('registerVendeur', {
         email: form.email,
         nom_complet: form.nom_complet,
         telephone: form.telephone,
