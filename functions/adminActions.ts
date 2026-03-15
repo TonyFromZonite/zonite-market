@@ -90,15 +90,16 @@ Deno.serve(async (req) => {
 
            const hashedPassword = await bcrypt.hash(mot_de_passe, 10);
 
-           // ÉTAPE 1 : Créer le compte User Base44 avec le mot de passe fourni par l'admin
+           // ÉTAPE 1 : Créer le compte Base44 via inviteUser (obligatoire)
+           // Base44 envoie son propre email d'activation — on envoie ensuite un 2ème email ZONITE avec les identifiants.
            let user_id = null;
            try {
-             const newUser = await base44.users.createUser({ email, password: mot_de_passe, role: 'user' });
-             user_id = newUser?.id || null;
+             await base44.users.inviteUser(email, 'user');
+             const usersCheck = await base44.asServiceRole.entities.User.filter({ email });
+             user_id = usersCheck[0]?.id || null;
              console.log(`✅ Compte Base44 créé pour ${email}, user_id: ${user_id}`);
            } catch (userError) {
              console.warn(`⚠️ Impossible de créer le compte Base44 pour ${email}:`, userError.message);
-             // On continue : le compte sera lié à la première connexion
            }
 
            // ÉTAPE 2 : Créer le Seller avec seller_status correct

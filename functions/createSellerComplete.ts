@@ -50,9 +50,9 @@ Deno.serve(async (req) => {
     const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789@#!';
     const motDePasseGenere = Array.from({ length: 10 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
 
-    // ÉTAPE 1 : Créer le compte User Base44 EN PREMIER via inviteUser
-    // Note: Base44 ne supporte pas la création directe avec mot de passe via service role.
-    // On invite l'utilisateur (crée le compte) puis on envoie les identifiants via email séparé.
+    // ÉTAPE 1 : Créer le compte User Base44 via inviteUser (obligatoire)
+    // Base44 envoie un email d'activation automatiquement.
+    // On envoie ensuite un 2ème email ZONITE avec les identifiants.
     let user_id = null;
     try {
       await base44.users.inviteUser(email, 'user');
