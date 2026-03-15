@@ -91,8 +91,20 @@ Deno.serve(async (req) => {
       // ─── TICKET SUPPORT ──────────────────────────────────────────────────────
       case 'createTicketSupport': {
         // ✅ Forcer l'email depuis la session
-        const ticketData = { ...payload.data, vendeur_email };
+        const ticketData = { ...payload.data, vendeur_email, vendeur_nom: compteAuth.nom_complet };
         const result = await db.TicketSupport.create(ticketData);
+        // Notifications aux admins
+        const adminsTicket = await db.User.filter({ role: 'admin' });
+        for (const admin of adminsTicket) {
+          await db.NotificationVendeur.create({
+            vendeur_email: admin.email,
+            titre: '🎫 Nouveau ticket support',
+            message: `${compteAuth.nom_complet} a ouvert un ticket : "${ticketData.sujet || 'Sans sujet'}" (catégorie: ${ticketData.categorie || 'autre'}).`,
+            type: 'info',
+            importante: false,
+            lien: '/SupportAdmin'
+          }).catch(() => {});
+        }
         return Response.json({ success: true, result });
       }
 
