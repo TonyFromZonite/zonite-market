@@ -25,7 +25,7 @@ export default function Layout({ children, currentPageName }) {
 
   // Charger les badges (compteurs de notifications)
   useEffect(() => {
-    if (PAGES_VENDEUR.includes(currentPageName)) return;
+    if (PAGES_SANS_LAYOUT_ADMIN.has(currentPageName)) return;
     const chargerBadges = async () => {
       try {
         const [cmdAttente, kycAttente] = await Promise.all([
