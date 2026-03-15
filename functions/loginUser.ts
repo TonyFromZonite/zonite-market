@@ -26,8 +26,10 @@ const authenticateSeller = async (base44, email, password) => {
 
 // Admin/Sub-admin authentication
 const authenticateAdmin = async (base44, username, password) => {
-  // Vérifier d'abord les sous-admins
-  const sousAdmins = await base44.asServiceRole.entities.SousAdmin.filter({ username });
+  // Vérifier d'abord les sous-admins (par username OU par email)
+  const byUsername = await base44.asServiceRole.entities.SousAdmin.filter({ username });
+  const byEmail = byUsername.length === 0 ? await base44.asServiceRole.entities.SousAdmin.filter({ email: username }) : [];
+  const sousAdmins = byUsername.length > 0 ? byUsername : byEmail;
   if (sousAdmins.length > 0) {
     const sousAdmin = sousAdmins[0];
     const passwordMatch = await bcrypt.compare(password, sousAdmin.mot_de_passe_hash);
