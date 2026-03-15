@@ -130,15 +130,36 @@ Deno.serve(async (req) => {
       importante: true
     }).catch(() => {});
 
-    // ÉTAPE 5 : Envoyer email avec identifiants (mot de passe généré)
+    // ÉTAPE 5 : Envoyer 2ème email ZONITE personnalisé avec les identifiants et instructions
     const appUrl = Deno.env.get('APP_URL') || 'https://app.zonite.cm';
-    const messageEmail = auto_valider_kyc
-      ? `Bonjour ${nom_complet},\n\nBienvenue chez ZONITE ! 🚀\n\nVotre compte vendeur est créé et votre KYC a été validé.\n\nEmail : ${email}\n\nVous avez reçu un email séparé pour définir votre mot de passe.\nConnectez-vous ensuite sur : ${appUrl}\n\n⚠️ PROCHAINE ÉTAPE : Regardez la vidéo de formation obligatoire pour débloquer le catalogue.\n\nBonne vente !\nL'équipe ZONITE`
-      : `Bonjour ${nom_complet},\n\nVotre compte vendeur a été créé par nos administrateurs.\n\nEmail : ${email}\n\nVous avez reçu un email séparé pour définir votre mot de passe.\nConnectez-vous ensuite sur : ${appUrl}\n\n📋 ÉTAPE 1 : Soumettre votre dossier KYC\n📹 ÉTAPE 2 : Regarder la vidéo de formation\n🛍️ ÉTAPE 3 : Accès au catalogue\n\nCordialement,\nL'équipe ZONITE`;
+    const prochainesEtapes = auto_valider_kyc
+      ? `📹 PROCHAINE ÉTAPE : Regardez la vidéo de formation obligatoire pour débloquer le catalogue.`
+      : `📋 ÉTAPE 1 : Soumettez votre dossier KYC\n📹 ÉTAPE 2 : Regardez la vidéo de formation\n🛍️ ÉTAPE 3 : Accédez au catalogue`;
+
+    const messageEmail = `Bonjour ${nom_complet},
+
+Votre compte vendeur ZONITE a été créé par l'équipe ZONITE.
+
+Vos informations de connexion :
+──────────────────────────────
+Email         : ${email}
+Mot de passe  : ${motDePasseGenere}
+──────────────────────────────
+
+👉 Connectez-vous ici : ${appUrl}/Connexion
+
+⚠️ IMPORTANT : Vous allez recevoir un autre email de "Base44" avec un lien d'activation.
+Vous devez d'abord cliquer sur ce lien pour activer votre compte, puis utiliser
+vos identifiants ci-dessus pour vous connecter.
+
+${prochainesEtapes}
+
+À très bientôt,
+L'équipe ZONITE`;
 
     await base44.integrations.Core.SendEmail({
       to: email,
-      subject: auto_valider_kyc ? '🎉 Bienvenue chez ZONITE — Vos identifiants' : '📋 Compte ZONITE créé — Vos identifiants',
+      subject: auto_valider_kyc ? '🎉 Bienvenue sur ZONITE — Vos accès' : '🎉 Bienvenue sur ZONITE — Vos accès',
       body: messageEmail
     }).catch(e => console.warn('Email failed:', e.message));
 

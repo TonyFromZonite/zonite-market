@@ -129,12 +129,12 @@ Deno.serve(async (req) => {
              importante: true
            }).catch(() => {});
 
-           // ÉTAPE 4 : Envoyer email avec les VRAIS identifiants (pas un lien d'invitation)
+           // ÉTAPE 4 : Envoyer 2ème email ZONITE avec identifiants + instructions activation
            const appUrl = Deno.env.get('APP_URL') || 'https://votre-app.base44.com';
            await base44.integrations.Core.SendEmail({
              to: email,
-             subject: '🎉 Votre compte ZONITE a été créé',
-             body: `Bonjour ${nom_complet},\n\n🎉 Bienvenue chez ZONITE !\n\nVotre compte vendeur a été créé par notre équipe.\n\n━━━━━━━━━━━━━━━━━━━━\n📧 Email : ${email}\n🔐 Mot de passe : ${mot_de_passe}\n━━━━━━━━━━━━━━━━━━━━\n\n🔗 Connectez-vous ici : ${appUrl}\n\n📹 ÉTAPE OBLIGATOIRE : Regardez la vidéo de formation pour débloquer l'accès au catalogue.\n\n⚠️ Pour votre sécurité, changez ce mot de passe dès la première connexion.\n\nBonne vente !\nL'équipe ZONITE`
+             subject: '🎉 Bienvenue sur ZONITE — Vos accès',
+             body: `Bonjour ${nom_complet},\n\nVotre compte vendeur ZONITE a été créé par l'équipe ZONITE.\n\nVos informations de connexion :\n──────────────────────────────\nEmail         : ${email}\nMot de passe  : ${mot_de_passe}\n──────────────────────────────\n\n👉 Connectez-vous ici : ${appUrl}/Connexion\n\n⚠️ IMPORTANT : Vous allez recevoir un autre email de "Base44" avec un lien d'activation.\nVous devez d'abord cliquer sur ce lien pour activer votre compte, puis utiliser\nvos identifiants ci-dessus pour vous connecter.\n\n📹 ÉTAPE OBLIGATOIRE : Regardez la vidéo de formation pour débloquer l'accès au catalogue.\n\nÀ très bientôt,\nL'équipe ZONITE`
            }).catch(e => console.warn('Email failed:', e.message));
 
            // ÉTAPE 5 : Audit log
@@ -197,12 +197,14 @@ Deno.serve(async (req) => {
           return Response.json({ error: `Un compte utilisateur existe déjà avec l'email ${email}` }, { status: 409 });
         }
 
-        // ÉTAPE 1 : Créer le compte User Base44 avec rôle sous_admin
+        // ÉTAPE 1 : Créer le compte Base44 via inviteUser (obligatoire)
+        // Base44 envoie son propre email d'activation — on envoie ensuite un 2ème email ZONITE personnalisé.
         let user_id = null;
         const mdpClair = mot_de_passe_clair || 'Zonite2024!'; // fallback si non fourni
         try {
-          const newUser = await base44.users.createUser({ email, password: mdpClair, role: 'sous_admin' });
-          user_id = newUser?.id || null;
+          await base44.users.inviteUser(email, 'sous_admin');
+          const usersCheck = await base44.asServiceRole.entities.User.filter({ email });
+          user_id = usersCheck[0]?.id || null;
           console.log(`✅ Compte Base44 sous_admin créé pour ${email}`);
         } catch (userError) {
           console.warn(`⚠️ Impossible de créer le compte Base44 pour ${email}:`, userError.message);
@@ -211,12 +213,12 @@ Deno.serve(async (req) => {
         // ÉTAPE 2 : Créer l'entité SousAdmin
         const result = await db.SousAdmin.create({ nom_complet, nom_role, username, email, mot_de_passe_hash, permissions: permissions || [], statut: statut || 'actif', notes: notes || '' });
 
-        // ÉTAPE 3 : Envoyer email avec les VRAIS identifiants (pas un lien d'invitation)
+        // ÉTAPE 3 : Envoyer 2ème email ZONITE avec identifiants + instructions activation
         const appUrl = Deno.env.get('APP_URL') || 'https://votre-app.base44.com';
         await base44.integrations.Core.SendEmail({
           to: email,
-          subject: '🔑 Votre accès administrateur ZONITE',
-          body: `Bonjour ${nom_complet},\n\nVotre compte administrateur ZONITE a été créé.\n\n━━━━━━━━━━━━━━━━━━━━\n📧 Email : ${email}\n🔐 Mot de passe : ${mdpClair}\n👤 Rôle : ${nom_role}\n━━━━━━━━━━━━━━━━━━━━\n\n🔗 Connectez-vous ici : ${appUrl}\n\nModules auxquels vous avez accès :\n${(permissions || []).join(', ') || 'Aucun module configuré'}\n\n⚠️ Changez votre mot de passe dès la première connexion.\n\nCordialement,\nL'équipe ZONITE`
+          subject: '🎉 Accès Sous-Admin ZONITE',
+          body: `Bonjour ${nom_complet},\n\nVous avez été ajouté comme Sous-Administrateur sur la plateforme ZONITE.\n\nVos informations de connexion :\n──────────────────────────────\nEmail         : ${email}\nMot de passe  : ${mdpClair}\nRôle          : ${nom_role}\n──────────────────────────────\n\n👉 Connectez-vous ici : ${appUrl}/Connexion\n\n⚠️ IMPORTANT : Vous allez recevoir un autre email de "Base44" avec un lien d'activation.\nActivez d'abord votre compte via ce lien, puis connectez-vous avec vos identifiants ci-dessus.\n\nModules accessibles :\n${(permissions || []).join(', ') || 'Aucun module configuré'}\n\nL'équipe ZONITE`
         }).catch(e => console.warn('Email sous-admin failed:', e.message));
 
         // ÉTAPE 4 : Audit log
