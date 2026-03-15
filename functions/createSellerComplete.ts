@@ -56,19 +56,14 @@ Deno.serve(async (req) => {
     let user_id = null;
     try {
       await base44.users.inviteUser(email, 'user');
-      // Attendre que Base44 enregistre l'utilisateur (légère latence)
-      await new Promise(r => setTimeout(r, 2000));
-      // Retry jusqu'à 3 fois pour récupérer l'user_id
-      for (let i = 0; i < 3; i++) {
-        const usersCheck = await base44.asServiceRole.entities.User.filter({ email });
-        user_id = usersCheck[0]?.id || null;
-        if (user_id) break;
-        await new Promise(r => setTimeout(r, 1500));
-      }
-      if (!user_id) throw new Error('user_id introuvable après inviteUser');
-      console.log(`✅ Compte Base44 créé pour ${email}, user_id: ${user_id}`);
+      console.log(`✅ Invitation Base44 envoyée à ${email}`);
+      // Tenter de récupérer l'user_id (peut ne pas être immédiatement disponible)
+      await new Promise(r => setTimeout(r, 1500));
+      const usersCheck = await base44.asServiceRole.entities.User.filter({ email });
+      user_id = usersCheck[0]?.id || null;
+      console.log(`ℹ️ user_id récupéré: ${user_id || 'non disponible encore (sera lié à la connexion)'}`);
     } catch (userError) {
-      console.error(`❌ Impossible de créer le compte Base44 pour ${email}:`, userError.message);
+      console.error(`❌ Impossible d'inviter ${email}:`, userError.message);
       return Response.json({ error: `Impossible de créer le compte: ${userError.message}` }, { status: 500 });
     }
 
