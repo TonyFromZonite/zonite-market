@@ -199,33 +199,35 @@ function DashboardAdmin() {
 
   if (enChargement) {
     return (
-      <div className="space-y-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {Array(8).fill(0).map((_, i) => <Skeleton key={i} className="h-28 rounded-xl" />)}
+      <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12 }}>
+          {Array(8).fill(0).map((_, i) => (
+            <div key={i} style={{ height: 96, borderRadius: 12, background: "#E2E8F0", animation: "pulse 1.5s infinite" }} />
+          ))}
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
       {/* Alertes */}
       {(candidaturesArray.length > 0 || kycArray.length > 0 || paiementsArray.length > 0) && (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
-          <p className="font-semibold text-yellow-800 text-sm mb-2">⚠️ Actions requises</p>
-          <div className="flex flex-wrap gap-2">
+        <div style={{ background: "#FEFCE8", border: "1px solid #FDE68A", borderRadius: 12, padding: 16 }}>
+          <p style={{ fontWeight: 600, color: "#92400E", fontSize: 13, marginBottom: 8 }}>⚠️ Actions requises</p>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
             {candidaturesArray.length > 0 && (
-              <Link to={createPageUrl("Vendeurs")} className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full font-medium hover:bg-yellow-200">
+              <Link to={createPageUrl("Vendeurs")} style={{ fontSize: 12, background: "#FEF3C7", color: "#92400E", padding: "4px 10px", borderRadius: 20, fontWeight: 500, textDecoration: "none" }}>
                 {candidaturesArray.length} candidature{candidaturesArray.length > 1 ? "s" : ""} en attente
               </Link>
             )}
             {kycArray.length > 0 && (
-              <Link to={createPageUrl("Vendeurs")} className="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded-full font-medium hover:bg-orange-200">
+              <Link to={createPageUrl("Vendeurs")} style={{ fontSize: 12, background: "#FFEDD5", color: "#9A3412", padding: "4px 10px", borderRadius: 20, fontWeight: 500, textDecoration: "none" }}>
                 {kycArray.length} KYC à valider
               </Link>
             )}
             {paiementsArray.length > 0 && (
-              <Link to={createPageUrl("Vendeurs")} className="text-xs bg-red-100 text-red-800 px-2 py-1 rounded-full font-medium hover:bg-red-200">
+              <Link to={createPageUrl("Vendeurs")} style={{ fontSize: 12, background: "#FEE2E2", color: "#991B1B", padding: "4px 10px", borderRadius: 20, fontWeight: 500, textDecoration: "none" }}>
                 {paiementsArray.length} paiement{paiementsArray.length > 1 ? "s" : ""} en attente ({formaterMontant(commissionsVendeursAPayer)})
               </Link>
             )}
@@ -235,9 +237,9 @@ function DashboardAdmin() {
 
       {/* Ventes Directes */}
       <div>
-        <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">Ventes Directes (Admin)</p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <CarteStatistique titre="Chiffre d'Affaires Total" valeur={formaterMontant(chiffreAffaires)} icone={DollarSign} couleur="bleu" />
+        <p style={{ fontSize: 11, fontWeight: 600, color: "#94A3B8", textTransform: "uppercase", letterSpacing: 2, marginBottom: 12 }}>Ventes Directes (Admin)</p>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12 }}>
+          <CarteStatistique titre="Chiffre d'Affaires" valeur={formaterMontant(chiffreAffaires)} icone={DollarSign} couleur="bleu" />
           <CarteStatistique titre="Profit Net" valeur={formaterMontant(profitNet)} icone={TrendingUp} couleur="vert" />
           <CarteStatistique titre="Commissions à Payer" valeur={formaterMontant(commissionsAPayer)} icone={Wallet} couleur="orange" />
           <CarteStatistique titre="Commandes du Jour" valeur={commandesDuJour} icone={ShoppingCart} couleur="violet" />
@@ -246,24 +248,25 @@ function DashboardAdmin() {
 
       {/* Application Vendeurs */}
       <div>
-        <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">Application Vendeurs</p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <CarteStatistique titre="Commandes Vendeurs Aujourd'hui" valeur={commandesVendeursAujourdhui} icone={ShoppingCart} couleur="indigo" />
-          <CarteStatistique titre="Total Commandes Vendeurs" valeur={commandesArray.length} icone={Package} couleur="jaune" />
+        <p style={{ fontSize: 11, fontWeight: 600, color: "#94A3B8", textTransform: "uppercase", letterSpacing: 2, marginBottom: 12 }}>Application Vendeurs</p>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12 }}>
+          <CarteStatistique titre="Cmds Vendeurs Aujourd'hui" valeur={commandesVendeursAujourdhui} icone={ShoppingCart} couleur="indigo" />
+          <CarteStatistique titre="Total Commandes" valeur={commandesArray.length} icone={Package} couleur="jaune" />
           <CarteStatistique titre="Stock Critique" valeur={stockCritique} icone={AlertTriangle} couleur={stockCritique > 0 ? "rouge" : "vert"} />
           <CarteStatistique titre="Top Produit" valeur={topProduit?.nom || "—"} icone={Package} couleur="bleu" />
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Graphiques côte à côte sur desktop */}
+      <ResponsiveRow>
         <GraphiqueVentes ventes={ventesArray} />
         <StockCritique produits={produitsArray} />
-      </div>
+      </ResponsiveRow>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <ResponsiveRow>
         <TopProduits produits={produitsArray} />
         <TopVendeurs vendeurs={vendeursArray} />
-      </div>
+      </ResponsiveRow>
     </div>
   );
 }
