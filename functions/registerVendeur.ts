@@ -64,7 +64,6 @@ Deno.serve(async (req) => {
     const codeExpiryTime = new Date(Date.now() + 15 * 60 * 1000).toISOString();
 
     // ÉTAPE 2 : Créer le Seller — si ça échoue, supprimer le User créé (rollback)
-    let seller = null;
     const sellerData = {
       user_id: user_id, // Lié immédiatement si le compte Base44 a été créé
       email,
