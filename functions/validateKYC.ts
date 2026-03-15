@@ -86,6 +86,7 @@ Deno.serve(async (req) => {
 
     } else {
       // TRANSITION: kyc_pending → kyc_required (can resubmit)
+      validateStatusTransition(seller.seller_status, 'kyc_required');
       await base44.asServiceRole.entities.Seller.update(seller_id, {
         statut_kyc: 'rejete',
         seller_status: 'kyc_required',
