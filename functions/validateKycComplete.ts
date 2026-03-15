@@ -35,14 +35,15 @@ Deno.serve(async (req) => {
 
     console.log(`✅ Validation KYC: ${seller.email}`);
 
-    // Mettre à jour le statut
+    // Transition to kyc_approved_training_required (training must be watched before active_seller)
     await base44.asServiceRole.entities.Seller.update(seller_id, {
       statut_kyc: 'valide',
-      statut: 'actif',
-      video_vue: true,
-      conditions_acceptees: true,
-      catalogue_debloque: true,
-      notes_admin: notes_admin || 'KYC validé'
+      statut: 'en_attente_kyc', // Legacy field - keep for compatibility
+      seller_status: 'kyc_approved_training_required', // NEW: Proper status transition
+      notes_admin: notes_admin || 'KYC validé',
+      // DO NOT mark video_vue, training_completed, or catalogue_debloque yet
+      // Seller must watch training video first
+      email_verified: true
     });
 
     // Notification in-app
