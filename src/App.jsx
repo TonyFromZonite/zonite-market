@@ -80,14 +80,6 @@ const AuthenticatedApp = () => {
         }
       />
       <Route
-        path="/DataConsistency"
-        element={
-          <LayoutWrapper currentPageName="DataConsistency">
-            <DataConsistency />
-          </LayoutWrapper>
-        }
-      />
-      <Route
         path="/AuditSysteme"
         element={
           <LayoutWrapper currentPageName="AuditSysteme">
