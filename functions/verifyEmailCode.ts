@@ -68,6 +68,7 @@ Deno.serve(async (req) => {
     }
 
     // TRANSITION: pending_verification → kyc_required
+    validateStatusTransition(seller.seller_status, 'kyc_required');
     await base44.asServiceRole.entities.Seller.update(seller.id, {
       email_verified: true,
       verification_code: null,
