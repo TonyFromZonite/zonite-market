@@ -30,7 +30,7 @@ Deno.serve(async (req) => {
 
     console.log(`📝 Self-registration: ${email}`);
 
-    // Check duplicates in Seller
+    // Vérifier doublon Seller
     const existingSellers = await base44.asServiceRole.entities.Seller.filter({ email });
     if (existingSellers.length > 0) {
       return Response.json({ 
@@ -38,20 +38,24 @@ Deno.serve(async (req) => {
       }, { status: 409 });
     }
 
-    // STEP 1: Check if Base44 user exists (also checks for duplicates)
-    // Note: Base44 auto-creates users on first login
-    let user_id = null;
-    
+    // Vérifier doublon User Base44
     const existingUsers = await base44.asServiceRole.entities.User.filter({ email });
     if (existingUsers.length > 0) {
-      // User already exists - this is a duplicate
       return Response.json({ 
         error: 'Cet email est déjà utilisé dans le système' 
       }, { status: 409 });
     }
-    
-    // User will be auto-created on first login
-    console.log(`ℹ️ Base44 user will be auto-created on first login: ${email}`);
+
+    // ÉTAPE 1 : Créer immédiatement le compte User Base44 avec le mot de passe fourni
+    let user_id = null;
+    try {
+      const newUser = await base44.users.createUser({ email, password: mot_de_passe, role: 'user' });
+      user_id = newUser?.id || null;
+      console.log(`✅ Compte Base44 créé pour ${email}, user_id: ${user_id}`);
+    } catch (userError) {
+      console.warn(`⚠️ Impossible de créer le compte Base44 pour ${email}:`, userError.message);
+      // On continue même si la création Base44 échoue
+    }
 
     // STEP 2: Generate verification code
     const verificationCode = String(Math.floor(100000 + Math.random() * 900000));
