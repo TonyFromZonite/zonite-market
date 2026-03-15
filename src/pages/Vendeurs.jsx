@@ -22,7 +22,7 @@ const ONGLETS = [
 ];
 
 const initVendeur = {
-  nom_complet: "", email: "", telephone: "", ville: "", quartier: "",
+  nom_complet: "", email: "", telephone: "", ville: "", quartier: "", mot_de_passe: "",
   numero_mobile_money: "", operateur_mobile_money: "orange_money",
   taux_commission: 0, statut: "actif", date_embauche: new Date().toISOString().split("T")[0],
 };
@@ -83,6 +83,7 @@ function ListeVendeurs() {
           quartier: form.quartier,
           numero_mobile_money: form.numero_mobile_money,
           operateur_mobile_money: form.operateur_mobile_money,
+          mot_de_passe: form.mot_de_passe,
         });
         toast({ title: "✅ Vendeur créé avec succès", description: `${form.nom_complet} (${form.email}) peut immédiatement se connecter. Il doit regarder la vidéo pour accéder au catalogue.`, duration: 5000 });
       }
@@ -216,18 +217,25 @@ function ListeVendeurs() {
                   <Input value={form.numero_mobile_money} onChange={(e) => modifier("numero_mobile_money", e.target.value)} placeholder="Ex: 699123456" />
                 </div>
                 <div className="space-y-2">
-                   <Label>Opérateur Mobile Money *</Label>
-                   <Select value={form.operateur_mobile_money} onValueChange={(value) => modifier("operateur_mobile_money", value)}>
-                     <SelectTrigger><SelectValue /></SelectTrigger>
-                     <SelectContent>
-                       <SelectItem value="orange_money">Orange Money</SelectItem>
-                       <SelectItem value="mtn_momo">MTN MoMo</SelectItem>
-                     </SelectContent>
-                   </Select>
-                 </div>
-                 <p className="text-xs text-slate-500 bg-blue-50 border border-blue-100 p-3 rounded-lg">
-                   ℹ️ Un mot de passe sécurisé sera généré automatiquement et envoyé au vendeur par email.
-                 </p>
+                  <Label>Opérateur Mobile Money *</Label>
+                  <Select value={form.operateur_mobile_money} onValueChange={(value) => modifier("operateur_mobile_money", value)}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="orange_money">Orange Money</SelectItem>
+                      <SelectItem value="mtn_momo">MTN MoMo</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Mot de passe *</Label>
+                  <Input 
+                    type="text" 
+                    value={form.mot_de_passe} 
+                    onChange={(e) => modifier("mot_de_passe", e.target.value)} 
+                    placeholder="Mot de passe initial pour le vendeur" 
+                  />
+                  <p className="text-xs text-slate-500">Le vendeur recevra ce mot de passe par email</p>
+                </div>
               </>
             )}
             {vendeurEdite && <div className="space-y-2"><Label>Date d'Embauche</Label><Input type="date" value={form.date_embauche} onChange={(e) => modifier("date_embauche", e.target.value)} /></div>}
@@ -235,8 +243,17 @@ function ListeVendeurs() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOuvert(false)}>Annuler</Button>
             <Button 
-              onClick={() => sauvegarder()}
-              disabled={enCours || !form.nom_complet || (!vendeurEdite && (!form.email || !form.numero_mobile_money))} 
+              onClick={() => {
+                console.log("🔴 CLIC BOUTON - État actuel:", {
+                  nom_complet: form.nom_complet,
+                  email: form.email,
+                  mot_de_passe: form.mot_de_passe,
+                  mot_de_passe_length: form.mot_de_passe?.length,
+                  validation: !form.nom_complet || !form.email || !form.mot_de_passe
+                });
+                sauvegarder();
+              }}
+              disabled={enCours || !form.nom_complet || (!vendeurEdite && (!form.email || (form.mot_de_passe || '').trim() === '' || !form.numero_mobile_money))} 
               className="bg-[#1a1f5e] hover:bg-[#141952]"
             >
               {enCours ? <Loader2 className="w-4 h-4 animate-spin" /> : vendeurEdite ? "Enregistrer" : "Créer"}
