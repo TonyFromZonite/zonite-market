@@ -68,19 +68,6 @@ function ListeVendeurs() {
         await adminApi.updateVendeur(vendeurEdite.id, { nom_complet: form.nom_complet, email: form.email, telephone: form.telephone, statut: form.statut, date_embauche: form.date_embauche });
         await adminApi.createJournalAudit({ action: "Vendeur modifié", module: "vendeur", details: `Vendeur ${form.nom_complet} modifié`, entite_id: vendeurEdite.id });
         toast({ title: "Vendeur modifié avec succès", duration: 5000 });
-      } else {
-        // Créer un compte vendeur initial en attente de validation KYC
-        const result = await adminApi.createVendeurInitial({
-          nom_complet: form.nom_complet,
-          email: form.email,
-          telephone: form.telephone,
-          ville: form.ville,
-          quartier: form.quartier,
-          numero_mobile_money: form.numero_mobile_money,
-          operateur_mobile_money: form.operateur_mobile_money,
-          mot_de_passe: form.mot_de_passe,
-        });
-        toast({ title: "✅ Vendeur créé avec succès", description: `${form.nom_complet} (${form.email}) peut immédiatement se connecter. Il doit regarder la vidéo pour accéder au catalogue.`, duration: 5000 });
       }
       queryClient.invalidateQueries({ queryKey: ["vendeurs"] });
       queryClient.invalidateQueries({ queryKey: ["comptes_vendeurs"] });
@@ -137,9 +124,7 @@ function ListeVendeurs() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <Input placeholder="Rechercher un vendeur..." value={recherche} onChange={(e) => setRecherche(e.target.value)} className="pl-9" />
         </div>
-        <Button onClick={() => ouvrir(null)} className="bg-[#1a1f5e] hover:bg-[#141952]">
-          <Plus className="w-4 h-4 mr-2" /> Nouveau Vendeur
-        </Button>
+
       </div>
       <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
         <div className="overflow-x-auto">
