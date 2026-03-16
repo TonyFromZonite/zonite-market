@@ -11,6 +11,7 @@ import { CheckCircle2, Loader2, ChevronLeft, AlertCircle } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import SelecteurLocalisation from "@/components/vente/SelecteurLocalisation";
+import BlocageKycPending from "@/components/BlocageKycPending";
 
 export default function NouvelleCommandeVendeur() {
   const [compteVendeur, setCompteVendeur] = useState(null);
