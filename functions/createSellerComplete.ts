@@ -52,20 +52,19 @@ Deno.serve(async (req) => {
     const motDePasseGenere = Array.from({ length: 10 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
     const motDePasseHash = await bcrypt.hash(motDePasseGenere, 10);
 
-    // ÉTAPE 1 : Créer le compte User Base44 via inviteUser (obligatoire)
-    // Base44 envoie un email d'activation automatiquement.
-    // On envoie ensuite un 2ème email ZONITE avec les identifiants.
+    // ÉTAPE 1 : Créer le compte User Base44 via register (pas d'email d'invitation)
     let user_id = null;
     try {
-      await base44.users.inviteUser(email, 'user');
-      console.log(`✅ Invitation Base44 envoyée à ${email}`);
-      // Tenter de récupérer l'user_id (peut ne pas être immédiatement disponible)
-      await new Promise(r => setTimeout(r, 1500));
-      const usersCheck = await base44.asServiceRole.entities.User.filter({ email });
-      user_id = usersCheck[0]?.id || null;
-      console.log(`ℹ️ user_id récupéré: ${user_id || 'non disponible encore (sera lié à la connexion)'}`);
+      const registerResult = await base44.auth.register({ email, password: motDePasseGenere });
+      user_id = registerResult?.user?.id || registerResult?.id || null;
+      if (!user_id) {
+        const usersCheck = await base44.asServiceRole.entities.User.filter({ email });
+        user_id = usersCheck[0]?.id || null;
+      }
+      if (!user_id) throw new Error('user_id introuvable après register');
+      console.log(`✅ Compte Base44 créé pour ${email}, user_id: ${user_id}`);
     } catch (userError) {
-      console.error(`❌ Impossible d'inviter ${email}:`, userError.message);
+      console.error(`❌ Impossible de créer le compte Base44 pour ${email}:`, userError.message);
       return Response.json({ error: `Impossible de créer le compte: ${userError.message}` }, { status: 500 });
     }
 
