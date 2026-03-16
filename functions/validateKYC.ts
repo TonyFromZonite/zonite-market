@@ -3,8 +3,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 const TRANSITIONS_AUTORISEES = {
   'pending_verification': ['kyc_required'],
   'kyc_required': ['kyc_pending'],
-  'kyc_pending': ['kyc_approved_training_required', 'kyc_required'],
-  'kyc_approved_training_required': ['active_seller'],
+  'kyc_pending': ['active_seller', 'kyc_required'],
   'active_seller': []
 };
 
@@ -16,10 +15,9 @@ function validateStatusTransition(actuel, nouveau) {
 }
 
 /**
- * KYC VALIDATION BY ADMIN (NEW ARCHITECTURE)
- * Transitions seller:
- * - If approved: kyc_pending → kyc_approved_training_required
- * - If rejected: kyc_pending → kyc_required (can resubmit)
+ * KYC VALIDATION BY ADMIN
+ * - If approved: kyc_pending → active_seller
+ * - If rejected: kyc_pending → kyc_required
  */
 Deno.serve(async (req) => {
   try {
@@ -33,59 +31,45 @@ Deno.serve(async (req) => {
     const { seller_id, statut, notes } = await req.json();
 
     if (!seller_id || !statut) {
-      return Response.json({ 
-        error: 'seller_id et statut requis' 
-      }, { status: 400 });
+      return Response.json({ error: 'seller_id et statut requis' }, { status: 400 });
     }
 
     if (!['valide', 'rejete'].includes(statut)) {
-      return Response.json({ 
-        error: 'statut doit être "valide" ou "rejete"' 
-      }, { status: 400 });
+      return Response.json({ error: 'statut doit être "valide" ou "rejete"' }, { status: 400 });
     }
 
-    console.log(`📋 KYC validation for seller ${seller_id}: ${statut}`);
-
-    // Get seller
     const sellers = await base44.asServiceRole.entities.Seller.filter({ id: seller_id });
     if (sellers.length === 0) {
-      return Response.json({ 
-        error: 'Vendeur non trouvé' 
-      }, { status: 404 });
+      return Response.json({ error: 'Vendeur non trouvé' }, { status: 404 });
     }
 
     const seller = sellers[0];
+    const appUrl = Deno.env.get('APP_URL') || 'https://app.base44.com';
 
     if (statut === 'valide') {
-      // TRANSITION: kyc_pending → kyc_approved_training_required
-      validateStatusTransition(seller.seller_status, 'kyc_approved_training_required');
+      validateStatusTransition(seller.seller_status, 'active_seller');
       await base44.asServiceRole.entities.Seller.update(seller_id, {
         statut_kyc: 'valide',
-        seller_status: 'kyc_approved_training_required',
+        seller_status: 'active_seller',
         statut: 'actif',
         notes_admin: notes || ''
       });
 
-      console.log(`✅ KYC approved for ${seller.email}, status → kyc_approved_training_required`);
-
-      // Notification to seller
       await base44.asServiceRole.entities.NotificationVendeur.create({
         vendeur_email: seller.email,
-        titre: '✅ KYC Validé !',
-        message: 'Félicitations ! Votre dossier KYC a été validé. Veuillez regarder la vidéo de formation pour débloquer le catalogue.',
+        titre: '🎉 Compte activé !',
+        message: 'Votre KYC a été validé. Vous pouvez maintenant créer des commandes et gérer vos ventes.',
         type: 'succes',
         importante: true
       }).catch(() => {});
 
-      // Email to seller
       base44.integrations.Core.SendEmail({
         to: seller.email,
-        subject: '✅ KYC Validé - ZONITE',
-        body: `Bonjour ${seller.nom_complet},\n\nFélicitations ! 🎉\n\nVotre dossier KYC a été validé avec succès.\n\n📹 PROCHAINE ÉTAPE : Regardez la vidéo de formation obligatoire pour débloquer l'accès au catalogue.\n\nConnectez-vous à votre espace vendeur pour continuer.\n\nBonne vente !\nL'équipe ZONITE`
+        subject: 'ZONITE - Compte activé !',
+        body: `Bonjour ${seller.nom_complet},\n\nBonne nouvelle ! Votre compte ZONITE est maintenant actif.\n\nVous pouvez dès maintenant :\n- Créer des commandes pour vos clients\n- Suivre vos commissions\n- Gérer vos ventes\n\n👉 Connectez-vous : ${appUrl}/Connexion\n\nPour accéder au catalogue complet, visionnez la vidéo de formation ZONITE.\n\nL'équipe ZONITE`
       }).catch(() => {});
 
     } else {
-      // TRANSITION: kyc_pending → kyc_required (can resubmit)
       validateStatusTransition(seller.seller_status, 'kyc_required');
       await base44.asServiceRole.entities.Seller.update(seller_id, {
         statut_kyc: 'rejete',
@@ -93,9 +77,6 @@ Deno.serve(async (req) => {
         notes_admin: notes || ''
       });
 
-      console.log(`❌ KYC rejected for ${seller.email}, status → kyc_required`);
-
-      // Notification to seller
       await base44.asServiceRole.entities.NotificationVendeur.create({
         vendeur_email: seller.email,
         titre: '❌ KYC Rejeté',
@@ -104,15 +85,13 @@ Deno.serve(async (req) => {
         importante: true
       }).catch(() => {});
 
-      // Email to seller
       base44.integrations.Core.SendEmail({
         to: seller.email,
-        subject: '❌ KYC Rejeté - ZONITE',
-        body: `Bonjour ${seller.nom_complet},\n\nMalheureusement, votre dossier KYC a été rejeté.\n\nRaison : ${notes || 'Non spécifiée'}\n\nVeuillez soumettre un nouveau dossier avec des documents conformes.\n\nConnectez-vous à votre espace vendeur pour soumettre à nouveau.\n\nCordialement,\nL'équipe ZONITE`
+        subject: 'ZONITE - KYC Rejeté',
+        body: `Bonjour ${seller.nom_complet},\n\nMalheureusement, votre dossier KYC a été rejeté.\n\nRaison : ${notes || 'Non spécifiée'}\n\nVeuillez soumettre un nouveau dossier avec des documents conformes.\n\nCordialement,\nL'équipe ZONITE`
       }).catch(() => {});
     }
 
-    // Audit log
     await base44.asServiceRole.entities.JournalAudit.create({
       action: statut === 'valide' ? 'KYC validé' : 'KYC rejeté',
       module: 'vendeur',
@@ -121,7 +100,7 @@ Deno.serve(async (req) => {
       entite_id: seller_id,
       donnees_apres: JSON.stringify({
         statut_kyc: statut,
-        seller_status: statut === 'valide' ? 'kyc_approved_training_required' : 'kyc_required',
+        seller_status: statut === 'valide' ? 'active_seller' : 'kyc_required',
         notes
       })
     }).catch(() => {});
@@ -129,11 +108,10 @@ Deno.serve(async (req) => {
     return Response.json({
       success: true,
       message: statut === 'valide' ? 'KYC validé avec succès' : 'KYC rejeté',
-      seller_status: statut === 'valide' ? 'kyc_approved_training_required' : 'kyc_required'
+      seller_status: statut === 'valide' ? 'active_seller' : 'kyc_required'
     });
 
   } catch (error) {
-    console.error('❌ KYC validation error:', error);
     return Response.json({ error: error.message }, { status: 500 });
   }
 });
