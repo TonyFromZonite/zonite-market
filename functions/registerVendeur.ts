@@ -49,7 +49,7 @@ Deno.serve(async (req) => {
 
     // Générer code de vérification
     const newCode = String(Math.floor(100000 + Math.random() * 900000));
-    const expiryTime = new Date(Date.now() + 15 * 60 * 1000).toISOString(); // 15 minutes
+    const expiryTime = new Date(Date.now() + 60 * 60 * 1000).toISOString(); // 60 minutes
 
     // ÉTAPE 1 : Créer le compte User Base44 EN PREMIER
     let user_id = null;
@@ -122,7 +122,7 @@ Deno.serve(async (req) => {
       await base44.integrations.Core.SendEmail({
         to: email,
         subject: '🔐 Votre code de vérification ZONITE',
-        body: `Bonjour ${nom_complet},\n\nVotre code de vérification est : ${newCode}\n\nCe code expire dans 15 minutes.\n\nSi vous n'avez pas demandé ce code, ignorez ce message.\n\nL'équipe ZONITE`
+        body: `Bonjour ${nom_complet},\n\nVotre code de vérification est : ${newCode}\n\nCe code expire dans 1 heure.\n\nSi vous n'avez pas demandé ce code, ignorez ce message.\n\nL'équipe ZONITE`
       });
       console.log(`📧 Code de vérification envoyé à ${email}`);
     } catch (emailError) {

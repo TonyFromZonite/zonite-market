@@ -20,7 +20,7 @@ Deno.serve(async (req) => {
 
     // Générer un nouveau code (6 chiffres)
     const newCode = String(Math.floor(100000 + Math.random() * 900000));
-    const expiryTime = new Date(Date.now() + 15 * 60 * 1000).toISOString(); // 15 minutes
+    const expiryTime = new Date(Date.now() + 60 * 60 * 1000).toISOString(); // 60 minutes
 
     // Mettre à jour le code
     await base44.asServiceRole.entities.Seller.update(seller.id, {
@@ -33,7 +33,7 @@ Deno.serve(async (req) => {
       await base44.integrations.Core.SendEmail({
         to: email,
         subject: '🔐 Votre code de vérification ZONITE',
-        body: `Bonjour ${seller.nom_complet},\n\nVotre code de vérification est : ${newCode}\n\nCe code expire dans 15 minutes.\n\nSi vous n'avez pas demandé ce code, ignorez ce message.\n\nL'équipe ZONITE`
+        body: `Bonjour ${seller.nom_complet},\n\nVotre code de vérification est : ${newCode}\n\nCe code expire dans 1 heure.\n\nSi vous n'avez pas demandé ce code, ignorez ce message.\n\nL'équipe ZONITE`
       });
     } catch (e) {
       console.error('Email send failed:', e.message);
