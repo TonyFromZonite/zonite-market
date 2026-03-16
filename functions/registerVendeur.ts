@@ -111,19 +111,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: `Erreur création profil vendeur: ${sellerError.message}` }, { status: 500 });
     }
 
-    // STEP 4: Send verification email
-    try {
-      await base44.integrations.Core.SendEmail({
-        to: email,
-        subject: '🔐 Votre code de vérification ZONITE',
-        body: `Bonjour ${nom_complet},\n\nMerci de votre inscription chez ZONITE ! 🚀\n\nVotre code de vérification est : ${verificationCode}\n\nCe code expire dans 15 minutes.\n\nEntrez ce code pour vérifier votre email et accéder à votre compte.\n\nSi vous n'avez pas demandé cette inscription, ignorez ce message.\n\nL'équipe ZONITE`
-      });
-      console.log(`✅ Verification email sent to ${email}`);
-    } catch (emailErr) {
-      console.warn('⚠️ Email send failed:', emailErr.message);
-    }
-
-    // STEP 5: Audit log
+    // STEP 4: Audit log
     await base44.asServiceRole.entities.JournalAudit.create({
       action: 'Inscription vendeur',
       module: 'vendeur',
