@@ -439,14 +439,14 @@ export default function InscriptionVendeur() {
               <Button variant="outline" onClick={() => { setEtape(2); setErreur(""); }} className="flex-1 border-white/20 text-white hover:bg-white/10 rounded-xl h-11">
                 <ChevronLeft className="w-4 h-4 mr-1" /> Retour
               </Button>
-              <Button onClick={validerEtape3} className="flex-1 h-11 bg-[#F5C518] hover:bg-[#e0b010] text-[#1a1f5e] font-black rounded-xl">
-                Continuer →
+              <Button onClick={validerEtape3} disabled={enCours} className="flex-1 h-11 bg-[#F5C518] hover:bg-[#e0b010] text-[#1a1f5e] font-black rounded-xl">
+                {enCours ? <Loader2 className="w-4 h-4 animate-spin" /> : "Accéder à mon espace →"}
               </Button>
             </div>
           </div>
         )}
 
-        {/* ÉTAPE 4 : KYC */}
+        {/* ÉTAPE 4 : KYC — SUPPRIMÉE, maintenant dans EspaceVendeur */}
         {etape === 4 && (
           <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-6 border border-white/20 space-y-4">
             <div>
