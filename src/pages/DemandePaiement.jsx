@@ -80,6 +80,11 @@ export default function DemandePaiement() {
     setSucces(true);
   };
 
+  // Blocage doux si KYC en attente
+  if (compteVendeur && compteVendeur.seller_status === "kyc_pending") {
+    return <BlocageKycPending titre="Demander un paiement" />;
+  }
+
   if (succes) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">

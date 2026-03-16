@@ -50,6 +50,11 @@ export default function MesCommandesVendeur() {
   const formater = n => `${Math.round(n || 0).toLocaleString("fr-FR")} FCFA`;
   const formaterDate = d => d ? new Date(d).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" }) : "—";
 
+  // Blocage doux si KYC en attente
+  if (compteVendeur && compteVendeur.seller_status === "kyc_pending") {
+    return <BlocageKycPending titre="Mes commandes" />;
+  }
+
   const commandesFiltrees = commandes.filter(c =>
     `${c.produit_nom} ${c.client_nom} ${c.client_ville}`.toLowerCase().includes(recherche.toLowerCase())
   );
