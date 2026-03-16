@@ -185,8 +185,14 @@ export default function InscriptionVendeur() {
     });
     setEnCours(false);
     if (response.data?.success || !response.data?.error) {
-      // Succès → session + redirect vers EspaceVendeur où le modal KYC s'ouvrira
-      sessionStorage.setItem("vendeur_session", JSON.stringify({ email: vendeurEmail, role: 'vendeur' }));
+      // Succès → session avec toutes les données disponibles + redirect vers EspaceVendeur
+      sessionStorage.setItem("vendeur_session", JSON.stringify({
+        email: vendeurEmail,
+        nom_complet: form.nom_complet,
+        role: 'vendeur',
+        seller_status: 'kyc_required',
+        email_verified: true,
+      }));
       window.location.href = createPageUrl("EspaceVendeur");
     } else {
       setErreur(response.data?.error || "Erreur lors de la sauvegarde du profil.");
