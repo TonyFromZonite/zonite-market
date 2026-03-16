@@ -156,6 +156,11 @@ Deno.serve(async (req) => {
         return Response.json({ success: true });
       }
 
+      // ─── GET SELLER BY EMAIL (pour EspaceVendeur initial load) ──────────────
+      case 'getSellerByEmail': {
+        return Response.json({ success: true, seller: compteAuth });
+      }
+
       default:
         return Response.json({ error: `Action inconnue: ${action}` }, { status: 400 });
     }
