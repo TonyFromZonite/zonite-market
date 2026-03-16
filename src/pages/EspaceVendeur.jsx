@@ -249,20 +249,71 @@ export default function EspaceVendeur() {
         </div>
       )}
 
-      {/* Required modal based on seller status */}
+      {/* Modal KYC obligatoire — non fermable sans soumettre */}
       {compteVendeur.seller_status === SELLER_STATUSES.KYC_REQUIRED && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl p-6 max-w-sm w-full text-center shadow-lg">
-            <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-3xl">📋</span>
+        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl p-5 max-w-sm w-full shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div className="text-center mb-4">
+              <div className="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                <span className="text-2xl">📋</span>
+              </div>
+              <h2 className="text-lg font-bold text-slate-900">Complétez votre vérification KYC</h2>
+              <p className="text-xs text-slate-500 mt-1">Uploadez vos documents pour activer votre compte.</p>
             </div>
-            <h2 className="text-lg font-bold text-slate-900 mb-2">Complétez votre dossier KYC</h2>
-            <p className="text-sm text-slate-500 mb-4">Nous avons besoin de vérifier votre identité avant que vous puissiez commencer à vendre.</p>
-            <Link to={createPageUrl("ResoumissionKYC")}>
-              <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold">
-                Soumettre mes documents →
-              </Button>
-            </Link>
+
+            {/* Type document */}
+            <div className="flex gap-2 mb-3">
+              <button onClick={() => { setTypeDocument("cni"); setKycForm(p => ({ ...p, photo_identite_verso_url: "" })); }}
+                className={`flex-1 py-2 rounded-xl text-xs font-bold border transition-all ${typeDocument === "cni" ? "bg-blue-600 text-white border-blue-600" : "bg-slate-100 text-slate-600 border-slate-200"}`}>
+                🪪 CNI
+              </button>
+              <button onClick={() => { setTypeDocument("passeport"); setKycForm(p => ({ ...p, photo_identite_verso_url: "" })); }}
+                className={`flex-1 py-2 rounded-xl text-xs font-bold border transition-all ${typeDocument === "passeport" ? "bg-blue-600 text-white border-blue-600" : "bg-slate-100 text-slate-600 border-slate-200"}`}>
+                📘 Passeport
+              </button>
+            </div>
+
+            {/* Recto */}
+            <div className="mb-3">
+              <p className="text-xs text-slate-500 mb-1">{typeDocument === "cni" ? "CNI Recto *" : "Page principale *"}</p>
+              <label className={`flex flex-col items-center justify-center h-20 rounded-xl border-2 border-dashed cursor-pointer transition-all ${kycForm.photo_identite_url ? "border-emerald-400 bg-emerald-50" : "border-slate-200 bg-slate-50 hover:bg-slate-100"}`}>
+                {kycUpload.id ? <Loader2 className="w-5 h-5 animate-spin text-slate-400" /> :
+                  kycForm.photo_identite_url ? <><CheckCircle2 className="w-5 h-5 text-emerald-500 mb-1" /><span className="text-xs text-emerald-600 font-medium">Uploadé ✓</span></> :
+                  <><Upload className="w-5 h-5 text-slate-400 mb-1" /><span className="text-xs text-slate-400">Appuyer pour uploader</span></>}
+                <input type="file" accept="image/*" className="hidden" onChange={e => e.target.files[0] && uploadKycFile(e.target.files[0], "photo_identite_url")} />
+              </label>
+            </div>
+
+            {/* Verso CNI */}
+            {typeDocument === "cni" && (
+              <div className="mb-3">
+                <p className="text-xs text-slate-500 mb-1">CNI Verso *</p>
+                <label className={`flex flex-col items-center justify-center h-20 rounded-xl border-2 border-dashed cursor-pointer transition-all ${kycForm.photo_identite_verso_url ? "border-emerald-400 bg-emerald-50" : "border-slate-200 bg-slate-50 hover:bg-slate-100"}`}>
+                  {kycUpload.idVerso ? <Loader2 className="w-5 h-5 animate-spin text-slate-400" /> :
+                    kycForm.photo_identite_verso_url ? <><CheckCircle2 className="w-5 h-5 text-emerald-500 mb-1" /><span className="text-xs text-emerald-600 font-medium">Uploadé ✓</span></> :
+                    <><Upload className="w-5 h-5 text-slate-400 mb-1" /><span className="text-xs text-slate-400">Appuyer pour uploader</span></>}
+                  <input type="file" accept="image/*" className="hidden" onChange={e => e.target.files[0] && uploadKycFile(e.target.files[0], "photo_identite_verso_url")} />
+                </label>
+              </div>
+            )}
+
+            {/* Selfie */}
+            <div className="mb-3">
+              <p className="text-xs text-slate-500 mb-1">Selfie avec pièce d'identité *</p>
+              <label className={`flex flex-col items-center justify-center h-20 rounded-xl border-2 border-dashed cursor-pointer transition-all ${kycForm.selfie_url ? "border-emerald-400 bg-emerald-50" : "border-slate-200 bg-slate-50 hover:bg-slate-100"}`}>
+                {kycUpload.selfie ? <Loader2 className="w-5 h-5 animate-spin text-slate-400" /> :
+                  kycForm.selfie_url ? <><CheckCircle2 className="w-5 h-5 text-emerald-500 mb-1" /><span className="text-xs text-emerald-600 font-medium">Uploadé ✓</span></> :
+                  <><Upload className="w-5 h-5 text-slate-400 mb-1" /><span className="text-xs text-slate-400">Selfie avec votre pièce visible</span></>}
+                <input type="file" accept="image/*" className="hidden" onChange={e => e.target.files[0] && uploadKycFile(e.target.files[0], "selfie_url")} />
+              </label>
+            </div>
+
+            {kycErreur && <p className="text-red-500 text-xs mb-3 text-center">{kycErreur}</p>}
+
+            <Button onClick={soumettreKyc} disabled={kycEnCours || kycUpload.id || kycUpload.idVerso || kycUpload.selfie}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold h-11">
+              {kycEnCours ? <Loader2 className="w-4 h-4 animate-spin" /> : "Soumettre mes documents"}
+            </Button>
           </div>
         </div>
       )}
