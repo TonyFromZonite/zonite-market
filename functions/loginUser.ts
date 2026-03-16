@@ -12,19 +12,23 @@ const authenticateSeller = async (base44, email, password) => {
 
   const seller = sellers[0];
 
-  // Vérifier que le hash existe
-  if (!seller.mot_de_passe_hash) {
-    return { success: false, error: 'Mot de passe non défini. Utilisez "Mot de passe oublié" pour créer votre mot de passe.' };
+  if (seller.mot_de_passe_hash) {
+    // Authentification via hash bcrypt (méthode principale)
+    const passwordMatch = await bcrypt.compare(password, seller.mot_de_passe_hash);
+    if (!passwordMatch) {
+      return { success: false, error: 'Email ou mot de passe incorrect' };
+    }
+  } else {
+    // Fallback : authentification via Base44 auth native (vendeurs inscrits avant ajout du hash)
+    try {
+      await base44.auth.login({ email, password });
+      // Si le login réussit, on met à jour le hash pour les prochaines connexions
+      const newHash = await bcrypt.hash(password, 10);
+      await base44.asServiceRole.entities.Seller.update(seller.id, { mot_de_passe_hash: newHash });
+    } catch (_) {
+      return { success: false, error: 'Email ou mot de passe incorrect' };
+    }
   }
-  
-  // Vérifier le mot de passe (async pour éviter CPU timeout)
-  const passwordMatch = await bcrypt.compare(password, seller.mot_de_passe_hash);
-  if (!passwordMatch) {
-    return { success: false, error: 'Email ou mot de passe incorrect' };
-  }
-
-  // Allow login for any seller (access control happens on the frontend via SellerStatusEngine)
-  // No KYC or status checks here—the seller will see modals if their account isn't fully activated
 
   return { success: true, seller };
 };
