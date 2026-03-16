@@ -8,7 +8,6 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Search, Package, ExternalLink, ChevronLeft, PlayCircle } from "lucide-react";
 import { getVendeurSession } from "@/components/useSessionGuard";
-import { base44 } from "@/api/base44Client";
 import BlocageKycPending from "@/components/BlocageKycPending";
 
 export default function CatalogueVendeur() {
