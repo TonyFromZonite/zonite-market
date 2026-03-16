@@ -13,6 +13,17 @@ import BlocageKycPending from "@/components/BlocageKycPending";
 
 export default function CatalogueVendeur() {
   const [recherche, setRecherche] = useState("");
+  const [compteVendeur, setCompteVendeur] = useState(null);
+
+  useEffect(() => {
+    const charger = async () => {
+      const session = getVendeurSession();
+      if (!session) return;
+      const sellers = await base44.entities.Seller.filter({ email: session.email });
+      if (sellers.length > 0) setCompteVendeur(sellers[0]);
+    };
+    charger();
+  }, []);
 
   const { data: produits = [], isLoading } = useQuery({
     queryKey: ["produits_catalogue"],
