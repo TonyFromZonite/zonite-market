@@ -10,6 +10,7 @@ import { createPageUrl } from "@/utils";
 import { LogOut, ChevronLeft, User, Phone, MapPin, Wallet, TrendingUp, ShoppingBag, KeyRound, Eye, EyeOff, CheckCircle2 } from "lucide-react";
 
 import { LOGO_URL as LOGO } from "@/components/constants";
+import BanniereKycPending from "@/components/BanniereKycPending";
 
 export default function ProfilVendeur() {
   const [compteVendeur, setCompteVendeur] = useState(null);
@@ -80,6 +81,7 @@ export default function ProfilVendeur() {
 
   return (
     <div className="min-h-screen bg-slate-50 pb-24">
+      {compteVendeur?.seller_status === "kyc_pending" && <BanniereKycPending />}
       <div className="bg-[#1a1f5e] text-white px-4 pb-8" style={{ paddingTop: "max(1.25rem, env(safe-area-inset-top, 0px))" }}>
         <div className="flex items-center gap-3 mb-4">
           <Link to={createPageUrl("EspaceVendeur")}>
