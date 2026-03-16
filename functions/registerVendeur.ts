@@ -68,10 +68,13 @@ Deno.serve(async (req) => {
     }
 
     // ÉTAPE 2 : Créer le Seller avec statut pending_verification
+    const mot_de_passe_hash = await bcrypt.hash(mot_de_passe, 10);
+
     const sellerData = {
       user_id: user_id,
       email,
       nom_complet,
+      mot_de_passe_hash,
       telephone: telephone || '',
       ville: ville || '',
       quartier: quartier || '',
