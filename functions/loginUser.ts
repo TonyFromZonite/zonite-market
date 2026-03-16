@@ -11,6 +11,11 @@ const authenticateSeller = async (base44, email, password) => {
   }
 
   const seller = sellers[0];
+
+  // Vérifier que le hash existe
+  if (!seller.mot_de_passe_hash) {
+    return { success: false, error: 'Mot de passe non défini. Utilisez "Mot de passe oublié" pour créer votre mot de passe.' };
+  }
   
   // Vérifier le mot de passe (async pour éviter CPU timeout)
   const passwordMatch = await bcrypt.compare(password, seller.mot_de_passe_hash);
