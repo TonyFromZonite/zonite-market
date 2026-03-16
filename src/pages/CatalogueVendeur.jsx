@@ -30,6 +30,11 @@ export default function CatalogueVendeur() {
     queryFn: () => base44.entities.Produit.filter({ statut: "actif" }),
   });
 
+  // Blocage doux si KYC en attente
+  if (compteVendeur && compteVendeur.seller_status === "kyc_pending") {
+    return <BlocageKycPending titre="Catalogue Produits" />;
+  }
+
   const formater = (n) => `${Math.round(n || 0).toLocaleString("fr-FR")} FCFA`;
 
   const produitsFiltres = produits.filter(p =>
