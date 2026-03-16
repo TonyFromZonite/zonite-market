@@ -167,12 +167,31 @@ export default function InscriptionVendeur() {
     }
   };
 
-  const validerEtape3 = () => {
+  const validerEtape3 = async () => {
     if (!form.ville || !form.quartier || !form.numero_mobile_money) {
       setErreur("Ville, quartier et numéro Mobile Money sont obligatoires."); return;
     }
+    setEnCours(true);
     setErreur("");
-    setEtape(4);
+    const response = await base44.functions.invoke('vendeurActions', {
+      action: 'updateProfil',
+      vendeur_email: vendeurEmail,
+      payload: {
+        ville: form.ville,
+        quartier: form.quartier,
+        numero_mobile_money: form.numero_mobile_money,
+        operateur_mobile_money: form.operateur_mobile_money,
+        experience_vente: form.experience_vente,
+      }
+    });
+    setEnCours(false);
+    if (response.data?.success || !response.data?.error) {
+      // Succès → session + redirect vers EspaceVendeur où le modal KYC s'ouvrira
+      sessionStorage.setItem("vendeur_session", JSON.stringify({ email: vendeurEmail, role: 'vendeur' }));
+      window.location.href = createPageUrl("EspaceVendeur");
+    } else {
+      setErreur(response.data?.error || "Erreur lors de la sauvegarde du profil.");
+    }
   };
 
   const soumettre = async () => {
