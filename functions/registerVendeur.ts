@@ -63,13 +63,9 @@ Deno.serve(async (req) => {
       return Response.json({ error: `Impossible de créer le compte: ${userError.message}` }, { status: 500 });
     }
 
-    // STEP 2: Generate verification code
-    const verificationCode = String(Math.floor(100000 + Math.random() * 900000));
-    const codeExpiryTime = new Date(Date.now() + 15 * 60 * 1000).toISOString();
-
     // ÉTAPE 2 : Créer le Seller — si ça échoue, supprimer le User créé (rollback)
     const sellerData = {
-      user_id: user_id, // Lié immédiatement si le compte Base44 a été créé
+      user_id: user_id,
       email,
       nom_complet,
       telephone: telephone || '',
@@ -82,10 +78,10 @@ Deno.serve(async (req) => {
       selfie_url: '',
       statut_kyc: 'en_attente',
       statut: 'en_attente_kyc',
-      seller_status: 'pending_verification', // Must verify email first
-      email_verified: false,
-      verification_code: verificationCode,
-      verification_code_expiry: codeExpiryTime,
+      seller_status: 'kyc_required', // Directly go to KYC — no email verification step
+      email_verified: true,
+      verification_code: null,
+      verification_code_expiry: null,
       video_vue: false,
       training_completed: false,
       conditions_acceptees: false,
