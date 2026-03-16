@@ -151,10 +151,6 @@ Mot de passe  : ${motDePasseGenere}
 
 👉 Connectez-vous ici : ${appUrl}/Connexion
 
-⚠️ IMPORTANT : Vous allez recevoir un autre email de "Base44" avec un lien d'activation.
-Vous devez d'abord cliquer sur ce lien pour activer votre compte, puis utiliser
-vos identifiants ci-dessus pour vous connecter.
-
 ${prochainesEtapes}
 
 À très bientôt,
