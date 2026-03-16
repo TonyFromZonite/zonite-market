@@ -181,7 +181,6 @@ export default function InscriptionVendeur() {
         quartier: form.quartier,
         numero_mobile_money: form.numero_mobile_money,
         operateur_mobile_money: form.operateur_mobile_money,
-        experience_vente: form.experience_vente,
       }
     });
     setEnCours(false);
