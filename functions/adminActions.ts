@@ -315,6 +315,33 @@ Deno.serve(async (req) => {
         return Response.json({ success: true, result });
       }
 
+      case 'marquerDemandePaye': {
+        const { demandeId } = payload;
+        // Récupérer la demande
+        const demandes = await db.DemandePaiementVendeur.filter({ id: demandeId });
+        if (!demandes.length) return Response.json({ error: 'Demande introuvable' }, { status: 404 });
+        const demande = demandes[0];
+        // Marquer comme payée
+        await db.DemandePaiementVendeur.update(demandeId, { statut: 'paye' });
+        // Mettre à jour le solde du vendeur
+        const sellers = await db.Seller.filter({ id: demande.vendeur_id });
+        if (sellers.length > 0) {
+          const seller = sellers[0];
+          await db.Seller.update(seller.id, {
+            solde_commission: Math.max(0, (seller.solde_commission || 0) - demande.montant),
+            total_commissions_payees: (seller.total_commissions_payees || 0) + demande.montant
+          });
+        }
+        // Notifier le vendeur
+        await db.NotificationVendeur.create({
+          vendeur_email: demande.vendeur_email,
+          titre: "Paiement effectué !",
+          message: `Votre paiement de ${demande.montant.toLocaleString("fr-FR")} FCFA a été envoyé sur votre numéro ${demande.numero_mobile_money} (${demande.operateur}).`,
+          type: "paiement"
+        }).catch(() => {});
+        return Response.json({ success: true });
+      }
+
       // ─── RETOUR PRODUIT ──────────────────────────────────────────────────────
       case 'updateRetourProduit': {
         const result = await db.RetourProduit.update(payload.retourId, payload.data);
