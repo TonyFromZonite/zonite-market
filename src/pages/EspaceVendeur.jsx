@@ -232,16 +232,7 @@ export default function EspaceVendeur() {
         </div>
       )}
 
-      {/* KYC Pending modal */}
-      {compteVendeur.seller_status === SELLER_STATUSES.KYC_PENDING && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl p-6 max-w-sm w-full text-center shadow-lg">
-            <Clock className="w-12 h-12 text-yellow-500 mx-auto mb-3" />
-            <h2 className="text-lg font-bold text-slate-900 mb-2">Dossier en révision</h2>
-            <p className="text-sm text-slate-500">Votre dossier KYC est en cours de vérification. Vous recevrez un email sous 24-48h.</p>
-          </div>
-        </div>
-      )}
+      {/* Bannière jaune kyc_pending — pas de modal bloquant */}
 
       {/* Training Required modal - show if training not completed */}
       {shouldShowTrainingModal(compteVendeur.seller_status, compteVendeur.training_completed) && (
