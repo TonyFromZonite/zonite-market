@@ -37,6 +37,41 @@ export default function EspaceVendeur() {
   const [enCours, setEnCours] = useState(false);
   const queryClient = useQueryClient();
 
+  // KYC modal state
+  const [typeDocument, setTypeDocument] = useState("cni");
+  const [kycForm, setKycForm] = useState({ photo_identite_url: "", photo_identite_verso_url: "", selfie_url: "" });
+  const [kycUpload, setKycUpload] = useState({ id: false, idVerso: false, selfie: false });
+  const [kycErreur, setKycErreur] = useState("");
+  const [kycEnCours, setKycEnCours] = useState(false);
+
+  const uploadKycFile = async (fichier, champ) => {
+    const key = champ === "photo_identite_url" ? "id" : champ === "photo_identite_verso_url" ? "idVerso" : "selfie";
+    setKycUpload(p => ({ ...p, [key]: true }));
+    const { file_url } = await base44.integrations.Core.UploadFile({ file: fichier });
+    setKycForm(p => ({ ...p, [champ]: file_url }));
+    setKycUpload(p => ({ ...p, [key]: false }));
+  };
+
+  const soumettreKyc = async () => {
+    if (!kycForm.photo_identite_url) { setKycErreur("Veuillez uploader votre pièce d'identité."); return; }
+    if (typeDocument === "cni" && !kycForm.photo_identite_verso_url) { setKycErreur("Veuillez uploader le verso de votre CNI."); return; }
+    if (!kycForm.selfie_url) { setKycErreur("Veuillez uploader votre selfie."); return; }
+    setKycEnCours(true);
+    setKycErreur("");
+    const response = await base44.functions.invoke('updateKYCDocuments', {
+      email: compteVendeur.email,
+      photo_identite_url: kycForm.photo_identite_url,
+      photo_identite_verso_url: kycForm.photo_identite_verso_url || "",
+      selfie_url: kycForm.selfie_url,
+    });
+    setKycEnCours(false);
+    if (response.data?.success) {
+      setCompteVendeur(prev => ({ ...prev, seller_status: 'kyc_pending' }));
+    } else {
+      setKycErreur(response.data?.error || "Erreur lors de la soumission.");
+    }
+  };
+
   useEffect(() => {
     const charger = async () => {
       try {
