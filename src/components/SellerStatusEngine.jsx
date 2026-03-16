@@ -28,10 +28,11 @@ export const STATUS_LABELS = {
  */
 export const canAccessFeature = (sellerStatus, feature, trainingCompleted = false) => {
   const accessMap = {
+    // dashboard = tableau de bord, profil, notifs, support
     dashboard: {
       [SELLER_STATUSES.PENDING_VERIFICATION]: false,
-      [SELLER_STATUSES.KYC_REQUIRED]: true,
-      [SELLER_STATUSES.KYC_PENDING]: true,
+      [SELLER_STATUSES.KYC_REQUIRED]: false,
+      [SELLER_STATUSES.KYC_PENDING]: true,  // ✅ accès dès le KYC soumis
       [SELLER_STATUSES.KYC_APPROVED_TRAINING_REQUIRED]: true,
       [SELLER_STATUSES.ACTIVE_SELLER]: true,
     },
@@ -45,7 +46,7 @@ export const canAccessFeature = (sellerStatus, feature, trainingCompleted = fals
     sales: {
       [SELLER_STATUSES.PENDING_VERIFICATION]: false,
       [SELLER_STATUSES.KYC_REQUIRED]: false,
-      [SELLER_STATUSES.KYC_PENDING]: false,
+      [SELLER_STATUSES.KYC_PENDING]: false,  // ❌ bloqué pendant kyc_pending
       [SELLER_STATUSES.KYC_APPROVED_TRAINING_REQUIRED]: false,
       [SELLER_STATUSES.ACTIVE_SELLER]: true,
     },
@@ -58,8 +59,8 @@ export const canAccessFeature = (sellerStatus, feature, trainingCompleted = fals
     },
     profile: {
       [SELLER_STATUSES.PENDING_VERIFICATION]: false,
-      [SELLER_STATUSES.KYC_REQUIRED]: true,
-      [SELLER_STATUSES.KYC_PENDING]: true,
+      [SELLER_STATUSES.KYC_REQUIRED]: false,
+      [SELLER_STATUSES.KYC_PENDING]: true,  // ✅ accès au profil dès kyc_pending
       [SELLER_STATUSES.KYC_APPROVED_TRAINING_REQUIRED]: true,
       [SELLER_STATUSES.ACTIVE_SELLER]: true,
     },
