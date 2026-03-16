@@ -176,62 +176,20 @@ function ListeVendeurs() {
         </div>
       </div>
 
+      {/* Dialog Modifier Vendeur */}
       <Dialog open={dialogOuvert} onOpenChange={setDialogOuvert}>
         <DialogContent className="w-[95vw] max-w-lg max-h-[90vh] overflow-y-auto">
-          <DialogHeader><DialogTitle>{vendeurEdite ? "Modifier le Vendeur" : "Nouveau Vendeur"}</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>Modifier le Vendeur</DialogTitle></DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2"><Label>Nom Complet *</Label><Input value={form.nom_complet} onChange={(e) => modifier("nom_complet", e.target.value)} /></div>
-            <div className="space-y-2"><Label>Email *</Label><Input type="email" value={form.email} onChange={(e) => modifier("email", e.target.value)} disabled={!!vendeurEdite} /></div>
+            <div className="space-y-2"><Label>Email</Label><Input type="email" value={form.email} disabled /></div>
             <div className="space-y-2"><Label>Téléphone</Label><Input value={form.telephone} onChange={(e) => modifier("telephone", e.target.value)} /></div>
-            {!vendeurEdite && (
-              <>
-                <div className="space-y-2"><Label>Ville</Label><Input value={form.ville} onChange={(e) => modifier("ville", e.target.value)} /></div>
-                <div className="space-y-2"><Label>Quartier</Label><Input value={form.quartier} onChange={(e) => modifier("quartier", e.target.value)} /></div>
-                <div className="space-y-2">
-                  <Label>Numéro Mobile Money *</Label>
-                  <Input value={form.numero_mobile_money} onChange={(e) => modifier("numero_mobile_money", e.target.value)} placeholder="Ex: 699123456" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Opérateur Mobile Money *</Label>
-                  <Select value={form.operateur_mobile_money} onValueChange={(value) => modifier("operateur_mobile_money", value)}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="orange_money">Orange Money</SelectItem>
-                      <SelectItem value="mtn_momo">MTN MoMo</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Mot de passe *</Label>
-                  <Input 
-                    type="text" 
-                    value={form.mot_de_passe} 
-                    onChange={(e) => modifier("mot_de_passe", e.target.value)} 
-                    placeholder="Mot de passe initial pour le vendeur" 
-                  />
-                  <p className="text-xs text-slate-500">Le vendeur recevra ce mot de passe par email</p>
-                </div>
-              </>
-            )}
-            {vendeurEdite && <div className="space-y-2"><Label>Date d'Embauche</Label><Input type="date" value={form.date_embauche} onChange={(e) => modifier("date_embauche", e.target.value)} /></div>}
+            <div className="space-y-2"><Label>Date d'Embauche</Label><Input type="date" value={form.date_embauche} onChange={(e) => modifier("date_embauche", e.target.value)} /></div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOuvert(false)}>Annuler</Button>
-            <Button 
-              onClick={() => {
-                console.log("🔴 CLIC BOUTON - État actuel:", {
-                  nom_complet: form.nom_complet,
-                  email: form.email,
-                  mot_de_passe: form.mot_de_passe,
-                  mot_de_passe_length: form.mot_de_passe?.length,
-                  validation: !form.nom_complet || !form.email || !form.mot_de_passe
-                });
-                sauvegarder();
-              }}
-              disabled={enCours || !form.nom_complet || (!vendeurEdite && (!form.email || (form.mot_de_passe || '').trim() === '' || !form.numero_mobile_money))} 
-              className="bg-[#1a1f5e] hover:bg-[#141952]"
-            >
-              {enCours ? <Loader2 className="w-4 h-4 animate-spin" /> : vendeurEdite ? "Enregistrer" : "Créer"}
+            <Button onClick={sauvegarder} disabled={enCours || !form.nom_complet} className="bg-[#1a1f5e] hover:bg-[#141952]">
+              {enCours ? <Loader2 className="w-4 h-4 animate-spin" /> : "Enregistrer"}
             </Button>
           </DialogFooter>
         </DialogContent>
