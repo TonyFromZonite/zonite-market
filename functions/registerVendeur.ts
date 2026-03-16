@@ -22,9 +22,9 @@ Deno.serve(async (req) => {
     } = await req.json();
 
     // Validation
-    if (!email || !nom_complet || !mot_de_passe || !numero_mobile_money) {
+    if (!email || !nom_complet || !mot_de_passe) {
       return Response.json({ 
-        error: 'Données manquantes (email, nom, mot de passe, mobile money requis)' 
+        error: 'Données manquantes (email, nom et mot de passe requis)' 
       }, { status: 400 });
     }
 
