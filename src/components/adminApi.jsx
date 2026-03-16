@@ -62,6 +62,7 @@ export const adminApi = {
 
   // Paiements
   updateDemandePaiement: (demandeId, data) => invoke('updateDemandePaiement', { demandeId, data }),
+  marquerDemandePaye: (demandeId) => invoke('marquerDemandePaye', { demandeId }),
   createPaiementCommission: (data) => invoke('createPaiementCommission', { data }),
 
   // Retours
