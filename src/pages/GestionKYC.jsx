@@ -157,7 +157,7 @@ export default function GestionKYC() {
 
               {compteSelectionne.statut_kyc === "en_attente" && (
                 <div className="bg-blue-50 rounded-lg p-3 text-xs text-blue-700">
-                  ℹ️ En validant ce dossier, un email avec les identifiants de connexion sera automatiquement envoyé au vendeur.
+                  ℹ️ En validant ce dossier, un email "Compte activé !" sera envoyé au vendeur.
                 </div>
               )}
               <div className="grid grid-cols-2 gap-3 text-sm">
@@ -196,7 +196,7 @@ export default function GestionKYC() {
                 <XCircle className="w-4 h-4 mr-1" /> Rejeter
               </Button>
               <Button onClick={() => validerKYC("valide")} disabled={enCours} className="bg-emerald-600 hover:bg-emerald-700">
-                <CheckCircle2 className="w-4 h-4 mr-1" /> {enCours ? "Envoi en cours..." : "Valider & Envoyer identifiants"}
+                <CheckCircle2 className="w-4 h-4 mr-1" /> {enCours ? "En cours..." : "Valider le dossier"}
               </Button>
             </DialogFooter>
           )}
