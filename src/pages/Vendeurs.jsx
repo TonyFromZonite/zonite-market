@@ -52,12 +52,7 @@ function ListeVendeurs() {
   });
 
   const modifier = (champ, valeur) => {
-    console.log(`✏️ Modification: ${champ} =`, valeur);
-    setForm((p) => {
-      const nouveau = { ...p, [champ]: valeur };
-      console.log("📋 Nouvel état:", nouveau);
-      return nouveau;
-    });
+    setForm((p) => ({ ...p, [champ]: valeur }));
   };
 
   const ouvrir = (vendeur) => {

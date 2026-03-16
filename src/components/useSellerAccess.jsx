@@ -41,7 +41,7 @@ export function useSellerAccess() {
     loading,
 
     // Peut accéder à l'espace vendeur (dashboard, profil, notifs, support)
-    canAccessEspace: ["kyc_pending", "kyc_approved_training_required", "active_seller"].includes(status),
+    canAccessEspace: ["kyc_pending", "active_seller"].includes(status),
 
     // Peut faire des actions (commandes, commissions, paiements)
     canDoActions: status === "active_seller",
@@ -60,8 +60,5 @@ export function useSellerAccess() {
 
     // Compte pleinement actif
     isFullyActive: status === "active_seller",
-
-    // Formation requise
-    isTrainingRequired: status === "kyc_approved_training_required" && !seller?.training_completed,
   };
 }
