@@ -145,12 +145,13 @@ Deno.serve(async (req) => {
 
       // ─── MISE À JOUR PROFIL ──────────────────────────────────────────────────
       case 'updateProfil': {
-        const { ville, quartier, numero_mobile_money, operateur_mobile_money } = payload;
+        const { ville, quartier, numero_mobile_money, operateur_mobile_money, experience_vente } = payload;
         const updateData = {};
         if (ville) updateData.ville = ville;
         if (quartier) updateData.quartier = quartier;
         if (numero_mobile_money) updateData.numero_mobile_money = numero_mobile_money;
         if (operateur_mobile_money) updateData.operateur_mobile_money = operateur_mobile_money;
+        if (experience_vente) updateData.experience_vente = experience_vente;
         await db.Seller.update(compteAuth.id, updateData);
         return Response.json({ success: true });
       }
