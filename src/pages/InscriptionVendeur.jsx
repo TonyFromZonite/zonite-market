@@ -14,7 +14,6 @@ const ETAPES = [
   { num: 1, label: "Mon compte" },
   { num: 2, label: "Vérifier email" },
   { num: 3, label: "Mon profil" },
-  { num: 4, label: "Vérification KYC" },
 ];
 
 // Générer un mot de passe aléatoire lisible (fallback si vendeur ne choisit pas)
