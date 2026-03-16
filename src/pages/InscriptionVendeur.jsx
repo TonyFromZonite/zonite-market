@@ -143,8 +143,9 @@ export default function InscriptionVendeur() {
       });
 
       if (response.data?.success) {
-        setErreur("");
-        setEtape(3);
+        // Redirection immédiate vers l'espace vendeur — le modal KYC s'ouvrira là-bas
+        sessionStorage.setItem("vendeur_session", JSON.stringify({ email: vendeurEmail, role: 'vendeur' }));
+        window.location.href = createPageUrl("EspaceVendeur");
       } else {
         setErreur(response.data?.error || "Code invalide ou expiré");
       }

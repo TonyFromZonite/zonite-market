@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { CheckCircle2, Loader2, ChevronLeft, Wallet, AlertCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import BlocageKycPending from "@/components/BlocageKycPending";
+import BanniereKycPending from "@/components/BanniereKycPending";
 
 const STATUTS_PAIEMENT = {
   en_attente: { label: "En attente", couleur: "bg-yellow-100 text-yellow-800" },
