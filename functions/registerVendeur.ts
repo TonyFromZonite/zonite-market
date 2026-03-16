@@ -122,7 +122,7 @@ Deno.serve(async (req) => {
         seller_id: seller.id,
         user_id: user_id,
         email,
-        seller_status: 'pending_verification'
+        seller_status: 'kyc_required'
       })
     }).catch(() => {});
 
@@ -131,8 +131,8 @@ Deno.serve(async (req) => {
       seller_id: seller.id,
       user_id: user_id,
       email, 
-      status: 'pending_verification',
-      message: 'Code de vérification envoyé par email'
+      status: 'kyc_required',
+      message: 'Compte créé avec succès'
     });
 
   } catch (error) {
