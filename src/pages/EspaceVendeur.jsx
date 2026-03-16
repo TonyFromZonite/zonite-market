@@ -252,6 +252,9 @@ export default function EspaceVendeur() {
         </div>
       )}
 
+      {/* Bannière KYC en attente */}
+      {compteVendeur.seller_status === SELLER_STATUSES.KYC_PENDING && <BanniereKycPending />}
+
       {/* Header */}
       <div className="bg-[#1a1f5e] text-white px-4 pt-6 pb-10" style={{ paddingTop: "max(1.5rem, env(safe-area-inset-top, 0px))" }}>
         <div className="flex justify-between items-center mb-1">
