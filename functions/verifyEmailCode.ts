@@ -22,7 +22,9 @@ function validateStatusTransition(actuel, nouveau) {
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const { email, code } = await req.json();
+    const body = await req.json();
+    const email = body.email;
+    const code = body.code || body.verification_code;
 
     if (!email || !code) {
       return Response.json({ 
