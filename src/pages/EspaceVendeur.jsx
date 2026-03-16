@@ -9,9 +9,9 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 
 import {
-  ShoppingBag, Bell, Package,
+  ShoppingBag, Package,
   Clock, CheckCircle2, XCircle, Truck, Plus,
-  AlertCircle, Eye
+  AlertCircle, Upload, Loader2
 } from "lucide-react";
 import { getVendeurSession, clearAllSessions } from "@/components/useSessionGuard";
 import { LOGO_URL as LOGO } from "@/components/constants";
