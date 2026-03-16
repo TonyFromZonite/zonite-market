@@ -115,14 +115,9 @@ function ListeVendeurs() {
     if (!vendeurRoleEdite) return;
     setEnCours(true);
     try {
-      const users = await base44.entities.User.filter({ email: vendeurRoleEdite.email });
-      if (users.length === 0) {
-        toast({ title: "Utilisateur non trouvé", variant: "destructive", duration: 5000 });
-        setEnCours(false);
-        return;
-      }
+      // Utiliser le vendeur_id déjà disponible (user_id du seller)
       await base44.functions.invoke('changeUserRole', {
-        user_id: users[0].id,
+        user_email: vendeurRoleEdite.email,
         new_role: nouveauRoleVendeur
       });
       await adminApi.createJournalAudit({ action: "Rôle utilisateur changé", module: "vendeur", details: `Rôle de ${vendeurRoleEdite.nom_complet} changé en ${nouveauRoleVendeur}`, entite_id: vendeurRoleEdite.id });
