@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2, Loader2, Search, Wallet, DollarSign, AlertCircle, CheckCircle2, XCircle, Eye, Clock, UserCog } from "lucide-react";
+import { Pencil, Trash2, Loader2, Search, Wallet, DollarSign, AlertCircle, CheckCircle2, XCircle, Eye, UserCog } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -62,19 +62,17 @@ function ListeVendeurs() {
   };
 
   const sauvegarder = async () => {
+    if (!vendeurEdite) return;
     setEnCours(true);
     try {
-      if (vendeurEdite) {
-        await adminApi.updateVendeur(vendeurEdite.id, { nom_complet: form.nom_complet, email: form.email, telephone: form.telephone, statut: form.statut, date_embauche: form.date_embauche });
-        await adminApi.createJournalAudit({ action: "Vendeur modifié", module: "vendeur", details: `Vendeur ${form.nom_complet} modifié`, entite_id: vendeurEdite.id });
-        toast({ title: "Vendeur modifié avec succès", duration: 5000 });
-      }
+      await adminApi.updateVendeur(vendeurEdite.id, { nom_complet: form.nom_complet, telephone: form.telephone, statut: form.statut, date_embauche: form.date_embauche });
+      await adminApi.createJournalAudit({ action: "Vendeur modifié", module: "vendeur", details: `Vendeur ${form.nom_complet} modifié`, entite_id: vendeurEdite.id });
+      toast({ title: "Vendeur modifié avec succès", duration: 5000 });
       queryClient.invalidateQueries({ queryKey: ["vendeurs"] });
-      queryClient.invalidateQueries({ queryKey: ["comptes_vendeurs"] });
       setDialogOuvert(false);
-      setEnCours(false);
     } catch (error) {
-      alert("Erreur: " + error.message);
+      toast({ title: "Erreur", description: error.message, variant: "destructive", duration: 5000 });
+    } finally {
       setEnCours(false);
     }
   };
