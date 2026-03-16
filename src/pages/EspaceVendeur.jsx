@@ -113,23 +113,40 @@ export default function EspaceVendeur() {
           return unsubscribe;
         }
         
-        // Otherwise, fetch from database
+        // Otherwise, fetch from database via backend function (bypasse les restrictions RLS)
         const emailVendeur = session.email;
-        const sellers = await base44.entities.Seller.filter({ email: emailVendeur });
-        if (sellers.length > 0) {
-          setCompteVendeur(sellers[0]);
-          
-          // Subscribe to real-time seller updates
-          const unsubscribe = base44.entities.Seller.subscribe((event) => {
-            if (event.data?.email === emailVendeur) {
-              setCompteVendeur(event.data);
-            }
+        try {
+          const resp = await base44.functions.invoke('vendeurActions', {
+            action: 'getSellerByEmail',
+            vendeur_email: emailVendeur,
+            payload: {},
           });
-          
-          setChargement(false);
-          return unsubscribe;
-        } else {
-          window.location.href = createPageUrl("Connexion");
+          const sellerData = resp.data?.seller;
+          if (sellerData) {
+            setCompteVendeur(sellerData);
+            // Enrichir la session avec les données complètes
+            sessionStorage.setItem("vendeur_session", JSON.stringify({ ...session, ...sellerData, role: 'vendeur' }));
+
+            const unsubscribe = base44.entities.Seller.subscribe((event) => {
+              if (event.data?.email === emailVendeur) {
+                setCompteVendeur(event.data);
+              }
+            });
+
+            setChargement(false);
+            return unsubscribe;
+          } else {
+            window.location.href = createPageUrl("Connexion");
+          }
+        } catch (_) {
+          // Fallback direct si la fonction échoue
+          const sellers = await base44.entities.Seller.filter({ email: emailVendeur });
+          if (sellers.length > 0) {
+            setCompteVendeur(sellers[0]);
+            setChargement(false);
+          } else {
+            window.location.href = createPageUrl("Connexion");
+          }
         }
       } catch (error) {
         console.error('Erreur chargement espace vendeur:', error);
