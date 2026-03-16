@@ -77,7 +77,7 @@ Deno.serve(async (req) => {
     let seller;
     try {
       seller = await base44.asServiceRole.entities.Seller.create({
-        user_id: user_id || 'pending',   // 'pending' si pas encore disponible, mis à jour à la connexion
+        user_id: user_id,
         email,
         nom_complet,
         telephone: telephone || '',
