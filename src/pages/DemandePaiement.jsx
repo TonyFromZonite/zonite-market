@@ -80,11 +80,6 @@ export default function DemandePaiement() {
     setSucces(true);
   };
 
-  // Blocage doux si KYC en attente
-  if (compteVendeur && compteVendeur.seller_status === "kyc_pending") {
-    return <BlocageKycPending titre="Demander un paiement" />;
-  }
-
   if (succes) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
@@ -102,6 +97,7 @@ export default function DemandePaiement() {
 
   return (
     <div className="min-h-screen bg-slate-50 pb-8">
+      {compteVendeur?.seller_status === "kyc_pending" && <BanniereKycPending />}
       <div className="bg-[#1a1f5e] text-white px-4 pb-6" style={{ paddingTop: "max(1.25rem, env(safe-area-inset-top, 0px))" }}>
         <div className="flex items-center gap-3 mb-4">
           <Link to={createPageUrl("EspaceVendeur")}>

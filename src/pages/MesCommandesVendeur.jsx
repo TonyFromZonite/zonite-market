@@ -50,17 +50,13 @@ export default function MesCommandesVendeur() {
   const formater = n => `${Math.round(n || 0).toLocaleString("fr-FR")} FCFA`;
   const formaterDate = d => d ? new Date(d).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" }) : "—";
 
-  // Blocage doux si KYC en attente
-  if (compteVendeur && compteVendeur.seller_status === "kyc_pending") {
-    return <BlocageKycPending titre="Mes commandes" />;
-  }
-
   const commandesFiltrees = commandes.filter(c =>
     `${c.produit_nom} ${c.client_nom} ${c.client_ville}`.toLowerCase().includes(recherche.toLowerCase())
   );
 
   return (
     <div className="min-h-screen bg-slate-50 pb-20">
+      {compteVendeur?.seller_status === "kyc_pending" && <BanniereKycPending />}
       <div className="bg-[#1a1f5e] text-white px-4 pb-4 sticky top-0 z-10" style={{ paddingTop: "max(1.25rem, env(safe-area-inset-top, 0px))" }}>
         <div className="flex items-center gap-3 mb-4">
           <Link to={createPageUrl("EspaceVendeur")}>
