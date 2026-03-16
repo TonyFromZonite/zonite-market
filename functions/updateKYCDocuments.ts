@@ -1,19 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 
-const TRANSITIONS_AUTORISEES = {
-  'pending_verification': ['kyc_required'],
-  'kyc_required': ['kyc_pending'],
-  'kyc_pending': ['active_seller', 'kyc_required'],
-  'active_seller': []
-};
-
-function validateStatusTransition(actuel, nouveau) {
-  const autorisees = TRANSITIONS_AUTORISEES[actuel] || [];
-  if (!autorisees.includes(nouveau)) {
-    throw new Error(`Transition interdite: ${actuel} → ${nouveau}`);
-  }
-}
-
 /**
  * KYC DOCUMENT SUBMISSION
  * Transitions seller from kyc_required → kyc_pending
@@ -38,7 +24,12 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'KYC déjà soumis ou validé' }, { status: 400 });
     }
 
-    validateStatusTransition(seller.seller_status, 'kyc_pending');
+    // Accepter kyc_required ET pending_verification (cas où email vérifié mais statut pas mis à jour)
+    const statusAutorisés = ['kyc_required', 'pending_verification'];
+    if (!statusAutorisés.includes(seller.seller_status)) {
+      return Response.json({ error: `Impossible de soumettre le KYC depuis le statut: ${seller.seller_status}` }, { status: 400 });
+    }
+
     await base44.asServiceRole.entities.Seller.update(seller.id, {
       photo_identite_url,
       photo_identite_verso_url: photo_identite_verso_url || '',
