@@ -62,6 +62,24 @@ export default function CatalogueVendeur() {
         </div>
       </div>
 
+      {/* Bannière bleue si catalogue non débloqué */}
+      {compteVendeur && compteVendeur.seller_status === "active_seller" && !compteVendeur.catalogue_debloque && (
+        <div className="bg-blue-50 border-b-2 border-blue-300 px-4 py-4 flex items-start gap-3">
+          <PlayCircle className="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <p className="text-blue-800 font-bold text-sm">🎓 Déverrouillez votre catalogue</p>
+            <p className="text-blue-700 text-xs mt-0.5 mb-2">
+              Visionnez la vidéo de formation ZONITE pour accéder à tous nos produits.
+            </p>
+            <Link to={createPageUrl("VideoFormation")}>
+              <button className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2 rounded-xl transition-colors">
+                ▶ Voir la formation
+              </button>
+            </Link>
+          </div>
+        </div>
+      )}
+
       <div className="p-4">
         {isLoading ? (
           <div className="grid grid-cols-1 gap-4">
