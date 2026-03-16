@@ -9,14 +9,22 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Admin access required' }, { status: 403 });
     }
 
-    const { user_id, new_role } = await req.json();
+    const { user_id, user_email, new_role } = await req.json();
 
-    if (!user_id || !new_role) {
-      return Response.json({ error: 'Missing user_id or new_role' }, { status: 400 });
+    if (!new_role || (!user_id && !user_email)) {
+      return Response.json({ error: 'Missing user identifier or new_role' }, { status: 400 });
+    }
+
+    // Resolve user_id from email if not provided
+    let targetUserId = user_id;
+    if (!targetUserId && user_email) {
+      const users = await base44.asServiceRole.entities.User.filter({ email: user_email });
+      if (!users.length) return Response.json({ error: 'Utilisateur non trouvé' }, { status: 404 });
+      targetUserId = users[0].id;
     }
 
     // Update user role
-    const updatedUser = await base44.asServiceRole.entities.User.update(user_id, { 
+    const updatedUser = await base44.asServiceRole.entities.User.update(targetUserId, { 
       role: new_role 
     });
 
